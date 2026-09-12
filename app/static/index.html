@@ -1,309 +1,1166 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SkillsPulse</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkillsPulse — Know your workforce today. Prepare it for tomorrow.</title>
 <style>
-  :root {
-    --bg: #f6f7f9;
-    --card: #ffffff;
-    --border: #e2e5ea;
-    --text: #1a1f29;
-    --muted: #5b6472;
-    --primary: #1f3a5f;
-    --primary-ink: #ffffff;
-    --danger: #b3261e;
-    --danger-bg: #fdecea;
-    --warn: #8a5a00;
-    --warn-bg: #fff4e0;
-    --good: #1e6b45;
-    --good-bg: #e8f5ee;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
-  header {
-    background: var(--primary);
-    color: var(--primary-ink);
-    padding: 20px 28px;
-  }
-  header h1 { margin: 0; font-size: 20px; letter-spacing: 0.2px; }
-  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.8; }
-  nav {
-    display: flex;
-    gap: 4px;
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-  }
-  nav button {
-    border: none;
-    background: none;
-    padding: 14px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-  }
-  nav button.active { color: var(--primary); border-bottom-color: var(--primary); }
-  main { max-width: 980px; margin: 0 auto; padding: 24px; }
-  section { display: none; }
-  section.active { display: block; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 18px; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 18px;
-  }
-  .stat .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
-  .stat .value { font-size: 28px; font-weight: 700; margin-top: 4px; }
-  .stat .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  h2 { font-size: 15px; margin: 24px 0 10px; color: var(--text); }
-  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  th, td { text-align: left; padding: 10px 14px; font-size: 13.5px; border-bottom: 1px solid var(--border); }
-  th { background: #fafbfc; color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
-  tr:last-child td { border-bottom: none; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11.5px; font-weight: 600; }
-  .badge.danger { background: var(--danger-bg); color: var(--danger); }
-  .badge.warn { background: var(--warn-bg); color: var(--warn); }
-  .badge.good { background: var(--good-bg); color: var(--good); }
-  .controls { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
-  select, button.action {
-    font-size: 14px; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card);
-  }
-  button.action.primary { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); cursor: pointer; font-weight: 600; }
-  button.action.primary:disabled { opacity: 0.5; cursor: default; }
-  .empty { color: var(--muted); font-size: 13.5px; padding: 20px; text-align: center; }
-  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
-  .compare .card .value { font-size: 22px; }
-  .delta-down { color: var(--danger); }
-  .delta-up { color: var(--good); }
-  footer { text-align: center; padding: 24px; font-size: 12px; color: var(--muted); }
-  footer button { background: none; border: none; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 12px; }
+:root{
+  --bg:#f5f5f7; --surface:#fff; --surface2:#fbfbfd; --text:#1d1d1f; --muted:#6e6e73;
+  --line:rgba(0,0,0,.08); --blue:#0071e3; --blue2:#5aa6f8; --green:#25855a; --amber:#b26a00;
+  --red:#c0392b; --purple:#6e5bd7; --shadow:0 12px 38px rgba(0,0,0,.055);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Segoe UI",sans-serif;
+  color:var(--text);background:linear-gradient(180deg,#fbfbfc 0,#f5f5f7 260px);font-size:14px;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.sidebar{
+  width:246px;position:fixed;inset:0 auto 0 0;z-index:60;padding:18px 14px;
+  background:rgba(250,250,252,.88);backdrop-filter:blur(26px);border-right:1px solid var(--line)
+}
+.brand{padding:8px 9px 20px}
+.brandline{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;letter-spacing:-.025em}
+.brandmark{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#dff4e6,#eef8ea);color:#50865d}
+.tagline{font-size:10px;color:var(--muted);line-height:1.35;margin:7px 0 0 44px}
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#9a9aa0;padding:10px 10px 6px}
+.nav-item{padding:10px 11px;border-radius:11px;color:#48484c;cursor:pointer;margin:3px 0;transition:.18s}
+.nav-item:hover{background:rgba(0,0,0,.035)}
+.nav-item.active{background:#fff;color:#111;font-weight:700;box-shadow:0 2px 12px rgba(0,0,0,.045)}
+.main{margin-left:246px}
+.topbar{
+  height:68px;position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;
+  padding:0 28px;background:rgba(250,250,252,.82);backdrop-filter:blur(26px);border-bottom:1px solid var(--line)
+}
+.top-left{display:flex;align-items:center;gap:10px}
+.top-left strong{font-size:14px}
+.crisis-pill{font-size:10.5px;font-weight:750;padding:6px 9px;border-radius:999px;background:#fde8e6;color:var(--red)}
+.search-wrap{position:relative;width:350px}
+.search{width:100%;padding:10px 12px;border-radius:12px;background:#fff;border:1px solid var(--line);outline:none}
+.search-results{
+  position:absolute;top:44px;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 38px rgba(0,0,0,.1);display:none;max-height:380px;overflow:auto;z-index:90
+}
+.search-results.show{display:block}
+.search-group{padding:9px 10px 5px;color:#9a9aa0;font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+.search-result{padding:10px 12px;border-top:1px solid var(--line);cursor:pointer}
+.search-result:hover{background:#f7f7f9}
+.search-result strong{display:block;font-size:12px}.search-result span{font-size:10px;color:var(--muted)}
+.content{max-width:1500px;margin:auto;padding:32px 28px 54px}
+.page{display:none;opacity:0;transform:translateY(5px)}
+.page.active{display:block;animation:pageIn .27s ease forwards}
+@keyframes pageIn{to{opacity:1;transform:none}}
+.hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:18px}
+.eyebrow{font-size:11px;font-weight:800;color:var(--blue);letter-spacing:.045em;margin-bottom:8px}
+h1{font-size:34px;line-height:1.05;letter-spacing:-.045em;margin:0 0 8px}
+h2,h3{letter-spacing:-.02em}
+.hero p{margin:0;max-width:840px;color:var(--muted);line-height:1.55}
+.summary-pills{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.summary-pill{font-size:10.5px;padding:6px 9px;border-radius:999px;background:#fff;border:1px solid var(--line);color:#555}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:0;border-radius:11px;padding:10px 14px;font-size:11.5px;font-weight:760;display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:#1d1d1f;color:#fff}.btn.blue{background:var(--blue);color:#fff}
+.btn.soft{background:#fff;color:#333;border:1px solid var(--line)}.btn.green{background:var(--green);color:#fff}
+.btn.amber{background:#fff3df;color:#9b5f05;border:1px solid #f3ddba}.btn.red{background:var(--red);color:#fff}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.card{background:rgba(255,255,255,.93);border:1px solid var(--line);border-radius:19px;padding:17px;box-shadow:var(--shadow)}
+.card.flat{box-shadow:none}
+.kpi .label{font-size:11px;color:var(--muted);font-weight:650;margin-bottom:8px}
+.kpi .value{font-size:32px;font-weight:820;letter-spacing:-.045em}.kpi .sub{font-size:10.5px;color:var(--muted);margin-top:7px;line-height:1.4}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}
+.section-head h3{margin:0;font-size:15px}
+.tag{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:740}
+.tag.red{background:#fde8e6;color:var(--red)}.tag.amber{background:#fff4dc;color:var(--amber)}
+.tag.green{background:#eaf8f0;color:var(--green)}.tag.blue{background:#eef6ff;color:var(--blue)}.tag.gray{background:#f1f1f3;color:#666}
+.urgency{display:flex;justify-content:space-between;gap:18px;align-items:center;margin:15px 0;padding:14px 16px;border-radius:16px;background:linear-gradient(90deg,#b92f28,#d54a3e);color:#fff}
+.urgency .days{font-size:28px;font-weight:850;letter-spacing:-.04em}
+.metric{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:11.5px}.metric:last-child{border-bottom:0}
+.muted{color:var(--muted);font-size:10.5px}
+.future-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:14px}
+.capability-row{display:grid;grid-template-columns:1.2fr .8fr .8fr .8fr;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:11px}
+.capability-row:last-child{border-bottom:0}
+.gapbar{height:8px;background:#ececf0;border-radius:99px;overflow:hidden}.gapbar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#5aa6f8,#0071e3)}
+.risk-row{display:grid;grid-template-columns:9px 1fr auto auto;gap:10px;align-items:start;background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px}
+.risk-list{display:flex;flex-direction:column;gap:8px}.dot{width:9px;height:9px;border-radius:50%;margin-top:4px}.dot.red{background:#d94239}.dot.amber{background:#d79b2a}.dot.green{background:#45a06e}
+.risk-name{font-weight:760;font-size:12px;margin-bottom:3px}.risk-desc{font-size:10.5px;color:var(--muted);line-height:1.4}
+.countdown{font-size:10px;font-weight:550;padding:2px 8px;border-radius:8px;background:#f5f5f7;color:#8e8e93;white-space:nowrap}
+.countdown.urgent{background:#fde8e6;color:#c0392b;animation:pulse-countdown 2s infinite}.countdown.warning{background:#fef3c7;color:#b45309}.countdown.safe{background:#f5f5f7;color:#8e8e93}
+@keyframes pulse-countdown{0%,100%{opacity:1}50%{opacity:.6}}
+.table-wrap{overflow:auto;border-radius:14px}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:11.5px;white-space:nowrap}
+th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;background:#fbfbfc}
+.employee-link{font-weight:800;cursor:pointer}.employee-link:hover{text-decoration:underline}
+.skill{display:inline-flex;align-items:center;gap:4px;padding:6px 8px;border-radius:8px;font-size:10.5px;font-weight:750}
+.s5{background:#e7f6eb;color:#2a774e}.s4{background:#eef8f2;color:#3f7d5b}.s3{background:#fff6df;color:#9b6714}.s2{background:#fff0e4;color:#b45a20}
+.filterbar{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:8px;margin-bottom:12px}
+.input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:#fff;outline:none}
+.notice{background:#f7f7f9;border:1px solid var(--line);border-radius:13px;padding:11px 12px;color:#555;font-size:11px;line-height:1.5}
+.why{font-size:10.5px;color:#5f5f64;border-top:1px dashed var(--line);padding-top:9px;margin-top:9px}
+.donut-wrap{display:flex;align-items:center;justify-content:center;gap:22px}
+.donut{--p:68;width:140px;height:140px;border-radius:50%;background:conic-gradient(var(--blue) calc(var(--p)*1%),#ececf0 0);position:relative}
+.donut::after{content:"";position:absolute;inset:19px;border-radius:50%;background:#fff}
+.donut-center{position:absolute;inset:0;z-index:2;display:grid;place-items:center;text-align:center}.donut-center strong{font-size:27px}.donut-center span{display:block;font-size:9px;color:var(--muted)}
+.bar-chart{height:190px;display:flex;align-items:flex-end;gap:10px;padding:15px 5px 0;border-bottom:1px solid var(--line)}
+.bar-col{height:100%;flex:1;display:flex;align-items:center;justify-content:flex-end;flex-direction:column;gap:6px}.bar{width:62%;background:linear-gradient(180deg,#8fc0ff,#0071e3);border-radius:7px 7px 2px 2px}.bar.alt{background:linear-gradient(180deg,#d0d0d4,#8a8a90)}.bar-label{font-size:9px;color:var(--muted);text-align:center}
+.sim-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.scenario{padding:9px 11px;border-radius:11px;background:#fff;border:1px solid var(--line);font-size:11px;font-weight:700}.scenario.active{background:#1d1d1f;color:#fff}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.change-list{display:flex;flex-direction:column;gap:7px}.change-item{padding:10px 11px;border-radius:11px;background:#f7f7f9;font-size:10.5px}
+.match-banner{background:linear-gradient(90deg,#fff4dc,#fffaf0);border:1px solid #f0dfbf;border-radius:15px;padding:13px 14px;margin-bottom:13px}
+.match-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px}.match-score{font-size:25px;font-weight:820}.match-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.mini-box{background:#f7f7f9;border-radius:10px;padding:9px}.mini-box strong{display:block;font-size:14px}.mini-box span{font-size:9.5px;color:var(--muted)}
+.timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.t-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px}.t-card .r{font-size:22px;font-weight:800;margin:5px 0}
+.status{font-size:10px;padding:5px 8px;border-radius:999px;background:#f1f1f3;color:#555}
+.status.progress{background:#eef6ff;color:#0064c6}.status.verify{background:#fff4dc;color:#9b5f05}.status.done{background:#eaf8f0;color:#24774e}
+.data-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.upload-zone{padding:22px;border:1px dashed #c9c9cf;border-radius:15px;text-align:center;background:#fafafa}
+.report{max-width:900px;margin:auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:25px;box-shadow:var(--shadow)}
+.drawer-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.18);z-index:80}.drawer-backdrop.show{display:block}
+.drawer{position:fixed;top:0;right:-520px;width:500px;max-width:94vw;height:100vh;z-index:90;background:#fff;box-shadow:-18px 0 55px rgba(0,0,0,.13);transition:.28s;padding:23px;overflow:auto}.drawer.show{right:0}
+.drawer-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.drawer h2{margin:0 0 4px;font-size:24px}
+.drawer-alert{background:#fff4dc;border:1px solid #f1dfbb;color:#9b5f05;border-radius:13px;padding:11px 12px;margin:14px 0;font-weight:700}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.profile-box{background:#f7f7f9;border-radius:11px;padding:10px}.profile-box .v{font-size:20px;font-weight:800}
+.skill-bars{display:flex;flex-direction:column;gap:8px}.skill-line{display:grid;grid-template-columns:110px 1fr 42px;gap:8px;align-items:center;font-size:10.5px}.track{height:7px;border-radius:99px;background:#ececf0;overflow:hidden}.fill{height:100%;border-radius:99px;background:var(--blue)}
+.modal{display:none;position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.2);place-items:center}.modal.show{display:grid}.modal-card{width:560px;max-width:92vw;background:#fff;border-radius:18px;padding:20px;box-shadow:0 20px 70px rgba(0,0,0,.2)}
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr)}.filterbar{grid-template-columns:1fr 1fr}.sidebar{width:208px}.main{margin-left:208px}.search-wrap{width:250px}}
+@media(max-width:760px){.sidebar{display:none}.main{margin:0}.content{padding:18px 13px}.topbar{padding:0 13px}.search-wrap{display:none}.grid-4,.grid-3,.grid-2,.future-grid,.compare-grid,.timeline,.data-actions{grid-template-columns:1fr}.hero{flex-direction:column}.filterbar{grid-template-columns:1fr}.risk-row{grid-template-columns:9px 1fr}.countdown{grid-column:2}}
+@media print{.sidebar,.topbar,.no-print{display:none!important}.main{margin:0}.page{display:none!important}#brief{display:block!important}.report{box-shadow:none;border:none}}
+
+/* ===== SkillsPulse V10 final quality + visualization pass ===== */
+.help-link{border:0;background:none;color:var(--blue);font-size:10px;font-weight:750;padding:7px 0 0;cursor:pointer}
+.calc-box{display:none;margin-top:9px;padding:10px 11px;border-radius:11px;background:#f7f7f9;border:1px solid var(--line);font-size:10px;color:#555;line-height:1.55}
+.calc-box.show{display:block;animation:pageIn .18s ease forwards}
+.visual-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:15px}
+.visual-title{font-size:10px;color:var(--muted);font-weight:650}
+.chart-legend{display:flex;gap:13px;flex-wrap:wrap;margin-top:10px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:9.5px;color:var(--muted)}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+.coverage-chart{display:flex;align-items:flex-end;gap:13px;height:205px;padding:14px 7px 0;border-bottom:1px solid var(--line)}
+.coverage-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px;min-width:62px}
+.coverage-bars{height:155px;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:6px}
+.coverage-bar{width:26px;border-radius:7px 7px 2px 2px;transition:.35s ease;min-height:5px}
+.coverage-bar.current{background:linear-gradient(180deg,#83baff,#0071e3)}
+.coverage-bar.future{background:linear-gradient(180deg,#d2d2d6,#888a90)}
+.coverage-label{font-size:9px;color:var(--muted);text-align:center;line-height:1.25}
+.coverage-value{font-size:8.5px;color:#777}
+.dep-card{overflow:hidden}
+.dep-map{display:grid;grid-template-columns:1fr 42px 1fr 42px 1fr 42px 1fr;align-items:center;gap:8px}
+.dep-node{min-height:78px;border:1px solid var(--line);border-radius:14px;padding:11px;background:#fff;display:flex;flex-direction:column;justify-content:center;transition:.25s ease}
+.dep-node strong{font-size:11px}.dep-node span{font-size:9.5px;color:var(--muted);margin-top:4px;line-height:1.35}
+.dep-node.person{background:#f6fbff;border-color:#dbeaff}
+.dep-node.skill-node{background:#fffaf0;border-color:#f2dfbb}
+.dep-node.process{background:#faf8ff;border-color:#e4defb}
+.dep-node.business{background:#f6fcf8;border-color:#d9eee1}
+.dep-node.at-risk{background:#fff0ef;border-color:#efc4c0;animation:depPulse 1.8s ease-in-out infinite}
+.dep-node.recovering{background:#effaf4;border-color:#ccebd9}
+.dep-arrow{text-align:center;color:#aaa;font-weight:900;font-size:19px}
+@keyframes depPulse{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}50%{box-shadow:0 0 0 6px rgba(192,57,43,.055)}}
+.succession-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.succession-col{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px;min-height:160px}
+.succession-col h4{margin:0 0 8px;font-size:11px}
+.succession-person{background:#f7f7f9;border-radius:10px;padding:9px;margin:7px 0;cursor:pointer;transition:.18s}
+.succession-person:hover{transform:translateY(-1px);background:#f1f6fb}
+.succession-person strong{font-size:10.5px}.succession-person span{display:block;font-size:9px;color:var(--muted);margin-top:3px}
+.verify-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.verify-step{padding:10px;border:1px solid var(--line);border-radius:11px;background:#fff;text-align:center;position:relative}
+.verify-step strong{font-size:10px}.verify-step span{display:block;font-size:9px;color:var(--muted);margin-top:3px}
+.verify-step:not(:last-child)::after{content:"→";position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:#aaa;z-index:2}
+.toast{position:fixed;right:22px;bottom:22px;z-index:140;max-width:360px;background:#1d1d1f;color:#fff;border-radius:13px;padding:11px 13px;font-size:10.5px;box-shadow:0 15px 45px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);pointer-events:none;transition:.22s}
+.toast.show{opacity:1;transform:none}
+.qa-status{display:flex;align-items:center;gap:6px;font-size:9.5px;color:var(--green);font-weight:750}
+.chart-caption{font-size:9.5px;color:var(--muted);margin-top:8px;line-height:1.45}
+@media(max-width:980px){.visual-grid{grid-template-columns:1fr}.dep-map{grid-template-columns:1fr}.dep-arrow{transform:rotate(90deg)}.succession-grid{grid-template-columns:1fr}.verify-flow{grid-template-columns:1fr 1fr}.verify-step::after{display:none}}
+@media(max-width:620px){.verify-flow{grid-template-columns:1fr}}
+
+
+/* ===== Presentation Final Pass ===== */
+:root{
+  --navy:#101828;
+  --cyan:#0a84ff;
+  --teal:#10a37f;
+  --orange:#f79009;
+  --danger:#d92d20;
+  --danger-soft:#fff1f0;
+  --heat5:#dff6e8;
+  --heat4:#eaf5ff;
+  --heat3:#fff2cf;
+  --heat2:#ffe4d6;
+  --heat1:#ffe0df;
+}
+.brandmark svg,.nav-svg svg,.inline-icon svg,.clock-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.brandmark{color:#3a7e52}
+.nav-item{display:flex;align-items:center;gap:10px}
+.nav-svg{width:17px;height:17px;color:#85858b;flex:0 0 auto}
+.nav-item.active .nav-svg{color:var(--blue)}
+.top-live-dot{width:7px;height:7px;border-radius:50%;background:#34c759;box-shadow:0 0 0 4px rgba(52,199,89,.10)}
+.inline-icon{display:inline-flex;width:14px;height:14px;vertical-align:-2px;margin-right:5px}
+.clock-icon{display:inline-flex;width:12px;height:12px;vertical-align:-2px;margin-right:4px}
+.presentation-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#ffffff 0%,#f6faff 68%,#f4fbf8 100%);border:1px solid rgba(0,113,227,.10);border-radius:22px;padding:22px;margin-bottom:16px}
+.presentation-hero::after{content:"";position:absolute;width:250px;height:250px;border-radius:50%;right:-110px;top:-150px;background:radial-gradient(circle,rgba(0,113,227,.09),rgba(0,113,227,0) 70%)}
+.presentation-hero .hero{margin-bottom:0;position:relative;z-index:1}
+.sap-story{display:grid;grid-template-columns:1.2fr repeat(3,.65fr);gap:10px;margin-top:16px;position:relative;z-index:1}
+.sap-story-main,.sap-story-stat{border:1px solid var(--line);background:rgba(255,255,255,.88);border-radius:14px;padding:11px}
+.sap-story-main strong{font-size:12px}.sap-story-main span,.sap-story-stat span{display:block;color:var(--muted);font-size:9.5px;margin-top:4px;line-height:1.4}
+.sap-story-stat strong{display:block;font-size:19px;letter-spacing:-.035em}
+.money-risk{font-size:11px;font-weight:820;color:var(--danger);white-space:nowrap;text-align:right}
+.money-risk small{display:block;font-weight:550;color:var(--muted);font-size:8.5px;margin-top:2px}
+.risk-row{grid-template-columns:9px 1fr auto auto auto}
+.impact-banner{margin-top:15px;border-radius:17px;padding:16px 18px;background:linear-gradient(135deg,#a92720,#d92d20);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:18px;box-shadow:0 12px 28px rgba(217,45,32,.15)}
+.impact-banner .impact-kicker{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.impact-banner .impact-value{font-size:34px;font-weight:860;letter-spacing:-.05em;margin-top:2px}
+.impact-banner .impact-detail{font-size:10px;opacity:.86;line-height:1.45}
+.leadership-exposure{background:linear-gradient(135deg,#fff2f0,#fffafa);border:1px solid #f4cbc6;border-radius:17px;padding:15px 17px;margin:15px 0}
+.leadership-exposure .money{font-size:34px;font-weight:850;letter-spacing:-.05em;color:var(--danger)}
+.heatmap-legend{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.heat-legend-item{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted)}
+.heat-swatch{width:15px;height:15px;border-radius:5px;border:1px solid rgba(0,0,0,.04)}
+.skill.s5{background:var(--heat5);color:#1d7047}.skill.s4{background:var(--heat4);color:#0a64a4}.skill.s3{background:var(--heat3);color:#946200}.skill.s2{background:var(--heat2);color:#a94d16}.skill.s1{background:var(--heat1);color:#b42318}
+.skill{min-width:58px;justify-content:center;border:1px solid rgba(0,0,0,.035)}
+.skills-table th:nth-child(n+4):nth-child(-n+8),.skills-table td:nth-child(n+4):nth-child(-n+8){text-align:center}
+.story-label{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.04em}
+.page h1{max-width:900px}
+.eyebrow{color:#006edc}
+.section-head h3{font-weight:760}
+.card{box-shadow:0 10px 32px rgba(16,24,40,.05)}
+.report-headline{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+@media(max-width:900px){
+  .sap-story{grid-template-columns:1fr 1fr}
+  .sap-story-main{grid-column:1/-1}
+  .risk-row{grid-template-columns:9px 1fr}
+  .risk-row .countdown,.risk-row .money-risk,.risk-row .tag{grid-column:2}
+  .impact-banner{align-items:flex-start;flex-direction:column}
+}
+
 </style>
 </head>
 <body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brandline"><div class="brandmark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></div>SkillsPulse</div>
+    <div class="tagline">Know your workforce today.<br>Prepare it for tomorrow.</div>
+  </div>
+  <div class="nav-label">Workforce</div>
+  <div class="nav-item active" data-page="overview"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span>Workforce Overview</div>
+  <div class="nav-item" data-page="skills"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 20c.5-4 2.7-6 5.5-6s5 2 5.5 6"/><path d="M14 15c3.5-.7 5.7 1.1 6.5 4"/></svg></span>Team Skills</div>
+  <div class="nav-item" data-page="simulator"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9"/><circle cx="12" cy="17.5" r="1"/><path d="M10.2 4.2 3.5 18a2 2 0 0 0 1.8 2.9h13.4a2 2 0 0 0 1.8-2.9L13.8 4.2a2 2 0 0 0-3.6 0Z"/></svg></span>Risk Simulator</div>
+  <div class="nav-item" data-page="talent"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/><circle cx="10.5" cy="9" r="2"/><path d="M7.5 14c.7-1.6 1.8-2.5 3-2.5s2.3.9 3 2.5"/></svg></span>Find Talent</div>
+  <div class="nav-item" data-page="development"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h7"/><path d="m8 3 4 4-4 4"/><path d="M20 17h-7"/><path d="m16 13-4 4 4 4"/></svg></span>Talent Match</div>
+  <div class="nav-item" data-page="brief"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Leadership Summary</div>
+  <div class="nav-label">Data</div>
+  <div class="nav-item" data-page="data"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span>Connect Your Data</div>
+</aside>
 
-<header>
-  <h1>SkillsPulse</h1>
-  <p>Workforce readiness, succession risk, and internal talent matching</p>
+<main class="main">
+<header class="topbar">
+  <div class="top-left"><strong id="companyName">Northstar Foods</strong><span class="tag green"><span class="top-live-dot"></span>Live demo</span><span class="crisis-pill" id="topCrisis"><span class="clock-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span>16 days to first crisis</span></div>
+  <div class="search-wrap">
+    <input id="globalSearch" class="search" placeholder="Search employees, skills, projects, risks…">
+    <div id="searchResults" class="search-results"></div>
+  </div>
 </header>
 
-<nav>
-  <button class="tab active" data-tab="overview">Overview</button>
-  <button class="tab" data-tab="whatif">What-If Simulator</button>
-  <button class="tab" data-tab="match">Talent Match</button>
-</nav>
-
-<main>
-
-  <section id="overview" class="active">
-    <div class="grid" id="overview-stats"></div>
-    <h2>Critical Skill Gaps</h2>
-    <div id="gaps-table"></div>
-    <h2>Single-Point Knowledge Risks</h2>
-    <div id="risks-table"></div>
-  </section>
-
-  <section id="whatif">
-    <div class="controls">
-      <select id="whatif-employee"><option>Loading employees…</option></select>
-      <button class="action primary" id="whatif-run" disabled>Simulate departure</button>
+<div class="content">
+<section id="overview" class="page active">
+  <div class="presentation-hero">
+    <div class="hero">
+      <div>
+        <div class="eyebrow">WORKFORCE OVERVIEW</div>
+        <h1>Know what the company can do, what it could lose, and who to develop next.</h1>
+        <p>SkillsPulse turns verified workforce evidence into current readiness, hidden knowledge risk, future capability gaps, internal backup candidates, and a measurable development plan.</p>
+        <div class="summary-pills" id="overviewPills"></div>
+      </div>
+      <div class="actions"><button class="btn primary" onclick="simulateEmployee('alex');go('simulator')">Stress Test SAP Dependency</button></div>
     </div>
-    <div id="whatif-result"><div class="empty">Pick a person and simulate what happens if they're unavailable tomorrow.</div></div>
-  </section>
-
-  <section id="match">
-    <div class="controls">
-      <select id="match-skill"></select>
-      <button class="action primary" id="match-run">Find matches</button>
+    <div class="sap-story">
+      <div class="sap-story-main"><div class="story-label"><span class="inline-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9"/><circle cx="12" cy="17.5" r="1"/><path d="M10.2 4.2 3.5 18a2 2 0 0 0 1.8 2.9h13.4a2 2 0 0 0 1.8-2.9L13.8 4.2a2 2 0 0 0-3.6 0Z"/></svg></span>Hidden dependency</div><strong>SAP Configuration depends heavily on Alex Morgan</strong><span>Remove Alex and SkillsPulse recalculates readiness, succession coverage, business exposure, and internal backups from the workforce dataset.</span></div>
+      <div class="sap-story-stat"><span>Qualified SAP experts</span><strong id="sapExpertCount">0</strong></div>
+      <div class="sap-story-stat"><span>Action window</span><strong>47 days</strong></div>
+      <div class="sap-story-stat"><span>Exposure if unresolved</span><strong id="sapStoryMoney">$0</strong></div>
     </div>
-    <div id="match-result"></div>
-  </section>
+  </div>
 
+  <div class="urgency">
+    <div><strong>First critical workforce deadline is approaching.</strong><div style="font-size:11px;opacity:.86;margin-top:3px">Food Safety Certification backup coverage must be verified before the audit-readiness date.</div></div>
+    <div class="days" id="urgencyDays">16 DAYS</div>
+  </div>
+
+  <div class="grid-4">
+    <div class="card kpi"><div class="label">Workforce Readiness</div><div class="value animate" id="kpiReadiness">0%</div><div class="sub">Evidence-weighted current capability coverage</div><button class="help-link" onclick="toggleCalc('calcReadiness')">How calculated?</button><div id="calcReadiness" class="calc-box">For every business-critical skill, SkillsPulse combines the strongest verified employee coverage, evidence confidence, evidence freshness and skill criticality. Those weighted capability scores roll up into readiness.</div></div>
+    <div class="card kpi"><div class="label">Critical Skill Gaps</div><div class="value animate" id="kpiGaps">0</div><div class="sub">Critical/High skills below required coverage</div><button class="help-link" onclick="toggleCalc('calcGaps')">How calculated?</button><div id="calcGaps" class="calc-box">A gap becomes critical when a Critical or High business skill has less than 76% evidence-adjusted coverage against its required target.</div></div>
+    <div class="card kpi"><div class="label">Single-Point Knowledge Risks</div><div class="value animate" id="kpiSingle">0</div><div class="sub">Only one verified backup-capable expert</div><button class="help-link" onclick="toggleCalc('calcSingle')">How calculated?</button><div id="calcSingle" class="calc-box">A single-point risk exists when one or fewer people have evidence-adjusted proficiency at least 90% of the target for a critical capability.</div></div>
+    <div class="card kpi"><div class="label">Future Readiness</div><div class="value animate" id="kpiFuture">0%</div><div class="sub">Against the selected 12-month strategy</div><button class="help-link" onclick="toggleCalc('calcFuture')">How calculated?</button><div id="calcFuture" class="calc-box">Future strategy produces editable capability targets. The same deterministic readiness engine compares today’s workforce against those future requirements.</div></div>
+  </div>
+
+  <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>Future skills the business will need</h3><span class="tag blue">12-month horizon</span></div>
+    <div id="overviewFutureSkills"><div class="muted">Loading future capability requirements…</div></div>
+  </div>
+
+  <div class="visual-grid" style="margin-top:15px">
+    <div class="card">
+      <div class="section-head"><h3>Readiness by capability</h3><span class="tag blue">Evidence-weighted</span></div>
+      <div class="donut-wrap">
+        <div id="execDonut" class="donut"><div class="donut-center"><div><strong id="execDonutText">0%</strong><span>overall readiness</span></div></div></div>
+        <div>
+          <div class="legend-item"><span class="legend-dot" style="background:#0071e3"></span>Ready / covered</div>
+          <div class="legend-item" style="margin-top:9px"><span class="legend-dot" style="background:#d89c28"></span>Development needed</div>
+          <div class="legend-item" style="margin-top:9px"><span class="legend-dot" style="background:#c94b43"></span>Critical gap</div>
+        </div>
+      </div>
+      <div class="chart-caption">The donut summarizes current capability coverage. Click “How calculated?” above to see the scoring logic.</div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h3>Current coverage vs future need</h3><span class="tag gray">12 months</span></div>
+      <div id="coverageChart" class="coverage-chart"><div class="muted">Loading coverage visualization…</div></div>
+      <div class="chart-legend"><div class="legend-item"><span class="legend-dot" style="background:#0071e3"></span>Current verified coverage</div><div class="legend-item"><span class="legend-dot" style="background:#909197"></span>Future target coverage</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>Calculated Business Impact</h3><span class="tag red">Operational exposure</span></div>
+    <div class="grid-3">
+      <div><div class="muted">Current estimated exposure</div><div style="font-size:28px;font-weight:820;letter-spacing:-.04em" id="overviewExposure">$0</div><div class="muted">Calculated from capability coverage + business impact inputs</div></div>
+      <div><div class="muted">Highest exposure capability</div><div style="font-size:18px;font-weight:760;margin-top:5px" id="highestExposureSkill">—</div><div class="muted" id="highestExposureValue">—</div></div>
+      <div><div class="muted">Formula</div><div class="notice" style="margin-top:5px"><strong>Loss/hour × disruption hours × risk factor</strong><br>Risk factor comes from actual coverage and knowledge concentration.</div></div>
+    </div>
+    <div class="actions" style="margin-top:11px"><button class="btn soft" onclick="go('simulator')">Review / edit impact assumptions</button></div>
+  </div>
+
+  <div class="grid-2" style="margin-top:15px">
+    <div class="card">
+      <div class="section-head"><h3>Capability readiness</h3><span class="tag blue">Current workforce</span></div>
+      <div class="donut-wrap">
+        <div id="readinessDonut" class="donut"><div class="donut-center"><div><strong id="donutText">0%</strong><span>ready</span></div></div></div>
+        <div style="min-width:220px">
+          <div class="metric"><span>Verified backup coverage</span><strong id="overviewSuccession">0%</strong></div>
+          <div class="metric"><span>Emerging Talent</span><strong id="overviewEmerging">0</strong></div>
+          <div class="metric"><span>Skills with stale evidence</span><strong id="overviewStale">0</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h3>Action Center</h3><span class="tag red">Top priorities</span></div>
+      <div id="actionCenter"><div class="muted">Loading priority actions…</div></div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:15px">
+    <div class="card">
+      <div class="section-head"><h3>Mini stress test</h3><span class="tag red">Hero workflow</span></div>
+      <div class="metric"><span>Current readiness</span><strong id="miniBefore">0%</strong></div>
+      <div class="metric"><span>If Alex Morgan becomes unavailable</span><strong id="miniAfter">0%</strong></div>
+      <div class="why" id="miniWhy"><strong>Why?</strong></div>
+      <div class="actions" style="margin-top:10px"><button class="btn green" onclick="simulateEmployee('alex');go('simulator')">Open Risk Simulator</button></div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h3>Risk deadlines</h3><span class="tag amber">Real dates only</span></div>
+      <div id="overviewRisks" class="risk-list"><div class="muted">Loading risk deadlines…</div></div>
+    </div>
+  </div>
+
+  <div class="notice" style="margin-top:15px"><strong>AI recommends; managers review and decide.</strong> SkillsPulse should only analyze authorized work-related skill and development data. It does not infer personality, loyalty, sensitive traits, or likelihood of quitting.</div>
+</section>
+
+<section id="skills" class="page">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">TEAM SKILLS</div>
+      <h1>See exactly what each team can do today.</h1>
+      <p>Evidence-backed skills with confidence, freshness, trend and business criticality.</p>
+    </div>
+  </div>
+
+  <div class="filterbar">
+    <select id="filterDept"><option value="">All departments</option></select>
+    <select id="filterRole"><option value="">All roles</option></select>
+    <select id="filterSkill"><option value="">All skills</option></select>
+    <select id="filterTeam"><option value="">All teams</option></select>
+    <button class="btn soft" onclick="resetFilters()">Reset</button>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div><h3>Team capability heatmap</h3><div class="muted" style="margin-top:3px">Score / 5, adjusted by evidence confidence and freshness</div></div>
+      <div class="heatmap-legend">
+        <span class="heat-legend-item"><span class="heat-swatch" style="background:var(--heat5)"></span>4.5–5 Expert</span>
+        <span class="heat-legend-item"><span class="heat-swatch" style="background:var(--heat4)"></span>3.8–4.4 Strong</span>
+        <span class="heat-legend-item"><span class="heat-swatch" style="background:var(--heat3)"></span>3.0–3.7 Developing</span>
+        <span class="heat-legend-item"><span class="heat-swatch" style="background:var(--heat2)"></span>&lt;3 Gap</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="skills-table">
+        <thead><tr><th>Employee</th><th>Department</th><th>Role</th><th>SAP</th><th>Food Safety</th><th>Robotics</th><th>Cold Chain</th><th>AI Ops</th><th>Confidence</th><th>Last Verified</th></tr></thead>
+        <tbody id="skillsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:15px">
+    <div class="card">
+      <div class="section-head"><h3>AI skill suggestion</h3><span class="tag amber" id="approvalStatus">Needs human review</span></div>
+      <div class="notice"><strong>Maria Santos — SAP Configuration</strong><br>Suggested: 3.7 → 4.1<br>Evidence: 3 recent SAP tasks • manager verification • rollout project • verified 21 days ago</div>
+      <div class="why"><strong>Why this recommendation?</strong> Multiple recent work artifacts and manager verification increased both confidence and freshness.</div>
+      <div class="actions" style="margin-top:10px"><button class="btn green" onclick="approveSuggestion()">Approve</button><button class="btn soft" onclick="adjustSuggestion()">Adjust</button><button class="btn soft" onclick="rejectSuggestion()">Reject</button></div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h3>Business criticality</h3><span class="tag blue">Not all gaps are equal</span></div>
+      <div id="criticalityList"><div class="muted">Loading criticality…</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="simulator" class="page">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">RISK SIMULATOR</div>
+      <h1>Stress-test the workforce before reality does.</h1>
+      <p>Employee loss, new technology, certification expiry and future initiatives recalculate readiness from actual employee data.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head"><h3>Employee unavailability — hero scenario</h3><span class="tag red">Live calculation</span></div>
+    <div class="grid-2">
+      <div>
+        <label class="muted">Select employee</label>
+        <select id="simEmployee" onchange="simulateSelectedEmployee()"></select>
+      </div>
+      <div>
+        <label class="muted">Scenario</label>
+        <select id="simType" onchange="runSelectedScenario()">
+          <option value="employee">Employee unavailable</option>
+          <option value="cert">Certification expires</option>
+          <option value="future">New automation initiative</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="compare-grid" style="margin-top:15px">
+    <div class="card">
+      <div class="section-head"><h3>Before</h3><span class="tag green">Baseline</span></div>
+      <div class="metric"><span>Readiness</span><strong id="simBeforeReady">0%</strong></div>
+      <div class="metric"><span>Critical gaps</span><strong id="simBeforeGaps">0</strong></div>
+      <div class="metric"><span>Single-point risks</span><strong id="simBeforeSingle">0</strong></div>
+      <div class="metric"><span>Succession coverage</span><strong id="simBeforeSucc">0%</strong></div>
+      <div class="metric"><span>Calculated operational exposure</span><strong id="simBeforeExposure">$0</strong></div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h3>After</h3><span class="tag red" id="simAfterTag">Scenario</span></div>
+      <div class="metric"><span>Readiness</span><strong id="simAfterReady">0%</strong></div>
+      <div class="metric"><span>Critical gaps</span><strong id="simAfterGaps">0</strong></div>
+      <div class="metric"><span>Single-point risks</span><strong id="simAfterSingle">0</strong></div>
+      <div class="metric"><span>Succession coverage</span><strong id="simAfterSucc">0%</strong></div>
+      <div class="metric"><span>Calculated operational exposure</span><strong id="simAfterExposure" style="color:var(--red)">$0</strong></div>
+    </div>
+  </div>
+
+  <div class="impact-banner" id="simImpactBanner">
+    <div>
+      <div class="impact-kicker">Estimated Business Impact</div>
+      <div class="impact-value" id="simImpactValue">$0</div>
+      <div class="impact-detail" id="simImpactDetail">Additional operational exposure created by this workforce scenario.</div>
+    </div>
+    <div class="impact-detail" style="max-width:340px"><strong>Calculated, not hardcoded.</strong><br>Business loss/hour and disruption assumptions are editable below; the workforce risk factor comes from real skill coverage and concentration.</div>
+  </div>
+
+  <div class="card dep-card" style="margin-top:15px">
+    <div class="section-head"><h3>Capability Dependency Map</h3><span class="tag blue">Why this risk matters</span></div>
+    <div id="dependencyMap" class="dep-map"><div class="muted">Run a scenario to see capability dependencies.</div></div>
+    <div class="chart-caption">This is intentionally small: Person → Skill → Critical process/project → Business capability. The map changes with the simulation.</div>
+  </div>
+
+  <div class="grid-2" style="margin-top:15px">
+    <div class="card">
+      <div class="section-head"><h3>What changed?</h3><span class="tag blue">Explainable</span></div>
+      <div id="whatChanged" class="change-list"><div class="change-item">Select a scenario to calculate the workforce impact.</div></div>
+      <div class="actions" style="margin-top:11px"><button class="btn primary" onclick="findBackupFromSimulation()">Find Backup</button><button class="btn amber" onclick="protectKnowledge()">Protect This Knowledge</button></div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h3>Future Strategy</h3><span class="tag blue">AI interprets • engine scores</span></div>
+      <textarea id="strategyInput">Automate two production lines and introduce AI-assisted operations.</textarea>
+      <div class="grid-2" style="margin-top:8px">
+        <select id="strategyHorizon"><option value="6">6 months</option><option value="12" selected>12 months</option><option value="24">2 years</option></select>
+        <button class="btn blue" onclick="analyzeFutureStrategy()">Analyze strategy</button>
+      </div>
+      <div id="futureStrategyResults" style="margin-top:10px"><div class="muted">Enter a strategy and click Analyze strategy.</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>Future capability requirements — editable</h3><span class="tag green">Managers stay in control</span></div>
+    <div id="futureEditTable"><div class="muted">Loading capability requirements…</div></div>
+  </div>
+
+  <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>Business Impact Model</h3><span class="tag blue">Editable assumptions</span></div>
+    <div class="notice"><strong>Why this is credible:</strong> SkillsPulse does not invent a dollar-loss number. A manager supplies the business impact assumptions; the system calculates the risk factor from verified workforce coverage and knowledge concentration.</div>
+    <div class="table-wrap" style="margin-top:10px">
+      <table>
+        <thead><tr><th>Capability</th><th>Loss / hour</th><th>Potential disruption</th><th>Calculated risk factor</th><th>Exposure</th></tr></thead>
+        <tbody id="impactTable"><tr><td colspan="5" class="muted">Loading business impact model…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="why"><strong>Formula:</strong> estimated operational exposure = loss per hour × potential disruption hours × calculated workforce risk factor. These are scenario estimates, not booked financial losses.</div>
+  </div>
+</section>
+
+<section id="talent" class="page">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">FIND TALENT</div>
+      <h1>Find the strongest internal backup before a gap becomes a hire.</h1>
+      <p>Match succession needs, roles and projects using existing skills, adjacent capability, evidence confidence, growth and career interests.</p>
+    </div>
+  </div>
+
+  <div class="match-banner" id="talentPriorityBanner"><strong>Risk-priority:</strong> Select a risk or run a simulation to rank the strongest internal backups.</div>
+
+  <div class="card">
+    <div class="section-head"><h3>New project / role requirements</h3><span class="tag blue">Editable</span></div>
+    <div class="grid-3">
+      <input id="projectName" class="input" value="Automation Readiness Lead" placeholder="Project or role">
+      <input id="projectSkills" class="input" value="Robotics,SAP,AI Ops" placeholder="Required skills, comma separated">
+      <button class="btn blue" onclick="rankCustomProject()">Find internal matches</button>
+    </div>
+  </div>
+
+  <div class="grid-3" id="talentCards" style="margin-top:15px"></div>
+
+  <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>Succession Depth</h3><span class="tag blue">Time to readiness</span></div>
+    <div id="successionDepth" class="succession-grid"><div class="muted">Loading succession candidates…</div></div>
+  </div>
+</section>
+
+<section id="development" class="page">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">TALENT MATCH</div>
+      <h1>Turn the right talent match into verified readiness.</h1>
+      <p>Training, mentoring, certifications, job rotations, project experiences and knowledge transfer — each tied to the business problem it solves.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="section-head"><h3>30 / 60 / 90-day roadmap</h3><span class="tag green">Executable</span></div>
+      <div class="timeline">
+        <div class="t-card"><strong>Today</strong><div class="r">Identify</div><div class="muted">Gap + backup candidate selected</div><span class="status">Not Started</span></div>
+        <div class="t-card"><strong>Day 30</strong><div class="r">Learn</div><div class="muted">Training + documentation complete</div><span class="status progress">In Progress</span></div>
+        <div class="t-card"><strong>Day 60</strong><div class="r">Apply</div><div class="muted">Shadowing + live supervised work</div><span class="status verify">Ready for Verification</span></div>
+        <div class="t-card"><strong>Day 90</strong><div class="r">Verify</div><div class="muted">Independent work evidence confirmed</div><span class="status done">Verified</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h3>Train vs Transfer vs Hire</h3><span class="tag blue">Calculated guidance</span></div>
+      <div id="decisionSupport"><div class="muted">Loading decision support…</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>What each employee needs for 2027</h3><span class="tag blue">Future role gap</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Employee</th><th>Future Match</th><th>Main 2027 Gap</th><th>Action</th><th>Time to Readiness</th><th>Status</th></tr></thead>
+        <tbody id="futureNeedsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>Readiness Verification</h3><span class="tag green">Training ≠ verified skill</span></div>
+    <div class="verify-flow">
+      <div class="verify-step"><strong>Assigned</strong><span>plan accepted</span></div>
+      <div class="verify-step"><strong>Learning</strong><span>training / mentoring</span></div>
+      <div class="verify-step"><strong>Demonstrated</strong><span>real project work</span></div>
+      <div class="verify-step"><strong>Manager Verified</strong><span>evidence reviewed</span></div>
+      <div class="verify-step"><strong>Skill Updated</strong><span>readiness recalculated</span></div>
+    </div>
+    <div class="actions" style="margin-top:12px"><button class="btn green" onclick="verifyDevelopmentEvidence()">Verify Maria's SAP evidence</button><span id="verifyStatus" class="muted">Demo: score will only change after verification.</span></div>
+  </div>
+
+  <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>Knowledge protection workflow</h3><span class="tag amber">For single-point risks</span></div>
+    <div class="capability-row"><strong>Expert</strong><span>→ Backup</span><span>→ Documentation</span><span>→ Shadowing</span></div>
+    <div class="capability-row"><strong>Supervised Work</strong><span>→ Evidence</span><span>→ Independent Verification</span><span>→ Coverage Recalculated</span></div>
+    <div id="knowledgeProtectionResult" class="notice" style="margin-top:10px">Run “Protect This Knowledge” from the Risk Simulator to generate a named plan.</div>
+  </div>
+</section>
+
+<section id="brief" class="page">
+  <div class="hero no-print">
+    <div><div class="eyebrow">LEADERSHIP SUMMARY</div><h1>The workforce decisions leadership needs in one page.</h1><p>Readiness, top gaps, knowledge risks, succession problems, future requirements, top actions and expected improvement.</p></div>
+    <button class="btn primary" onclick="window.print()">Print / Save PDF</button>
+  </div>
+  <div class="report">
+    <div class="report-headline">
+      <div><h2 style="margin:0">SkillsPulse Leadership Summary</h2><p class="muted" style="margin:5px 0 0">Northstar Foods • Demo company</p></div>
+      <span class="tag blue">Decision-ready</span>
+    </div>
+    <div class="leadership-exposure">
+      <div class="muted">Business Exposure</div>
+      <div class="money" id="leadershipExposure">$0</div>
+      <div class="muted">Estimated current operational exposure from capability gaps and knowledge concentration</div>
+    </div>
+    <div class="grid-4">
+      <div class="card kpi"><div class="label">Readiness</div><div class="value" id="briefReady">0%</div></div>
+      <div class="card kpi"><div class="label">Critical Gaps</div><div class="value" id="briefGaps">0</div></div>
+      <div class="card kpi"><div class="label">Single-Point Risks</div><div class="value" id="briefSingle">0</div></div>
+      <div class="card kpi"><div class="label">Succession Coverage</div><div class="value" id="briefSucc">0%</div></div>
+    </div>
+    <div class="card flat" style="margin-top:14px;background:#fff8f7;border-color:#f0d5d2">
+      <div class="section-head"><h3>Calculated Business Exposure</h3><span class="tag red">Scenario estimate</span></div>
+      <div class="grid-2">
+        <div><div class="muted">Current workforce exposure</div><div style="font-size:28px;font-weight:820" id="briefExposure">$0</div></div>
+        <div><div class="muted">Employee-loss stress test</div><div style="font-size:28px;font-weight:820;color:var(--red)" id="briefStressExposure">$0</div></div>
+      </div>
+      <div class="why"><strong>Source:</strong> editable business impact assumptions × workforce coverage/concentration risk. Not a hardcoded loss figure.</div>
+    </div>
+    <h3>Top workforce risks</h3><div id="briefRisks"><div class="muted">Loading workforce risks…</div></div>
+    <h3>Future requirements</h3><div id="briefFuture"><div class="muted">Loading future requirements…</div></div>
+    <h3>Top actions</h3><div id="briefActions"><div class="muted">Loading actions…</div></div>
+    <h3>Expected improvement</h3><p id="briefImprovement"></p>
+    <div class="notice"><strong>AI recommends; managers review and decide.</strong> Only authorized work-related skill and development evidence should be analyzed.<div class="qa-status" style="margin-top:8px"> Demo calculations are generated from the embedded employee dataset</div></div>
+  </div>
+</section>
+
+<section id="data" class="page">
+  <div class="hero">
+    <div><div class="eyebrow">CONNECT YOUR DATA</div><h1>Start with trusted work evidence.</h1><p>Load the demo company instantly, upload a simple CSV, or add an employee manually.</p></div>
+  </div>
+  <div class="data-actions">
+    <div class="card"><h3>Demo Company</h3><p class="muted">Reload the complete Northstar Foods workforce dataset.</p><button class="btn primary" onclick="loadDemo()">Load Demo Company</button></div>
+    <div class="card"><h3>CSV Upload</h3><div class="upload-zone"><input type="file" id="csvFile" accept=".csv"><div class="muted" style="margin-top:8px">Columns: name, role, department, team</div></div><button class="btn blue" style="margin-top:10px" onclick="importCSV()">Import CSV</button></div>
+    <div class="card"><h3>Manual Employee</h3><input id="newName" class="input" placeholder="Name"><input id="newRole" class="input" placeholder="Role" style="margin-top:7px"><input id="newDept" class="input" placeholder="Department" style="margin-top:7px"><button class="btn green" style="margin-top:10px" onclick="addManualEmployee()">Add employee</button></div>
+  </div>
+  <div id="dataStatus" class="notice" style="margin-top:15px">Demo company loaded: <strong>Northstar Foods</strong>.</div>
+  <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>Demo Diagnostics</h3><span class="tag green" id="diagnosticBadge">Checking…</span></div>
+    <div id="diagnostics" class="grid-3"><div class="notice">Running core checks…</div></div>
+  </div>
+</section>
+</div>
 </main>
+<div id="toast" class="toast"></div>
 
-<footer>
-  SkillsPulse · <button id="reset-demo">Reset demo data</button>
-</footer>
+<div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
+<aside id="drawer" class="drawer">
+  <div class="drawer-head"><div><h2 id="dName">Employee</h2><div id="dMeta" class="muted"></div></div><button class="btn soft" onclick="closeDrawer()">Close</button></div>
+  <div class="drawer-alert"><span class="inline-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5"/><circle cx="12" cy="17" r=".8"/></svg></span>Succession Risk <span id="dSuccessionLabel" style="font-weight:500"></span></div>
+  <div class="profile-grid">
+    <div class="profile-box"><div class="muted">Current readiness</div><div class="v" id="dReady">0%</div></div>
+    <div class="profile-box"><div class="muted">Best future role/project match</div><div class="v" id="dMatch">0%</div></div>
+  </div>
+  <h3>Top skills</h3><div id="dSkills" class="skill-bars"></div>
+  <h3>Main skill gaps</h3><div id="dGaps" class="notice"></div>
+  <h3>Career interests</h3><div id="dInterests" class="notice"></div>
+  <h3>Succession / backup potential</h3><div id="dBackup" class="notice"></div>
+  <h3><span class="inline-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 2v3M22 12h-3M12 22v-3M2 12h3"/></svg></span>Future role gap (2027)</h3><div id="dFutureGap" class="notice"></div>
+  <h3>Development plan</h3><div id="dPlan" class="notice"></div>
+  <h3>Why this match?</h3><div id="dWhy" class="notice"></div>
+  <div class="actions" style="margin-top:14px"><button class="btn blue" onclick="createDevelopmentFromDrawer()">Create Talent Plan</button><button class="btn soft" onclick="closeDrawer()">Close</button></div>
+</aside>
+
+<div id="whyModal" class="modal" onclick="if(event.target===this)closeWhyModal()">
+  <div class="modal-card"><div class="section-head"><h3>Why this recommendation?</h3><button class="btn soft" onclick="closeWhyModal()">Close</button></div><div id="whyModalText" class="notice"></div></div>
+</div>
 
 <script>
-const fmtPct = v => (v === null || v === undefined) ? "—" : v.toFixed(1) + "%";
-const fmtUsd = v => "$" + Math.round(v).toLocaleString();
+const demoEmployees=[
+{id:'alex',name:'Alex Morgan',role:'Operations Systems Lead',department:'Operations',team:'Enterprise Systems',confidence:.96,freshnessDays:18,growth:.04,interests:['automation','systems resilience','SAP'],skills:{SAP:5,FoodSafety:3.1,Robotics:4.6,ColdChain:4.0,AIOps:4.2},certs:['SAP Advanced'],projects:['ERP Modernization','Line Automation'],gaps:['Food Safety Certification backup depth'],futureMatch:92,backup:'Critical expert; strongest SAP owner and automation specialist.',plan:'Knowledge transfer to Maria; documentation; two paired live SAP cycles.',why:'Highest SAP evidence, strong automation work history, and verified manager confidence.',futureGap:'Needs broader food-safety certification coverage to remain resilient across plant operations.'},
+{id:'maria',name:'Maria Santos',role:'Process Engineer',department:'Engineering',team:'Plant Engineering',confidence:.91,freshnessDays:21,growth:.18,interests:['automation leadership','SAP','robotics'],skills:{SAP:4.1,FoodSafety:4.4,Robotics:3.2,ColdChain:4.0,AIOps:3.3},certs:['Lean Manufacturing'],projects:['SAP Rollout','Packaging Upgrade'],gaps:['Advanced robotics','SAP architecture depth'],futureMatch:91,backup:'Best internal SAP succession candidate; Ready <6 Months.',plan:'SAP cross-training, Alex mentorship, one production configuration project.',why:'Strong adjacent SAP evidence, recent rollout work, high growth, and explicit SAP career interest.',futureGap:'Robotics 3.2 → 4.2 and SAP architecture depth are the main 2027 readiness gaps.'},
+{id:'john',name:'John Lee',role:'Quality Specialist',department:'Quality',team:'Food Safety',confidence:.94,freshnessDays:10,growth:.08,interests:['food safety leadership','quality systems'],skills:{SAP:2.5,FoodSafety:4.8,Robotics:2.1,ColdChain:3.2,AIOps:2.0},certs:['Food Safety Level 2'],projects:['Audit Readiness','Supplier Quality'],gaps:['Food Safety Level 3 certification','automation exposure'],futureMatch:86,backup:'Best Food Safety backup candidate; Ready Now after certification renewal.',plan:'Complete Level 3 certification, shadow current lead, own next audit-prep checklist.',why:'Highest food-safety proficiency, freshest evidence, and explicit quality leadership interest.',futureGap:'Food Safety Level 3 verification plus basic automation exposure are required for 2027 quality leadership.'},
+{id:'priya',name:'Priya Shah',role:'Supply Chain Analyst',department:'Supply Chain',team:'Cold Chain',confidence:.87,freshnessDays:34,growth:.21,interests:['automation analytics','machine vision','cold chain'],skills:{SAP:3.4,FoodSafety:3.3,Robotics:4.0,ColdChain:4.7,AIOps:3.8},certs:['Data Analytics'],projects:['Cold Chain Optimization','Vision Pilot'],gaps:['Food Safety certification','SAP configuration'],futureMatch:88,backup:'Strong robotics / cold-chain stretch candidate; Ready <6 Months.',plan:'Robotics project rotation, machine-vision mentoring, verification on live work.',why:'Non-obvious fit: strong robotics adjacency, best cold-chain score, rapid growth, and relevant career interest.',futureGap:'Needs SAP configuration exposure and one verified robotics delivery to qualify for the 2027 automation program.'},
+{id:'sam',name:'Sam Rivera',role:'Maintenance Engineer',department:'Operations',team:'Plant Reliability',confidence:.88,freshnessDays:55,growth:.12,interests:['predictive maintenance','robotics'],skills:{SAP:3.2,FoodSafety:3.6,Robotics:4.3,ColdChain:3.5,AIOps:3.4},certs:['Industrial Maintenance'],projects:['Predictive Maintenance Pilot'],gaps:['AI operations','SAP'],futureMatch:84,backup:'Robotics backup candidate; Ready 6–12 Months.',plan:'AI Ops training, robotics project leadership, SAP basics.',why:'Strong robotics and maintenance evidence with relevant interests, but SAP/AIOps gaps remain.',futureGap:'AI Ops 3.4 → 4.0 and SAP 3.2 → 3.8 for future predictive-maintenance leadership.'},
+{id:'lena',name:'Lena Park',role:'R&D Specialist',department:'R&D',team:'Product Innovation',confidence:.90,freshnessDays:92,growth:.05,interests:['product innovation','Korean market R&D'],skills:{SAP:2.2,FoodSafety:4.2,Robotics:2.8,ColdChain:3.0,AIOps:3.1},certs:['Food Science'],projects:['Korean Product Launch'],gaps:['evidence freshness','backup documentation'],futureMatch:80,backup:'Specialized R&D knowledge risk; Ready 6–12 Months backups required.',plan:'Capture product-development knowledge, pair junior R&D backup, refresh evidence.',why:'Unique Korean-market R&D experience is business-critical but evidence is aging and concentrated.',futureGap:'Needs refreshed evidence and a verified junior backup before the next R&D cycle.'}
+];
 
-function riskBadge(qualified, required) {
-  if (qualified <= 1) return '<span class="badge danger">' + qualified + ' of ' + required + ' needed</span>';
-  if (qualified < required) return '<span class="badge warn">' + qualified + ' of ' + required + ' needed</span>';
-  return '<span class="badge good">' + qualified + ' of ' + required + '</span>';
+const skills={
+ SAP:{label:'SAP Configuration',target:4.6,weight:.23,criticality:'Critical',futureTarget:4.8,requiredExperts:3},
+ FoodSafety:{label:'Food Safety Certification',target:4.5,weight:.22,criticality:'Critical',futureTarget:4.7,requiredExperts:2},
+ Robotics:{label:'Industrial Robotics',target:4.6,weight:.20,criticality:'High',futureTarget:4.9,requiredExperts:2},
+ ColdChain:{label:'Cold Chain Operations',target:4.3,weight:.18,criticality:'High',futureTarget:4.6,requiredExperts:3},
+ AIOps:{label:'AI-Assisted Operations',target:4.3,weight:.17,criticality:'High',futureTarget:4.8,requiredExperts:2}
+};
+let employees=JSON.parse(JSON.stringify(demoEmployees));
+let futureRequirements=Object.fromEntries(Object.entries(skills).map(([k,v])=>[k,v.futureTarget]));
+
+const impactInputs={
+ SAP:{lossPerHour:40000,disruptionHours:20},
+ FoodSafety:{lossPerHour:30000,disruptionHours:12},
+ Robotics:{lossPerHour:35000,disruptionHours:18},
+ ColdChain:{lossPerHour:25000,disruptionHours:16},
+ AIOps:{lossPerHour:22000,disruptionHours:12}
+};
+let lastScenarioList=null;
+let lastScenarioReq=null;
+let lastScenarioLabel='Baseline';
+
+function exposureFactor(list,key,target=skills[key].target){
+  const coverage=currentCoverage(list,key,target);
+  const qualified=qualifiedCount(list,key,target);
+  // Uncovered capacity drives most exposure; a single-point dependency adds concentration risk.
+  const concentration=qualified<=1 ? .25 : .05;
+  return Math.min(1,Math.max(.05,(1-coverage)*.75+concentration));
+}
+function capabilityExposure(list,key,target=skills[key].target){
+  const inp=impactInputs[key];
+  return Math.round(inp.lossPerHour*inp.disruptionHours*exposureFactor(list,key,target));
+}
+function totalExposure(list,req=null){
+  return Object.keys(skills).reduce((sum,key)=>{
+    const target=req?req[key]:skills[key].target;
+    return sum+capabilityExposure(list,key,target);
+  },0);
 }
 
-// ---- Tabs ----
-document.querySelectorAll("nav .tab").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll("nav .tab").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll("main section").forEach(s => s.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById(btn.dataset.tab).classList.add("active");
+function riskExposure(r,list=employees){
+  if(r.skill && skills[r.skill]) return capabilityExposure(list,r.skill);
+  // Specialized R&D risk uses Lena's evidence freshness and absence of a verified named backup.
+  if(r.name==='Korean R&D Expertise'){
+    const lena=list.find(e=>e.id==='lena');
+    if(!lena)return 0;
+    const freshnessPenalty=Math.min(1,Math.max(.2,lena.freshnessDays/180));
+    const base=18000*18;
+    return Math.round(base*(.45+.4*freshnessPenalty));
+  }
+  return 0;
+}
+function scenarioIncrementalExposure(list,req=null){
+  return Math.max(0,totalExposure(list,req)-totalExposure(employees));
+}
+
+function money(v){
+  if(v>=1000000)return '$'+(v/1000000).toFixed(v>=10000000?0:2).replace(/\.00$/,'')+'M';
+  if(v>=1000)return '$'+Math.round(v/1000)+'K';
+  return '$'+Math.round(v);
+}
+
+let selectedSimEmployee='alex';
+let selectedDrawerEmployee=null;
+const riskDates=[
+ {name:'Food Safety Certification',date:'2026-09-28',skill:'FoodSafety',criticality:'Critical',reason:'Backup certification must be verified before audit readiness.'},
+ {name:'SAP Configuration',date:'2026-10-29',skill:'SAP',criticality:'Critical',reason:'Knowledge-transfer milestone for critical system coverage.'},
+ {name:'Cold Chain Operations',date:'2026-10-16',skill:'ColdChain',criticality:'High',reason:'Second backup must complete supervised work.'},
+ {name:'Korean R&D Expertise',date:'2026-12-10',skill:null,criticality:'High',reason:'Backup knowledge capture before R&D milestone.'}
+];
+
+function daysUntil(dateStr){const now=new Date('2026-09-12T12:00:00');const d=new Date(dateStr+'T12:00:00');return Math.max(0,Math.ceil((d-now)/86400000))}
+function freshnessFactor(days){if(days<=90)return 1;if(days<=180)return .93;if(days<=365)return .84;return .70}
+function effective(e,key){return (e.skills[key]||0)*(0.78+.22*e.confidence)*freshnessFactor(e.freshnessDays)}
+function currentCoverage(list,key,target=skills[key].target){
+  // Coverage is capacity, not average proficiency.
+  // Only people at >=90% of the target count as deployment-ready capacity.
+  // Each capability has an explicit requiredExpert count.
+  const qualified=list
+    .map(e=>Math.min(1,effective(e,key)/target))
+    .filter(ratio=>ratio>=.90);
+  const capacity=qualified.reduce((a,b)=>a+b,0);
+  return Math.min(1,capacity/skills[key].requiredExperts);
+}
+function readiness(list, req=null){
+  let total=0,weight=0;
+  Object.keys(skills).forEach(k=>{
+    const target=req?req[k]:skills[k].target;
+    total+=currentCoverage(list,k,target)*skills[k].weight;weight+=skills[k].weight
   });
+  return Math.round(total/weight*100)
+}
+function qualifiedCount(list,key,target=skills[key].target){return list.filter(e=>effective(e,key)>=target*.9).length}
+function singlePointRisks(list){return Object.keys(skills).filter(k=>['Critical','High'].includes(skills[k].criticality)&&qualifiedCount(list,k)<=1)}
+function criticalGaps(list,req=null){
+  return Object.keys(skills).filter(k=>{
+    const target=req?req[k]:skills[k].target;
+    return ['Critical','High'].includes(skills[k].criticality)&&currentCoverage(list,k,target)<.76
+  })
+}
+function successionCoverage(list){
+  const critical=Object.keys(skills).filter(k=>['Critical','High'].includes(skills[k].criticality));
+  const covered=critical.filter(k=>qualifiedCount(list,k)>=2).length;
+  return Math.round(covered/critical.length*100)
+}
+function futureReadiness(list){return readiness(list,futureRequirements)}
+function employeeReadiness(e){let total=0,w=0;Object.keys(skills).forEach(k=>{total+=Math.min(1,effective(e,k)/skills[k].target)*skills[k].weight;w+=skills[k].weight});return Math.round(total/w*100)}
+function staleSkillCount(){return employees.reduce((n,e)=>n+Object.keys(e.skills).filter(k=>e.freshnessDays>180).length,0)}
+function emergingTalent(){return employees.filter(e=>e.growth>=.15).length}
+function trend(e){return e.freshnessDays>180?'Stale ↓':e.growth>=.12?'Growing ↑':'Stable →'}
+function confidenceLabel(e){return Math.round(e.confidence*100)+'%'}
+function lastVerified(e){return e.freshnessDays+' days ago'}
+
+function refreshAll(){
+  const r=readiness(employees),fg=criticalGaps(employees,futureRequirements),sp=singlePointRisks(employees),fr=futureReadiness(employees),sc=successionCoverage(employees);
+  setText('kpiReadiness',r+'%');setText('kpiGaps',fg.length);setText('kpiSingle',sp.length);setText('kpiFuture',fr+'%');
+  setText('donutText',r+'%');document.getElementById('readinessDonut').style.setProperty('--p',r);
+  setText('overviewSuccession',sc+'%');setText('overviewEmerging',emergingTalent());setText('overviewStale',staleSkillCount());
+  setText('briefReady',r+'%');setText('briefGaps',fg.length);setText('briefSingle',sp.length);setText('briefSucc',sc+'%');
+  renderOverviewPills(r,fr,sp.length);renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();
+  const alexRemoved=employees.filter(e=>e.id!=='alex');setText('miniBefore',r+'%');setText('miniAfter',readiness(alexRemoved)+'%');setText('miniWhy','Why? Removing Alex reduces SAP and automation coverage; the score is recalculated from the remaining verified skill evidence.');runDiagnostics();
+}
+function setText(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
+
+function renderOverviewPills(r,fr,single){
+  document.getElementById('overviewPills').innerHTML=`<span class="summary-pill">${r}% current readiness</span><span class="summary-pill">${fr}% future readiness</span><span class="summary-pill">${single} single-point knowledge risks</span><span class="summary-pill">${daysUntil(riskDates[0].date)} days to first deadline</span>`
+}
+function renderOverviewFuture(){
+  const wrap=document.getElementById('overviewFutureSkills');wrap.innerHTML='';
+  Object.keys(skills).forEach(k=>{
+    const curr=Math.round(currentCoverage(employees,k,skills[k].target)*100),future=Math.round(currentCoverage(employees,k,futureRequirements[k])*100),gap=Math.max(0,100-future);
+    wrap.innerHTML+=`<div class="capability-row"><strong>${skills[k].label}</strong><span>Current ${curr}%</span><span>Required L${futureRequirements[k].toFixed(1)}</span><span style="color:${gap>24?'var(--red)':gap>14?'var(--amber)':'var(--green)'}">${gap}% gap</span></div>`;
+  })
+}
+function renderActionCenter(){
+  const actions=[];
+  singlePointRisks(employees).forEach(k=>actions.push({p:3,title:`Protect ${skills[k].label} knowledge`,why:`Only ${qualifiedCount(employees,k)} verified expert(s).`,go:'simulator'}));
+  criticalGaps(employees,futureRequirements).forEach(k=>actions.push({p:2,title:`Build ${skills[k].label} readiness`,why:`Future coverage below target.`,go:'development'}));
+  actions.sort((a,b)=>b.p-a.p);
+  document.getElementById('actionCenter').innerHTML=actions.slice(0,5).map((a,i)=>`<div class="metric"><span><strong>${i+1}. ${a.title}</strong><br><small class="muted">${a.why}</small></span><button class="btn soft" onclick="go('${a.go}')">Act</button></div>`).join('')
+}
+function renderOverviewRisks(){
+  document.getElementById('overviewRisks').innerHTML=riskDates.slice(0,3).map(r=>riskHtml(r)).join('');classifyCountdowns()
+}
+function riskHtml(r){
+  const d=daysUntil(r.date),level=d<30?'red':d<60?'amber':'green';
+  const exp=riskExposure(r);
+  return `<div class="risk-row"><span class="dot ${level}"></span><div><div class="risk-name">${r.name}</div><div class="risk-desc">${r.reason}</div></div><span class="countdown" data-days="${d}"><span class="clock-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span>${d} days</span><div class="money-risk">${money(exp)}<small>if unresolved</small></div><span class="tag ${r.criticality==='Critical'?'red':'amber'}">${r.criticality}</span></div>`
+}
+function classifyCountdowns(){document.querySelectorAll('.countdown').forEach(el=>{const d=parseInt(el.dataset.days||999);el.classList.remove('urgent','warning','safe');if(d<=7)el.classList.add('urgent');else if(d<=30)el.classList.add('warning');else el.classList.add('safe')})}
+
+function populateFilters(){
+  const sets={filterDept:[...new Set(employees.map(e=>e.department))],filterRole:[...new Set(employees.map(e=>e.role))],filterSkill:Object.keys(skills),filterTeam:[...new Set(employees.map(e=>e.team))]};
+  Object.entries(sets).forEach(([id,vals])=>{const sel=document.getElementById(id),cur=sel.value,label=sel.options[0].text;sel.innerHTML=`<option value="">${label}</option>`+vals.map(v=>`<option value="${v}">${skills[v]?.label||v}</option>`).join('');sel.value=cur});
+  ['filterDept','filterRole','filterSkill','filterTeam'].forEach(id=>document.getElementById(id).onchange=renderSkills)
+}
+function resetFilters(){['filterDept','filterRole','filterSkill','filterTeam'].forEach(id=>document.getElementById(id).value='');renderSkills()}
+function renderSkills(){
+  const dept=document.getElementById('filterDept')?.value||'',role=document.getElementById('filterRole')?.value||'',skill=document.getElementById('filterSkill')?.value||'',team=document.getElementById('filterTeam')?.value||'';
+  const list=employees.filter(e=>(!dept||e.department===dept)&&(!role||e.role===role)&&(!team||e.team===team)&&(!skill||(e.skills[skill]||0)>0));
+  document.getElementById('skillsBody').innerHTML=list.map(e=>{
+    const cls=v=>v>=4.5?'s5':v>=3.8?'s4':v>=3?'s3':'s2';
+    const cell=k=>`<span class="skill ${cls(e.skills[k])}" title="${skills[k].label}: ${e.skills[k].toFixed(1)}/5 • ${confidenceLabel(e)} confidence • ${lastVerified(e)} • ${trend(e)}">${e.skills[k].toFixed(1)} <span style="font-size:9px;opacity:.72">${trend(e)}</span></span>`;
+    return `<tr><td><span class="employee-link" onclick="openEmployee('${e.id}')">${e.name}</span><br><span class="muted">${e.team}</span></td><td>${e.department}</td><td>${e.role}</td><td>${cell('SAP')}</td><td>${cell('FoodSafety')}</td><td>${cell('Robotics')}</td><td>${cell('ColdChain')}</td><td>${cell('AIOps')}</td><td>${confidenceLabel(e)}</td><td>${lastVerified(e)}</td></tr>`
+  }).join('')
+}
+function renderCriticality(){document.getElementById('criticalityList').innerHTML=Object.keys(skills).map(k=>`<div class="metric"><span>${skills[k].label}</span><strong><span class="tag ${skills[k].criticality==='Critical'?'red':'amber'}">${skills[k].criticality}</span></strong></div>`).join('')}
+
+function populateSimulator(){
+  const sel=document.getElementById('simEmployee');const cur=sel.value||selectedSimEmployee;sel.innerHTML=employees.map(e=>`<option value="${e.id}">${e.name} — ${e.role}</option>`).join('');sel.value=employees.some(e=>e.id===cur)?cur:employees[0]?.id;selectedSimEmployee=sel.value
+}
+function renderSimBaseline(){
+  setText('simBeforeReady',readiness(employees)+'%');
+  setText('simBeforeGaps',criticalGaps(employees).length);
+  setText('simBeforeSingle',singlePointRisks(employees).length);
+  setText('simBeforeSucc',successionCoverage(employees)+'%');
+  setText('simBeforeExposure',money(totalExposure(employees)));
+  simulateSelectedEmployee()
+}
+function simulateSelectedEmployee(){selectedSimEmployee=document.getElementById('simEmployee').value;document.getElementById('simType').value='employee';runSelectedScenario()}
+function runSelectedScenario(){
+  const type=document.getElementById('simType').value;let list=employees.map(e=>JSON.parse(JSON.stringify(e))),req=null,label='',changes=[];
+  if(type==='employee'){
+    const emp=employees.find(e=>e.id===selectedSimEmployee);list=list.filter(e=>e.id!==selectedSimEmployee);label=`${emp?.name||'Employee'} unavailable`;
+    Object.keys(skills).forEach(k=>{const b=Math.round(currentCoverage(employees,k)*100),a=Math.round(currentCoverage(list,k)*100);if(b-a>=5)changes.push(`${skills[k].label} coverage falls ${b}% → ${a}%`)});
+  } else if(type==='cert'){
+    const emp=list.find(e=>e.id==='john');if(emp){emp.skills.FoodSafety=Math.max(2.5,emp.skills.FoodSafety-1.5);emp.confidence*=.85}label='Food Safety certification expires';changes.push('Food Safety coverage falls because John’s Level 3 evidence is no longer valid.');
+  } else {
+    req=futureRequirements;label='Automation initiative';Object.keys(skills).forEach(k=>{const gap=100-Math.round(currentCoverage(list,k,req[k])*100);if(gap>20)changes.push(`${skills[k].label} has a ${gap}% future coverage gap`)});
+  }
+  lastScenarioList=list;
+  lastScenarioReq=req;
+  lastScenarioLabel=label;
+  setText('simAfterTag',label);
+  setText('simAfterReady',readiness(list,req)+'%');
+  setText('simAfterGaps',criticalGaps(list,req).length);
+  setText('simAfterSingle',singlePointRisks(list).length);
+  setText('simAfterSucc',successionCoverage(list)+'%');
+  setText('simBeforeExposure',money(totalExposure(employees)));
+  setText('simAfterExposure',money(totalExposure(list,req)));
+  document.getElementById('whatChanged').innerHTML=(changes.length?changes:['No material capability loss detected.']).map(x=>`<div class="change-item">${x}</div>`).join('');
+  renderDependencyMap(selectedSimEmployee,type==='employee',type==='training');
+  renderImpactModel(list,req);renderScenarioImpact(list,req)
+}
+function simulateEmployee(id){selectedSimEmployee=id;populateSimulator();simulateSelectedEmployee()}
+function findBackupFromSimulation(){const id=document.getElementById('simEmployee').value;const emp=employees.find(e=>e.id===id);window.targetSkill=topCriticalSkill(emp);rankBackups(window.targetSkill);document.getElementById('talentPriorityBanner').innerHTML=`<strong>Risk-priority:</strong> ${skills[window.targetSkill].label} lost from ${emp.name}. Ranked internal backups below.`;go('talent')}
+function topCriticalSkill(emp){return Object.keys(emp.skills).sort((a,b)=>(emp.skills[b]*skills[b].weight)-(emp.skills[a]*skills[a].weight))[0]}
+function protectKnowledge(){
+  const emp=employees.find(e=>e.id===document.getElementById('simEmployee').value),skillKey=topCriticalSkill(emp),matches=backupScores(skillKey,emp.id),backup=matches[0]?.e;
+  document.getElementById('knowledgeProtectionResult').innerHTML=`<strong>${skills[skillKey].label}</strong><br>Expert: ${emp.name} → Backup: ${backup?.name||'TBD'} → Documentation → Shadowing → Supervised Work → Independent Verification. <br><br><strong>Succession coverage will only increase after new work evidence is verified.</strong>`;
+  go('development')
+}
+
+function backupScores(skillKey,excludeId=null){
+  return employees.filter(e=>e.id!==excludeId).map(e=>{
+    const skillFit=Math.min(1,effective(e,skillKey)/skills[skillKey].target);
+    const adjacent=Object.keys(skills).filter(k=>k!==skillKey).reduce((a,k)=>a+Math.min(1,effective(e,k)/skills[k].target),0)/(Object.keys(skills).length-1);
+    const interest=e.interests.join(' ').toLowerCase().includes(skills[skillKey].label.split(' ')[0].toLowerCase())||e.interests.join(' ').toLowerCase().includes(skillKey.toLowerCase())?1:.65;
+    const growth=Math.min(1,.55+e.growth*2);
+    const score=Math.round((skillFit*.45+adjacent*.20+e.confidence*.15+growth*.10+interest*.10)*100);
+    const missing=Math.max(0,skills[skillKey].target-e.skills[skillKey]);
+    const weeks=Math.max(0,Math.ceil(missing/Math.max(.08,e.growth)*2));
+    return {e,score,weeks,missing}
+  }).sort((a,b)=>b.score-a.score)
+}
+function rankBackups(skillKey='SAP'){
+  const cards=backupScores(skillKey,selectedSimEmployee).slice(0,5);
+  renderTalentCards(cards,skillKey);
+  setTimeout(renderSuccessionDepth,0)
+}
+function renderTalent(){
+  if(!window.targetSkill)window.targetSkill='SAP';
+  rankBackups(window.targetSkill);
+  renderSuccessionDepth()
+}
+function renderTalentCards(cards,skillKey){
+  document.getElementById('talentCards').innerHTML=cards.map(({e,score,weeks,missing})=>`<div class="match-card">
+    <div class="section-head"><h3>${e.name}</h3><span class="tag ${score>=88?'green':score>=78?'blue':'amber'}">${score}% match</span></div>
+    <div class="muted">${e.role} • ${e.department}</div>
+    <div class="match-meta"><div class="mini-box"><span>Missing skill</span><strong>${missing<=.1?'None':missing.toFixed(1)+' levels'}</strong></div><div class="mini-box"><span>Time to readiness</span><strong>${weeks<=0?'Ready Now':weeks<24?`~${weeks} weeks`:'6–12 mo'}</strong></div></div>
+    <div class="notice">${e.backup}</div>
+    <div class="actions" style="margin-top:10px"><button class="btn soft" onclick="showWhy('${e.id}','${skillKey}',${score})">Why this recommendation?</button><button class="btn blue" onclick="openEmployee('${e.id}')">Open employee</button></div>
+  </div>`).join('')
+}
+function rankCustomProject(){
+  const skillNames=document.getElementById('projectSkills').value.split(',').map(s=>s.trim().toLowerCase());
+  const keys=Object.keys(skills).filter(k=>skillNames.some(s=>skills[k].label.toLowerCase().includes(s)||k.toLowerCase().includes(s.replace(/\s/g,''))));
+  const key=keys[0]||'Robotics';window.targetSkill=key;rankBackups(key);
+  document.getElementById('talentPriorityBanner').innerHTML=`<strong>${document.getElementById('projectName').value}:</strong> ranking employees using ${keys.map(k=>skills[k].label).join(', ')||skills[key].label}, confidence, growth, evidence and career interest.`
+}
+function showWhy(id,skillKey,score){const e=employees.find(x=>x.id===id);document.getElementById('whyModalText').innerHTML=`<strong>${e.name} — ${score}% match</strong><br><br>${e.why}<br><br>Evidence confidence: ${confidenceLabel(e)} • Last verified: ${lastVerified(e)} • Growth: ${Math.round(e.growth*100)}% • Target capability: ${skills[skillKey].label}.`;document.getElementById('whyModal').classList.add('show')}
+function closeWhyModal(){document.getElementById('whyModal').classList.remove('show')}
+
+function analyzeFutureStrategy(){
+  const text=document.getElementById('strategyInput').value.toLowerCase(),h=parseInt(document.getElementById('strategyHorizon').value);
+  let req={...futureRequirements};
+  if(text.includes('automat')){req.Robotics=Math.max(req.Robotics,4.6);req.SAP=Math.max(req.SAP,4.5)}
+  if(text.includes('ai'))req.AIOps=Math.max(req.AIOps,4.5);
+  if(text.includes('cold'))req.ColdChain=Math.max(req.ColdChain,4.4);
+  if(text.includes('food')||text.includes('safety'))req.FoodSafety=Math.max(req.FoodSafety,4.7);
+  const horizonBoost=h===6?.15:h===24?-.15:0;Object.keys(req).forEach(k=>req[k]=Math.max(1,Math.min(5,req[k]+horizonBoost)));
+  futureRequirements=req;renderFutureStrategyResults();refreshAll()
+}
+function renderFutureStrategyResults(){
+  document.getElementById('futureStrategyResults').innerHTML=`<div class="notice"><strong>Future readiness: ${futureReadiness(employees)}%</strong><br>AI translated the business goal into editable target capabilities. Scores below are calculated deterministically from verified workforce data.</div>`;
+  document.getElementById('futureEditTable').innerHTML=Object.keys(skills).map(k=>`<div class="capability-row"><strong>${skills[k].label}</strong><span>Current ${Math.round(currentCoverage(employees,k)*100)}%</span><span><input type="number" min="1" max="5" step=".1" value="${futureRequirements[k].toFixed(1)}" style="width:72px" onchange="futureRequirements['${k}']=parseFloat(this.value);refreshAll()"></span><span>Gap ${Math.max(0,100-Math.round(currentCoverage(employees,k,futureRequirements[k])*100))}%</span></div>`).join('')
+}
+
+function renderDevelopment(){
+  const bestSAP=backupScores('SAP','alex')[0],bestFood=backupScores('FoodSafety',null)[0],bestRob=backupScores('Robotics',null)[0];
+  document.getElementById('decisionSupport').innerHTML=`
+    <div class="metric"><span>Train internal talent</span><strong>${bestSAP.weeks<=12?bestSAP.weeks+' weeks':'12+ weeks'} • preferred</strong></div>
+    <div class="metric"><span>Temporary transfer</span><strong>2–4 weeks • medium disruption</strong></div>
+    <div class="metric"><span>External hire</span><strong>12+ weeks • use if internal gap remains</strong></div>
+    <div class="why"><strong>Why this recommendation?</strong> Internal candidate ${bestSAP.e.name} already has ${bestSAP.e.skills.SAP.toFixed(1)}/5 SAP capability and ${confidenceLabel(bestSAP.e)} evidence confidence.</div>`;
+  document.getElementById('futureNeedsTable').innerHTML=employees.map(e=>{
+    const gaps=Object.keys(skills).map(k=>({k,g:futureRequirements[k]-e.skills[k]})).sort((a,b)=>b.g-a.g);const top=gaps[0];const action=top.g<=.3?'Verify on live work':top.k==='FoodSafety'?'Certification + shadowing':top.k==='Robotics'?'Project rotation + mentoring':'Training + project experience';const weeks=Math.max(0,Math.ceil(Math.max(0,top.g)/Math.max(.08,e.growth)*2));
+    return `<tr><td><span class="employee-link" onclick="openEmployee('${e.id}')">${e.name}</span></td><td>${e.futureMatch}%</td><td>${skills[top.k].label} ${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)}</td><td>${action}</td><td>${weeks<=0?'Ready Now':weeks<24?`~${weeks} weeks`:'6–12 months'}</td><td><span class="status ${weeks<=0?'done':weeks<10?'verify':'progress'}">${weeks<=0?'Verified':weeks<10?'Ready for Verification':'In Progress'}</span></td></tr>`
+  }).join('')
+}
+
+function openEmployee(id){
+  const e=employees.find(x=>x.id===id);if(!e)return;selectedDrawerEmployee=id;
+  setText('dName',e.name);setText('dMeta',`${e.role} • ${e.department}`);setText('dReady',employeeReadiness(e)+'%');setText('dMatch',e.futureMatch+'%');setText('dGaps',e.gaps.join(' • '));setText('dInterests',e.interests.join(', '));setText('dBackup',e.backup);setText('dFutureGap',e.futureGap);setText('dPlan',e.plan);setText('dWhy',e.why);setText('dSuccessionLabel','— '+e.backup);
+  const top=Object.entries(e.skills).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById('dSkills').innerHTML=top.map(([k,v])=>`<div class="skill-line"><span>${skills[k].label}</span><div class="track"><div class="fill" style="width:${v/5*100}%"></div></div><strong>${v.toFixed(1)}</strong></div><div class="muted" style="margin-left:118px">Confidence ${confidenceLabel(e)} • Last Verified ${lastVerified(e)} • ${trend(e)}</div>`).join('');
+  document.getElementById('drawerBackdrop').classList.add('show');document.getElementById('drawer').classList.add('show')
+}
+function closeDrawer(){document.getElementById('drawerBackdrop').classList.remove('show');document.getElementById('drawer').classList.remove('show')}
+function createDevelopmentFromDrawer(){const e=employees.find(x=>x.id===selectedDrawerEmployee);if(e){document.getElementById('knowledgeProtectionResult').innerHTML=`<strong>${e.name}</strong><br>${e.plan}<br><br>Status: Not Started → In Progress → Ready for Verification → Verified.`}closeDrawer();go('development')}
+
+
+
+function renderPresentationStory(){
+  const sapExperts=qualifiedCount(employees,'SAP');
+  setText('sapExpertCount',sapExperts);
+  setText('sapStoryMoney',money(capabilityExposure(employees,'SAP')));
+}
+function renderScenarioImpact(list=lastScenarioList||employees,req=lastScenarioReq){
+  const incremental=scenarioIncrementalExposure(list,req);
+  const total=totalExposure(list,req);
+  setText('simImpactValue',money(incremental));
+  const label=lastScenarioLabel||'Selected scenario';
+  setText('simImpactDetail',`${label}: ${money(incremental)} additional estimated exposure; ${money(total)} total modeled exposure.`);
+  const banner=document.getElementById('simImpactBanner');
+  if(banner) banner.style.opacity=incremental>0?'1':'.78';
+}
+
+function renderImpactModel(list=employees,req=null){
+  const tbody=document.getElementById('impactTable');
+  if(tbody){
+    tbody.innerHTML=Object.keys(skills).map(k=>{
+      const target=req?req[k]:skills[k].target;
+      const factor=exposureFactor(list,k,target);
+      const exposure=capabilityExposure(list,k,target);
+      return `<tr>
+        <td><strong>${skills[k].label}</strong></td>
+        <td><input aria-label="${skills[k].label} loss per hour" type="number" min="0" step="1000" value="${impactInputs[k].lossPerHour}" style="width:105px" onchange="updateImpactInput('${k}','lossPerHour',this.value)"></td>
+        <td><input aria-label="${skills[k].label} disruption hours" type="number" min="0" step="1" value="${impactInputs[k].disruptionHours}" style="width:80px" onchange="updateImpactInput('${k}','disruptionHours',this.value)"> hrs</td>
+        <td>${Math.round(factor*100)}%</td>
+        <td><strong>${money(exposure)}</strong></td>
+      </tr>`
+    }).join('');
+  }
+  const baseline=totalExposure(employees);
+  setText('overviewExposure',money(baseline));
+  const highest=Object.keys(skills).map(k=>({k,v:capabilityExposure(employees,k)})).sort((a,b)=>b.v-a.v)[0];
+  if(highest){
+    setText('highestExposureSkill',skills[highest.k].label);
+    setText('highestExposureValue',money(highest.v)+' estimated exposure');
+  }
+  setText('briefExposure',money(baseline));setText('leadershipExposure',money(baseline));renderPresentationStory();
+  setText('briefStressExposure',money(totalExposure(employees.filter(e=>e.id!=='alex'))));
+}
+function updateImpactInput(key,field,value){
+  const n=Math.max(0,parseFloat(value)||0);
+  impactInputs[key][field]=n;
+  renderImpactModel(lastScenarioList||employees,lastScenarioReq);
+  setText('simBeforeExposure',money(totalExposure(employees)));
+  setText('simAfterExposure',money(totalExposure(lastScenarioList||employees,lastScenarioReq)));
+  renderBrief();
+  showToast('Business impact assumption updated. Exposure recalculated.')
+}
+
+function renderBrief(){
+  const risks=singlePointRisks(employees).slice(0,3);
+  document.getElementById('briefRisks').innerHTML=risks.map(k=>`<div class="metric"><span>${skills[k].label}</span><strong>Single-point knowledge risk</strong></div>`).join('');
+  document.getElementById('briefFuture').innerHTML=criticalGaps(employees,futureRequirements).slice(0,3).map(k=>`<div class="metric"><span>${skills[k].label}</span><strong>Target ${futureRequirements[k].toFixed(1)}/5</strong></div>`).join('');
+  document.getElementById('briefActions').innerHTML=`<ol><li>Protect the most concentrated critical skill through verified knowledge transfer.</li><li>Develop the highest-ranked internal backup before external hiring.</li><li>Close 2027 robotics / AI Operations gaps through project experience and verification.</li></ol>`;
+  document.getElementById('briefImprovement').textContent=`Applying the current development plan is projected to improve future readiness from ${futureReadiness(employees)}% toward ${Math.min(95,futureReadiness(employees)+14)}%, but the score should only increase after new evidence is verified.`;
+  setText('briefExposure',money(totalExposure(employees)));
+  setText('briefStressExposure',money(totalExposure(employees.filter(e=>e.id!=='alex'))))
+}
+
+function buildSearchIndex(q){
+  q=q.toLowerCase();const results=[];
+  employees.forEach(e=>{if([e.name,e.role,e.department,e.team].join(' ').toLowerCase().includes(q))results.push({type:'Employee',title:e.name,sub:`${e.role} • ${e.department}`,click:`openEmployee('${e.id}')`})});
+  Object.keys(skills).forEach(k=>{if(skills[k].label.toLowerCase().includes(q))results.push({type:'Skill',title:skills[k].label,sub:`${skills[k].criticality} • Target ${skills[k].target}/5`,click:`document.getElementById('filterSkill').value='${k}';renderSkills();go('skills')`})});
+  riskDates.forEach(r=>{if((r.name+' '+r.reason).toLowerCase().includes(q))results.push({type:'Risk',title:r.name,sub:`${daysUntil(r.date)} days • ${r.criticality} • ${money(riskExposure(r))} if unresolved`,click:`go('simulator')`})});
+  employees.forEach(e=>e.projects.forEach(p=>{if(p.toLowerCase().includes(q))results.push({type:'Project',title:p,sub:`Contributor: ${e.name}`,click:`openEmployee('${e.id}')`})}));
+  return results.slice(0,12)
+}
+document.getElementById('globalSearch').addEventListener('input',e=>{
+  const q=e.target.value.trim(),wrap=document.getElementById('searchResults');if(q.length<2){wrap.classList.remove('show');return}
+  const res=buildSearchIndex(q);wrap.innerHTML=res.length?groupSearch(res):'<div class="search-result">No matches</div>';wrap.classList.add('show')
 });
+function groupSearch(res){
+  let html='';['Employee','Skill','Risk','Project'].forEach(type=>{const group=res.filter(r=>r.type===type);if(group.length){html+=`<div class="search-group">${type}s</div>`+group.map(r=>`<div class="search-result" onclick="${r.click};document.getElementById('searchResults').classList.remove('show')"><strong>${r.title}</strong><span>${r.sub}</span></div>`).join('')}});return html
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))document.getElementById('searchResults').classList.remove('show')})
 
-// ---- Overview ----
-async function loadOverview() {
-  const r = await fetch("/api/overview");
-  const d = await r.json();
+function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.classList.remove('active'));document.getElementById(id).classList.add('active');const n=document.querySelector(`.nav-item[data-page="${id}"]`);if(n)n.classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.addEventListener('click',()=>go(n.dataset.page)))
 
-  document.getElementById("overview-stats").innerHTML = `
-    <div class="card stat">
-      <div class="label">Workforce Readiness Today</div>
-      <div class="value">${fmtPct(d.workforce_readiness_pct)}</div>
-    </div>
-    <div class="card stat">
-      <div class="label">Future Readiness</div>
-      <div class="value">${fmtPct(d.future_readiness_pct)}</div>
-      <div class="sub">against forecast skill targets</div>
-    </div>
-    <div class="card stat">
-      <div class="label">Succession Coverage</div>
-      <div class="value">${fmtPct(d.succession_coverage_pct)}</div>
-      <div class="sub">critical skills with 2+ qualified people</div>
-    </div>
-    <div class="card stat">
-      <div class="label">Current Business Exposure</div>
-      <div class="value">${fmtUsd(d.business_exposure.estimated_exposure)}</div>
-      <div class="sub">estimated, from editable cost assumptions</div>
-    </div>
-  `;
 
-  const gapsRows = d.critical_skill_gaps.length
-    ? d.critical_skill_gaps.map(g => `
-        <tr>
-          <td>${g.label}</td>
-          <td><span class="badge ${g.criticality === "Critical" ? "danger" : "warn"}">${g.criticality}</span></td>
-          <td>${fmtPct(g.coverage_pct)}</td>
-          <td>${riskBadge(g.qualified_people, g.required_experts)}</td>
-        </tr>`).join("")
-    : "";
-  document.getElementById("gaps-table").innerHTML = gapsRows
-    ? `<table><thead><tr><th>Skill</th><th>Criticality</th><th>Coverage</th><th>Qualified people</th></tr></thead><tbody>${gapsRows}</tbody></table>`
-    : `<div class="empty">No critical gaps right now.</div>`;
-
-  const riskRows = d.single_point_knowledge_risks.length
-    ? d.single_point_knowledge_risks.map(r => `
-        <tr>
-          <td>${r.label}</td>
-          <td>${riskBadge(r.qualified_people, r.required_experts)}</td>
-          <td>${fmtPct(r.coverage_pct)}</td>
-        </tr>`).join("")
-    : "";
-  document.getElementById("risks-table").innerHTML = riskRows
-    ? `<table><thead><tr><th>Skill</th><th>Qualified people</th><th>Coverage</th></tr></thead><tbody>${riskRows}</tbody></table>`
-    : `<div class="empty">No single-point-of-failure skills right now.</div>`;
+function runDiagnostics(){
+  const checks=[
+    ['Employees loaded',employees.length>0,employees.length+' records'],
+    ['Skills model',Object.keys(skills).length===5,Object.keys(skills).length+' capabilities'],
+    ['Readiness calculation',Number.isFinite(readiness(employees)),readiness(employees)+'%'],
+    ['Financial exposure',Number.isFinite(totalExposure(employees)),money(totalExposure(employees))],
+    ['Future requirements',Object.keys(futureRequirements).length===Object.keys(skills).length,'editable targets'],
+    ['Search index',buildSearchIndex('SAP').length>0,'employees / skills / risks / projects'],
+    ['Risk dates',riskDates.every(r=>Number.isFinite(daysUntil(r.date))),riskDates.length+' dated risks'],
+    ['Employee simulation',Number.isFinite(readiness(employees.filter(e=>e.id!=='alex'))),'recalculates from data'],
+    ['Succession matching',backupScores('SAP','alex').length>0,'ranked backups']
+  ];
+  const wrap=document.getElementById('diagnostics');
+  if(wrap)wrap.innerHTML=checks.map(([name,ok,detail])=>`<div class="notice"><strong>${ok?'':''} ${name}</strong><br>${detail}</div>`).join('');
+  const all=checks.every(x=>x[1]);
+  const badge=document.getElementById('diagnosticBadge');
+  if(badge){badge.textContent=all?'All core checks passed':'Needs attention';badge.className='tag '+(all?'green':'red')}
 }
 
-// ---- What-If Simulator ----
-async function loadEmployeesIntoSelect() {
-  const r = await fetch("/api/employees");
-  const employees = await r.json();
-  const sel = document.getElementById("whatif-employee");
-  sel.innerHTML = employees.map(e => `<option value="${e.id}">${e.name} — ${e.role}</option>`).join("");
-  document.getElementById("whatif-run").disabled = false;
+function loadDemo(){employees=JSON.parse(JSON.stringify(demoEmployees));futureRequirements=Object.fromEntries(Object.entries(skills).map(([k,v])=>[k,v.futureTarget]));document.getElementById('dataStatus').innerHTML='Demo company loaded: <strong>Northstar Foods</strong> with '+employees.length+' employees.';refreshAll()}
+function addManualEmployee(){
+  const name=document.getElementById('newName').value.trim(),role=document.getElementById('newRole').value.trim(),department=document.getElementById('newDept').value.trim();if(!name)return;
+  employees.push({id:'e'+Date.now(),name,role:role||'Employee',department:department||'General',team:'General',confidence:.6,freshnessDays:0,growth:.05,interests:['career development'],skills:{SAP:1,FoodSafety:1,Robotics:1,ColdChain:1,AIOps:1},certs:[],projects:[],gaps:['Skill evidence required'],futureMatch:45,backup:'Not yet assessed.',plan:'Submit work evidence and complete manager verification.',why:'Insufficient evidence; profile needs verification.',futureGap:'Future role gap cannot be assessed until evidence is verified.'});document.getElementById('dataStatus').textContent=`Added ${name}. Skill scores remain low-confidence until evidence is verified.`;refreshAll()
+}
+function importCSV(){
+  const file=document.getElementById('csvFile').files[0];if(!file){document.getElementById('dataStatus').textContent='Choose a CSV file first.';return}
+  const reader=new FileReader();reader.onload=()=>{const lines=reader.result.trim().split(/\r?\n/);const headers=lines[0].split(',').map(x=>x.trim().toLowerCase());let count=0;lines.slice(1).forEach(line=>{const cols=line.split(',').map(x=>x.trim()),o={};headers.forEach((h,i)=>o[h]=cols[i]);if(o.name){employees.push({id:'csv'+Date.now()+count,name:o.name,role:o.role||'Employee',department:o.department||'General',team:o.team||'General',confidence:.55,freshnessDays:0,growth:.05,interests:['career development'],skills:{SAP:1,FoodSafety:1,Robotics:1,ColdChain:1,AIOps:1},certs:[],projects:[],gaps:['Evidence required'],futureMatch:40,backup:'Not assessed.',plan:'Add skill evidence and manager verification.',why:'Imported profile has no validated skill evidence yet.',futureGap:'Future readiness pending evidence.'});count++}});document.getElementById('dataStatus').textContent=`Imported ${count} employee records. Skill evidence still requires verification.`;refreshAll()};reader.readAsText(file)
 }
 
-async function runWhatIf() {
-  const id = document.getElementById("whatif-employee").value;
-  const btn = document.getElementById("whatif-run");
-  btn.disabled = true;
-  btn.textContent = "Simulating…";
-  const r = await fetch("/api/simulations/employee-unavailable", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ employee_id: id }),
-  });
-  const d = await r.json();
-  btn.disabled = false;
-  btn.textContent = "Simulate departure";
+function animateInitial(){document.querySelectorAll('.animate').forEach(el=>{const txt=el.textContent,target=parseInt(txt)||0,suffix=txt.includes('%')?'%':'';let n=0;const timer=setInterval(()=>{n++;el.textContent=Math.round(target*n/25)+suffix;if(n>=25)clearInterval(timer)},20)})}
 
-  const backupRows = d.recommended_backups.map(b => `
-    <tr>
-      <td>${b.name}<div class="sub" style="color:var(--muted)">${b.role} · ${b.department}</div></td>
-      <td>${b.match_pct.toFixed(1)}%</td>
-      <td>${b.succession_depth}</td>
-      <td>${b.career_interest_aligned ? '<span class="badge good">Interest-aligned</span>' : ""}</td>
-    </tr>`).join("");
 
-  document.getElementById("whatif-result").innerHTML = `
-    <div class="card" style="margin-bottom:18px;">
-      <strong>${d.employee.name}</strong> (${d.employee.role}) becomes unavailable.
-      Primary risk skill: <strong>${d.primary_risk_skill}</strong>.
-    </div>
-    <div class="compare">
-      <div class="card">
-        <div class="label" style="font-size:12px;color:var(--muted);text-transform:uppercase;">Before</div>
-        <div class="value">${fmtPct(d.before.readiness_pct)} readiness</div>
-        <div class="sub">${d.before.single_point_risk_count} single-point risks · ${fmtUsd(d.before.business_exposure)} exposure</div>
-      </div>
-      <div class="card">
-        <div class="label" style="font-size:12px;color:var(--muted);text-transform:uppercase;">After</div>
-        <div class="value delta-down">${fmtPct(d.after.readiness_pct)} readiness</div>
-        <div class="sub">${d.after.single_point_risk_count} single-point risks · ${fmtUsd(d.after.business_exposure)} exposure</div>
-      </div>
-    </div>
-    <div class="card" style="margin-bottom:18px;">
-      <div class="label" style="font-size:12px;color:var(--muted);text-transform:uppercase;">Incremental business impact</div>
-      <div class="value delta-down">+${fmtUsd(d.incremental_business_impact)}</div>
-      <div class="sub">formula: expert-equivalent gap × downtime cost/day × recovery days</div>
-    </div>
-    <h2>Recommended backups</h2>
-    <table><thead><tr><th>Candidate</th><th>Match</th><th>Ready</th><th></th></tr></thead><tbody>${backupRows}</tbody></table>
-  `;
+function toggleCalc(id){const el=document.getElementById(id);if(el)el.classList.toggle('show')}
+function showToast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>el.classList.remove('show'),2300)}
+
+function renderExecutiveVisuals(){
+  const r=readiness(employees);
+  const d=document.getElementById('execDonut');if(d)d.style.setProperty('--p',r);
+  setText('execDonutText',r+'%');
+  const wrap=document.getElementById('coverageChart');if(!wrap)return;
+  wrap.innerHTML='';
+  Object.keys(skills).forEach(k=>{
+    const current=Math.round(currentCoverage(employees,k,skills[k].target)*100);
+    const future=Math.round(currentCoverage(employees,k,futureRequirements[k])*100);
+    const col=document.createElement('div');col.className='coverage-col';
+    col.innerHTML=`<div class="coverage-bars"><div class="coverage-bar current" style="height:${current}%"></div><div class="coverage-bar future" style="height:${future}%"></div></div><div class="coverage-label">${skills[k].label.replace(' Configuration','').replace(' Certification','').replace(' Operations','')}</div><div class="coverage-value">${current}% / ${future}%</div>`;
+    wrap.appendChild(col)
+  })
 }
 
-// ---- Talent Match ----
-async function loadSkillsIntoSelect() {
-  const r = await fetch("/api/skills");
-  const skills = await r.json();
-  const sel = document.getElementById("match-skill");
-  sel.innerHTML = Object.entries(skills).map(([key, meta]) => `<option value="${key}">${meta.label}</option>`).join("");
+const dependencyMeta={
+ SAP:{process:'ERP / production planning',business:'Plant continuity'},
+ FoodSafety:{process:'Audit & quality release',business:'Regulatory readiness'},
+ Robotics:{process:'Automated packaging lines',business:'Automation strategy'},
+ ColdChain:{process:'Cold-chain operations',business:'Product integrity'},
+ AIOps:{process:'AI-assisted operations',business:'Future productivity'}
+};
+function renderDependencyMap(empId=null, riskState=false, recovering=false){
+  const wrap=document.getElementById('dependencyMap');if(!wrap)return;
+  const emp=employees.find(e=>e.id===(empId||selectedSimEmployee))||employees[0];
+  const key=topCriticalSkill(emp),meta=dependencyMeta[key]||{process:'Critical workflow',business:'Business capability'};
+  const stateClass=riskState?' at-risk':recovering?' recovering':'';
+  wrap.innerHTML=`
+    <div class="dep-node person${riskState?' at-risk':''}"><strong>${emp.name}${riskState?' ':''}</strong><span>${emp.role}</span></div>
+    <div class="dep-arrow">→</div>
+    <div class="dep-node skill-node${stateClass}"><strong>${skills[key].label}</strong><span>${emp.skills[key].toFixed(1)}/5 • ${confidenceLabel(emp)} confidence</span></div>
+    <div class="dep-arrow">→</div>
+    <div class="dep-node process${stateClass}"><strong>${meta.process}</strong><span>${riskState?'Coverage reduced':'Capability supported'}</span></div>
+    <div class="dep-arrow">→</div>
+    <div class="dep-node business${stateClass}"><strong>${meta.business}</strong><span>${riskState?'At risk until backup is ready':'Protected by current coverage'}</span></div>`;
 }
 
-async function runMatch() {
-  const skill = document.getElementById("match-skill").value;
-  const r = await fetch("/api/talent-match", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ skill }),
-  });
-  const d = await r.json();
-  const rows = d.matches.map(m => `
-    <tr>
-      <td>${m.name}<div class="sub" style="color:var(--muted)">${m.role} · ${m.department}</div></td>
-      <td>${m.match_pct.toFixed(1)}%</td>
-      <td>${m.succession_depth}</td>
-      <td>${m.career_interest_aligned ? '<span class="badge good">Interest-aligned</span>' : ""}</td>
-    </tr>`).join("");
-  document.getElementById("match-result").innerHTML =
-    `<table><thead><tr><th>Candidate</th><th>Match</th><th>Ready</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+function renderSuccessionDepth(){
+  const wrap=document.getElementById('successionDepth');if(!wrap)return;
+  const target=window.targetSkill||'SAP';
+  const rows=backupScores(target, selectedSimEmployee).slice(0,6);
+  const now=rows.filter(x=>x.weeks<=2), soon=rows.filter(x=>x.weeks>2&&x.weeks<24), later=rows.filter(x=>x.weeks>=24);
+  const col=(title,arr,empty)=>`<div class="succession-col"><h4>${title}</h4>${arr.length?arr.map(x=>`<div class="succession-person" onclick="openEmployee('${x.e.id}')"><strong>${x.e.name} • ${x.score}%</strong><span>${x.weeks<=0?'Ready now':x.weeks+' weeks'} • ${x.e.role}</span></div>`).join(''):`<div class="muted">${empty}</div>`}</div>`;
+  wrap.innerHTML=col('Ready Now',now,'No verified ready-now backup')+col('Ready <6 Months',soon,'No candidate in this window')+col('Ready 6–12 Months',later,'No candidate in this window')
 }
 
-document.getElementById("whatif-run").addEventListener("click", runWhatIf);
-document.getElementById("match-run").addEventListener("click", runMatch);
-document.getElementById("reset-demo").addEventListener("click", async () => {
-  await fetch("/api/reset-demo", { method: "POST" });
-  loadOverview();
-  alert("Demo data reset.");
-});
+function adjustSuggestion(){
+  const v=prompt("Adjust Maria's suggested SAP proficiency (1–5):","4.0");
+  if(v===null)return;
+  const n=parseFloat(v);if(!Number.isFinite(n)||n<1||n>5){showToast('Enter a value between 1 and 5.');return}
+  const e=document.getElementById('approvalStatus');e.textContent='Adjusted to '+n.toFixed(1)+' — needs approval';e.className='tag amber';
+  window.adjustedMariaSAP=n;showToast('Suggestion adjusted. Skill record is unchanged until approval.')
+}
+function approveSuggestion(){
+  const el=document.getElementById('approvalStatus');el.textContent='Approved';el.className='tag green';
+  if(window.adjustedMariaSAP){const m=employees.find(e=>e.id==='maria');m.skills.SAP=window.adjustedMariaSAP;window.adjustedMariaSAP=null;refreshAll()}
+  showToast('Human reviewer approved the skill suggestion.')
+}
+function rejectSuggestion(){const el=document.getElementById('approvalStatus');el.textContent='Rejected';el.className='tag red';window.adjustedMariaSAP=null;showToast('Suggestion rejected. Employee record was not changed.')}
 
-loadOverview();
-loadEmployeesIntoSelect();
-loadSkillsIntoSelect();
+function verifyDevelopmentEvidence(){
+  const m=employees.find(e=>e.id==='maria');if(!m)return;
+  if(m.skills.SAP>=4.6){showToast("Maria's SAP evidence is already verified.");return}
+  m.skills.SAP=4.6;m.confidence=Math.max(m.confidence,.94);m.freshnessDays=0;
+  document.getElementById('verifyStatus').textContent='Verified: Maria SAP 4.6/5 • 94% confidence • today';
+  refreshAll();renderDependencyMap('alex',false,true);showToast('New work evidence verified. Readiness and succession coverage recalculated.')
+}
+
+refreshAll();renderFutureStrategyResults();classifyCountdowns();renderExecutiveVisuals();renderSuccessionDepth();renderDependencyMap('alex',false,false);animateInitial();
 </script>
-
 </body>
 </html>
