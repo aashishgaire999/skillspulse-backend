@@ -1101,7 +1101,7 @@ async function analyzeFutureStrategy(){
     refreshAll();
     showToast(changed.length?`AI updated ${changed.length} future skill target(s) — live model call.`:'AI call succeeded but found no skills materially affected.');
   }catch(err){
-    resultsEl.innerHTML=`<div class="notice"><strong>AI call failed.</strong><br>${String(err.message||err)}<br><span class="muted">Check that OPENAI_API_KEY is set on the server.</span></div>`;
+    resultsEl.innerHTML=`<div class="notice"><strong>AI call failed.</strong><br>${String(err.message||err)}<br><span class="muted">Check that GEMINI_API_KEY is set on the server.</span></div>`;
   }
 }
 function renderFutureStrategyResults(){
@@ -1415,7 +1415,7 @@ async function requestSkillSuggestion(){
     lastSuggestion=await r.json();
     renderSkillSuggestion();
   }catch(err){
-    resultEl.innerHTML=`<div class="notice"><strong>AI call failed.</strong><br>${String(err.message||err)}<br><span class="muted">Check that OPENAI_API_KEY is configured on the server.</span></div>`;
+    resultEl.innerHTML=`<div class="notice"><strong>AI call failed.</strong><br>${String(err.message||err)}<br><span class="muted">Check that GEMINI_API_KEY is configured on the server.</span></div>`;
   }
 }
 function renderSkillSuggestion(){
