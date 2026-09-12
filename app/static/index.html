@@ -310,6 +310,24 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 
   <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>Workforce Composition</h3><span class="tag blue">Headcount &amp; departments</span></div>
+    <div class="visual-grid">
+      <div>
+        <div class="muted">Total employees</div>
+        <div style="font-size:44px;font-weight:850;letter-spacing:-.045em" id="totalHeadcount">0</div>
+        <div class="muted" id="headcountSub">across 0 departments</div>
+        <div class="metric" style="margin-top:14px"><span>Average evidence confidence</span><strong id="avgConfidence">0%</strong></div>
+        <div class="metric"><span>Emerging talent (fast growth)</span><strong id="compEmerging">0</strong></div>
+        <div class="actions" style="margin-top:11px"><button class="btn soft" onclick="go('skills')">View full roster →</button></div>
+      </div>
+      <div>
+        <div class="visual-title">Headcount by department</div>
+        <div id="departmentChart" class="coverage-chart"><div class="muted">Loading…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:15px">
     <div class="section-head"><h3>Future skills the business will need</h3><span class="tag blue">12-month horizon</span></div>
     <div id="overviewFutureSkills"><div class="muted">Loading future capability requirements…</div></div>
   </div>
@@ -825,13 +843,32 @@ function refreshAll(){
   setText('donutText',r+'%');document.getElementById('readinessDonut').style.setProperty('--p',r);
   setText('overviewSuccession',sc+'%');setText('overviewEmerging',emergingTalent());setText('overviewStale',staleSkillCount());
   setText('briefReady',r+'%');setText('briefGaps',fg.length);setText('briefSingle',sp.length);setText('briefSucc',sc+'%');
-  renderOverviewPills(r,fr,sp.length);renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();
+  renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();
   const alexRemoved=employees.filter(e=>e.id!=='alex');setText('miniBefore',r+'%');setText('miniAfter',readiness(alexRemoved)+'%');setText('miniWhy','Why? Removing Alex reduces SAP and automation coverage; the score is recalculated from the remaining verified skill evidence.');runDiagnostics();
 }
 function setText(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
 
 function renderOverviewPills(r,fr,single){
   document.getElementById('overviewPills').innerHTML=`<span class="summary-pill">${r}% current readiness</span><span class="summary-pill">${fr}% future readiness</span><span class="summary-pill">${single} single-point knowledge risks</span><span class="summary-pill">${daysUntil(riskDates[0].date)} days to first deadline</span>`
+}
+function renderWorkforceComposition(){
+  setText('totalHeadcount',employees.length);
+  const byDept={};
+  employees.forEach(e=>{byDept[e.department]=(byDept[e.department]||0)+1});
+  const depts=Object.keys(byDept);
+  setText('headcountSub',`across ${depts.length} department${depts.length===1?'':'s'}`);
+  const avgConf=employees.length?Math.round(employees.reduce((a,e)=>a+e.confidence,0)/employees.length*100):0;
+  setText('avgConfidence',avgConf+'%');
+  setText('compEmerging',emergingTalent());
+  const wrap=document.getElementById('departmentChart');if(!wrap)return;
+  const max=Math.max(1,...Object.values(byDept));
+  wrap.innerHTML='';
+  depts.sort((a,b)=>byDept[b]-byDept[a]).forEach(d=>{
+    const pct=Math.max(8,Math.round(byDept[d]/max*100));
+    const col=document.createElement('div');col.className='coverage-col';
+    col.innerHTML=`<div class="coverage-bars"><div class="coverage-bar current" style="height:${pct}%"></div></div><div class="coverage-label">${d}</div><div class="coverage-value">${byDept[d]} ${byDept[d]===1?'person':'people'}</div>`;
+    wrap.appendChild(col);
+  });
 }
 function renderOverviewFuture(){
   const wrap=document.getElementById('overviewFutureSkills');wrap.innerHTML='';
