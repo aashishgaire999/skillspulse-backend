@@ -274,6 +274,9 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 </header>
 
 <div class="content">
+<!-- ============================================================
+     PAGE: WORKFORCE OVERVIEW (sidebar: "Workforce Overview")
+     ============================================================ -->
 <section id="overview" class="page active">
   <div class="urgency urgency-top">
     <div><span class="clock-icon" style="width:16px;height:16px;margin-right:6px"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span><strong>First critical workforce deadline is approaching.</strong><div style="font-size:11px;opacity:.86;margin-top:3px">Food Safety Certification backup coverage must be verified before the audit-readiness date.</div></div>
@@ -394,6 +397,9 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   <div class="notice" style="margin-top:15px"><strong>AI recommends; managers review and decide.</strong> SkillsPulse should only analyze authorized work-related skill and development data. It does not infer personality, loyalty, sensitive traits, or likelihood of quitting.</div>
 </section>
 
+<!-- ============================================================
+     PAGE: TEAM SKILLS (heatmap, filters, AI skill suggestion)
+     ============================================================ -->
 <section id="skills" class="page">
   <div class="hero">
     <div>
@@ -447,6 +453,10 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 </section>
 
+<!-- ============================================================
+     PAGE: RISK SIMULATOR (employee-unavailable scenario, future
+     strategy AI, editable business-impact assumptions)
+     ============================================================ -->
 <section id="simulator" class="page">
   <div class="hero">
     <div>
@@ -543,6 +553,10 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 </section>
 
+<!-- ============================================================
+     PAGE: FIND TALENT (employee/role search, project skill matching,
+     succession depth, former-staff knowledge base)
+     ============================================================ -->
 <section id="talent" class="page">
   <div class="hero">
     <div>
@@ -589,6 +603,10 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 </section>
 
+<!-- ============================================================
+     PAGE: TALENT MATCH (sidebar label; section id is "development")
+     30/60/90 roadmap, train-vs-transfer-vs-hire, future-needs table
+     ============================================================ -->
 <section id="development" class="page">
   <div class="hero">
     <div>
@@ -644,6 +662,9 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 </section>
 
+<!-- ============================================================
+     PAGE: LEADERSHIP SUMMARY (print/PDF-friendly one-pager)
+     ============================================================ -->
 <section id="brief" class="page">
   <div class="hero no-print">
     <div><div class="eyebrow">LEADERSHIP SUMMARY</div><h1>The workforce decisions leadership needs in one page.</h1><p>Readiness, top gaps, knowledge risks, succession problems, future requirements, top actions and expected improvement.</p></div>
@@ -681,6 +702,9 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 </section>
 
+<!-- ============================================================
+     PAGE: CONNECT YOUR DATA (demo reload, CSV import, manual add)
+     ============================================================ -->
 <section id="data" class="page">
   <div class="hero">
     <div><div class="eyebrow">CONNECT YOUR DATA</div><h1>Start with trusted work evidence.</h1><p>Load the demo company instantly, upload a simple CSV, or add an employee manually.</p></div>
@@ -723,6 +747,42 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 </div>
 
 <script>
+/* ============================================================
+   FILE MAP — functions grew feature-by-feature and are NOT
+   physically grouped by page top-to-bottom. Use this as an index
+   (search a name, or Cmd+Shift+O "Go to Symbol" in VS Code) rather
+   than assuming position in the file = which page owns it.
+
+   DATA            demoEmployees, formerEmployees, skills, impactInputs
+   CALC ENGINE     effective, currentCoverage, readiness, qualifiedCount,
+                   singlePointRisks, criticalGaps, successionCoverage,
+                   exposureFactor/capabilityExposure/totalExposure,
+                   backupScores, time-to-readiness helpers
+   ORCHESTRATOR    refreshAll() - re-renders every page below; call this
+                   (not a page-specific function) after any data change
+   OVERVIEW        renderOverviewPills, renderWorkforceComposition,
+                   renderOverviewFuture, renderActionCenter,
+                   renderOverviewRisks, renderExposureChart,
+                   renderPresentationStory
+   TEAM SKILLS     populateFilters, renderSkills, renderCriticality,
+                   populateAiSuggestSelectors, requestSkillSuggestion,
+                   renderSkillSuggestion, approveSuggestion, adjustSuggestion,
+                   rejectSuggestion
+   RISK SIMULATOR  populateSimulator, renderSimBaseline,
+                   simulateSelectedEmployee, runSelectedScenario,
+                   renderDependencyMap, renderImpactModel,
+                   analyzeFutureStrategy, renderFutureStrategyResults
+   FIND TALENT     rankBackups, renderTalent, renderTalentCards,
+                   rankCustomProject, renderSuccessionDepth,
+                   searchTalentEmployee, renderRoleCoverage,
+                   renderFormerStaffDirectory
+   TALENT MATCH    renderDevelopment (sidebar says "Talent Match", the
+                   section id in the HTML is "development")
+   LEADERSHIP      renderBrief
+   CONNECT DATA    loadDemo, addManualEmployee, importCSV, runDiagnostics
+   SHARED (all pages) setText, money, showToast, go(), openEmployee,
+                   closeDrawer, buildSearchIndex (top-bar search)
+   ============================================================ */
 const demoEmployees=[
 {id:'alex',name:'Alex Morgan',role:'Operations Systems Lead',department:'Operations',team:'Enterprise Systems',confidence:.96,freshnessDays:18,growth:.04,interests:['automation','systems resilience','SAP'],skills:{SAP:5,FoodSafety:3.1,Robotics:4.6,ColdChain:4.0,AIOps:4.2},certs:['SAP Advanced'],projects:['ERP Modernization','Line Automation'],gaps:['Food Safety Certification backup depth'],futureMatch:92,backup:'Critical expert; strongest SAP owner and automation specialist.',plan:'Knowledge transfer to Maria; documentation; two paired live SAP cycles.',why:'Highest SAP evidence, strong automation work history, and verified manager confidence.',futureGap:'Needs broader food-safety certification coverage to remain resilient across plant operations.'},
 {id:'maria',name:'Maria Santos',role:'Process Engineer',department:'Engineering',team:'Plant Engineering',confidence:.91,freshnessDays:21,growth:.18,interests:['automation leadership','SAP','robotics'],skills:{SAP:4.1,FoodSafety:4.4,Robotics:3.2,ColdChain:4.0,AIOps:3.3},certs:['Lean Manufacturing'],projects:['SAP Rollout','Packaging Upgrade'],gaps:['Advanced robotics','SAP architecture depth'],futureMatch:91,backup:'Best internal SAP succession candidate; Ready <6 Months.',plan:'SAP cross-training, Alex mentorship, one production configuration project.',why:'Strong adjacent SAP evidence, recent rollout work, high growth, and explicit SAP career interest.',futureGap:'Robotics 3.2 → 4.2 and SAP architecture depth are the main 2027 readiness gaps.'},
