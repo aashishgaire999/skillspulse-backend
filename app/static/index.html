@@ -458,13 +458,21 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 <section id="simulator" class="page">
   <div class="hero">
     <div>
-      <div class="eyebrow">RISK SIMULATOR</div>
       <h1>Stress-test the workforce before reality does.</h1>
       <p>Employee loss, new technology, certification expiry and future initiatives recalculate readiness from actual employee data.</p>
     </div>
   </div>
 
-  <div class="card">
+  <div class="impact-banner" id="simImpactBanner">
+    <div>
+      <div class="impact-kicker">Estimated Business Impact</div>
+      <div class="impact-value" id="simImpactValue">$0</div>
+      <div class="impact-detail" id="simImpactDetail">Additional operational exposure created by this workforce scenario.</div>
+    </div>
+    <div class="impact-detail" style="max-width:340px"><strong>Calculated, not hardcoded.</strong><br>Business loss/hour and disruption assumptions are editable below; the workforce risk factor comes from real skill coverage and concentration.</div>
+  </div>
+
+  <div class="card" style="margin-top:15px">
     <div class="section-head"><h3>Employee unavailability — hero scenario</h3><span class="tag red">Live calculation</span></div>
     <div class="grid-2">
       <div>
@@ -499,15 +507,6 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <div class="metric"><span>Succession coverage</span><strong id="simAfterSucc">0%</strong></div>
       <div class="metric"><span>Calculated operational exposure</span><strong id="simAfterExposure" style="color:var(--red)">$0</strong></div>
     </div>
-  </div>
-
-  <div class="impact-banner" id="simImpactBanner">
-    <div>
-      <div class="impact-kicker">Estimated Business Impact</div>
-      <div class="impact-value" id="simImpactValue">$0</div>
-      <div class="impact-detail" id="simImpactDetail">Additional operational exposure created by this workforce scenario.</div>
-    </div>
-    <div class="impact-detail" style="max-width:340px"><strong>Calculated, not hardcoded.</strong><br>Business loss/hour and disruption assumptions are editable below; the workforce risk factor comes from real skill coverage and concentration.</div>
   </div>
 
   <div class="card dep-card" style="margin-top:15px">
