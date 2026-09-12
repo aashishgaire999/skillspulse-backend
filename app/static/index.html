@@ -554,13 +554,15 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 
   <div class="card" style="margin-bottom:15px">
-    <div class="section-head"><h3>Search an employee</h3><span class="tag blue">Full profile</span></div>
+    <div class="section-head"><h3>Who can cover this?</h3><span class="tag blue">Person or role</span></div>
+    <div class="muted" style="margin:-4px 0 10px">Search a person for their full profile, or a role (e.g. "Process Engineer") to see current holders, ranked backups from other roles, and former-employee knowledge.</div>
     <div class="grid-3">
       <input id="talentEmployeeSearch" class="input" placeholder="Search by name or role…" onkeydown="if(event.key==='Enter')searchTalentEmployee()">
       <button class="btn blue" onclick="searchTalentEmployee()">Search</button>
       <div></div>
     </div>
     <div id="talentEmployeeSearchResult" style="margin-top:10px"></div>
+    <div id="roleCoverageResult" style="margin-top:10px"></div>
   </div>
 
   <div class="match-banner" id="talentPriorityBanner"><strong>Risk-priority:</strong> Select a risk or run a simulation to rank the strongest internal backups.</div>
@@ -579,6 +581,12 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   <div class="card" style="margin-top:15px">
     <div class="section-head"><h3>Succession Depth</h3><span class="tag blue">Time to readiness</span></div>
     <div id="successionDepth" class="succession-grid"><div class="muted">Loading succession candidates…</div></div>
+  </div>
+
+  <div class="card" style="margin-top:15px">
+    <div class="section-head"><h3>Former Staff Knowledge Base</h3><span class="tag gray">Historical, not active coverage</span></div>
+    <div class="muted" style="margin-bottom:10px">Departed employees don't count toward readiness or succession coverage — this is documentation only, surfaced when a role or skill they held gets searched above.</div>
+    <div id="formerStaffList"></div>
   </div>
 </section>
 
@@ -722,7 +730,26 @@ const demoEmployees=[
 {id:'john',name:'John Lee',role:'Quality Specialist',department:'Quality',team:'Food Safety',confidence:.94,freshnessDays:10,growth:.08,interests:['food safety leadership','quality systems'],skills:{SAP:2.5,FoodSafety:4.8,Robotics:2.1,ColdChain:3.2,AIOps:2.0},certs:['Food Safety Level 2'],projects:['Audit Readiness','Supplier Quality'],gaps:['Food Safety Level 3 certification','automation exposure'],futureMatch:86,backup:'Best Food Safety backup candidate; Ready Now after certification renewal.',plan:'Complete Level 3 certification, shadow current lead, own next audit-prep checklist.',why:'Highest food-safety proficiency, freshest evidence, and explicit quality leadership interest.',futureGap:'Food Safety Level 3 verification plus basic automation exposure are required for 2027 quality leadership.'},
 {id:'priya',name:'Priya Shah',role:'Supply Chain Analyst',department:'Supply Chain',team:'Cold Chain',confidence:.87,freshnessDays:34,growth:.21,interests:['automation analytics','machine vision','cold chain'],skills:{SAP:3.4,FoodSafety:3.3,Robotics:4.0,ColdChain:4.7,AIOps:3.8},certs:['Data Analytics'],projects:['Cold Chain Optimization','Vision Pilot'],gaps:['Food Safety certification','SAP configuration'],futureMatch:88,backup:'Strong robotics / cold-chain stretch candidate; Ready <6 Months.',plan:'Robotics project rotation, machine-vision mentoring, verification on live work.',why:'Non-obvious fit: strong robotics adjacency, best cold-chain score, rapid growth, and relevant career interest.',futureGap:'Needs SAP configuration exposure and one verified robotics delivery to qualify for the 2027 automation program.'},
 {id:'sam',name:'Sam Rivera',role:'Maintenance Engineer',department:'Operations',team:'Plant Reliability',confidence:.88,freshnessDays:55,growth:.12,interests:['predictive maintenance','robotics'],skills:{SAP:3.2,FoodSafety:3.6,Robotics:4.3,ColdChain:3.5,AIOps:3.4},certs:['Industrial Maintenance'],projects:['Predictive Maintenance Pilot'],gaps:['AI operations','SAP'],futureMatch:84,backup:'Robotics backup candidate; Ready 6–12 Months.',plan:'AI Ops training, robotics project leadership, SAP basics.',why:'Strong robotics and maintenance evidence with relevant interests, but SAP/AIOps gaps remain.',futureGap:'AI Ops 3.4 → 4.0 and SAP 3.2 → 3.8 for future predictive-maintenance leadership.'},
-{id:'lena',name:'Lena Park',role:'R&D Specialist',department:'R&D',team:'Product Innovation',confidence:.90,freshnessDays:92,growth:.05,interests:['product innovation','Korean market R&D'],skills:{SAP:2.2,FoodSafety:4.2,Robotics:2.8,ColdChain:3.0,AIOps:3.1},certs:['Food Science'],projects:['Korean Product Launch'],gaps:['evidence freshness','backup documentation'],futureMatch:80,backup:'Specialized R&D knowledge risk; Ready 6–12 Months backups required.',plan:'Capture product-development knowledge, pair junior R&D backup, refresh evidence.',why:'Unique Korean-market R&D experience is business-critical but evidence is aging and concentrated.',futureGap:'Needs refreshed evidence and a verified junior backup before the next R&D cycle.'}
+{id:'lena',name:'Lena Park',role:'R&D Specialist',department:'R&D',team:'Product Innovation',confidence:.90,freshnessDays:92,growth:.05,interests:['product innovation','Korean market R&D'],skills:{SAP:2.2,FoodSafety:4.2,Robotics:2.8,ColdChain:3.0,AIOps:3.1},certs:['Food Science'],projects:['Korean Product Launch'],gaps:['evidence freshness','backup documentation'],futureMatch:80,backup:'Specialized R&D knowledge risk; Ready 6–12 Months backups required.',plan:'Capture product-development knowledge, pair junior R&D backup, refresh evidence.',why:'Unique Korean-market R&D experience is business-critical but evidence is aging and concentrated.',futureGap:'Needs refreshed evidence and a verified junior backup before the next R&D cycle.'},
+{id:'daniel',name:'Daniel Brooks',role:'Operations Systems Lead',department:'Operations',team:'Enterprise Systems',confidence:.90,freshnessDays:26,growth:.06,interests:['systems reliability','SAP governance','incident response'],skills:{SAP:3.8,FoodSafety:2.9,Robotics:3.5,ColdChain:3.8,AIOps:4.0},certs:['SAP Core'],projects:['Incident Response Playbook','SAP Governance Review'],gaps:['Food Safety exposure','SAP architecture depth'],futureMatch:84,backup:'Secondary SAP/AI Ops backup for Alex Morgan; Ready Now.',plan:'Shadow Alex on SAP architecture decisions, complete Food Safety fundamentals.',why:'Second-strongest SAP and AI Ops profile in Operations, immediately available.',futureGap:'Needs Food Safety fundamentals and deeper SAP architecture ownership for 2027 continuity.'},
+{id:'kevin',name:'Kevin Nguyen',role:'Process Engineer',department:'Engineering',team:'Plant Engineering',confidence:.89,freshnessDays:29,growth:.16,interests:['SAP rollout','process validation','cross-training'],skills:{SAP:3.9,FoodSafety:4.2,Robotics:3.8,ColdChain:3.9,AIOps:3.4},certs:['Six Sigma Green Belt'],projects:['SAP Rollout','Line Validation'],gaps:['AI Ops exposure'],futureMatch:90,backup:'Best available SAP/Food Safety succession candidate alongside Maria; Ready Now.',plan:'AI Ops fundamentals, shadow the SAP configuration change process.',why:'Broad, balanced skill profile with strong SAP and Food Safety evidence, actively growing.',futureGap:'AI Ops 3.4 → 4.0 is the main 2027 gap; otherwise well-positioned.'},
+{id:'hannah',name:'Hannah Kim',role:'Quality Specialist',department:'Quality',team:'Food Safety',confidence:.91,freshnessDays:17,growth:.07,interests:['food safety audits','supplier quality'],skills:{SAP:2.8,FoodSafety:4.0,Robotics:2.4,ColdChain:3.6,AIOps:2.2},certs:['Food Safety Level 1'],projects:['Supplier Audit Program'],gaps:['Food Safety Level 3','automation exposure'],futureMatch:82,backup:'Second Food Safety backup after John Lee; Ready Now for routine audits.',plan:'Level 3 certification, cross-train on automation basics.',why:'Freshest Food Safety evidence after John, active supplier-audit work.',futureGap:'Level 3 certification and automation basics needed for 2027 audit leadership.'},
+{id:'olivia',name:'Olivia Grant',role:'Supply Chain Analyst',department:'Supply Chain',team:'Cold Chain',confidence:.90,freshnessDays:22,growth:.14,interests:['cold chain logistics','demand planning'],skills:{SAP:3.6,FoodSafety:3.4,Robotics:3.0,ColdChain:4.1,AIOps:3.5},certs:['Supply Chain Analytics'],projects:['Cold Chain Optimization','Demand Planning Pilot'],gaps:['Robotics exposure'],futureMatch:87,backup:'Strong Cold Chain backup alongside Priya; Ready Now.',plan:'Robotics fundamentals, pair with Priya on the vision-pilot rollout.',why:'Second-highest Cold Chain score, consistent growth, relevant analytics background.',futureGap:'Robotics 3.0 → 4.0 for 2027 automated cold-chain monitoring.'},
+{id:'ethan',name:'Ethan Cole',role:'Maintenance Engineer',department:'Operations',team:'Plant Reliability',confidence:.89,freshnessDays:31,growth:.08,interests:['reliability engineering','robotics maintenance'],skills:{SAP:2.9,FoodSafety:3.3,Robotics:4.0,ColdChain:3.4,AIOps:3.0},certs:['Reliability-Centered Maintenance'],projects:['Predictive Maintenance Pilot'],gaps:['SAP','AI Ops'],futureMatch:80,backup:'Robotics backup alongside Sam Rivera; Ready <6 Months.',plan:'SAP basics, AI Ops fundamentals, shadow predictive-maintenance dashboards.',why:'Strong robotics maintenance evidence, works the same predictive-maintenance program as Sam.',futureGap:'SAP 2.9 → 3.8 and AI Ops 3.0 → 4.0 for future predictive-maintenance leadership.'},
+{id:'maya',name:'Maya Johnson',role:'R&D Specialist',department:'R&D',team:'Product Innovation',confidence:.88,freshnessDays:38,growth:.13,interests:['product innovation','sensory science'],skills:{SAP:2.4,FoodSafety:4.0,Robotics:3.0,ColdChain:3.2,AIOps:3.5},certs:['Food Science'],projects:['Flavor Innovation Pilot'],gaps:['evidence freshness','SAP'],futureMatch:79,backup:'Second R&D knowledge holder alongside Lena Park; Ready <6 Months.',plan:'Pair with Lena on active projects, refresh SAP basics.',why:'Second-strongest R&D profile, actively growing, real succession depth for R&D risk.',futureGap:'Needs paired documentation work with Lena before the next R&D cycle.'},
+{id:'noah',name:'Noah Williams',role:'Robotics Engineer',department:'Engineering',team:'Automation',confidence:.93,freshnessDays:14,growth:.17,interests:['industrial robotics','automation strategy'],skills:{SAP:3.5,FoodSafety:2.9,Robotics:4.7,ColdChain:3.2,AIOps:4.0},certs:['Robotics Systems Integration'],projects:['Line Automation','Robotics Standards'],gaps:['Food Safety exposure'],futureMatch:93,backup:'Strongest available Robotics backup; Ready Now.',plan:'Food Safety fundamentals, formalize robotics standards documentation.',why:'Highest Robotics score in the company with strong, fresh evidence and AI Ops overlap.',futureGap:'Minimal — Food Safety exposure is the only material 2027 gap.'},
+{id:'sofia',name:'Sofia Martinez',role:'Robotics Engineer',department:'Engineering',team:'Automation',confidence:.90,freshnessDays:20,growth:.15,interests:['machine vision','automation strategy'],skills:{SAP:3.3,FoodSafety:3.1,Robotics:4.1,ColdChain:3.5,AIOps:4.1},certs:['Machine Vision Fundamentals'],projects:['Vision Pilot','Line Automation'],gaps:['SAP depth'],futureMatch:89,backup:'Second Robotics/AI Ops backup alongside Noah; Ready Now.',plan:'SAP fundamentals, extend the machine-vision pilot to the Cold Chain line.',why:'Strong, balanced Robotics and AI Ops profile with active vision-pilot work.',futureGap:'SAP 3.3 → 4.2 to round out automation-program readiness.'},
+{id:'liam',name:'Liam Carter',role:'Mechanical Engineer',department:'Engineering',team:'Plant Engineering',confidence:.90,freshnessDays:27,growth:.06,interests:['mechanical design','equipment reliability'],skills:{SAP:3.1,FoodSafety:3.0,Robotics:4.2,ColdChain:3.8,AIOps:3.2},certs:['Mechanical Engineering Design'],projects:['Line Automation','Equipment Redesign'],gaps:['Food Safety','AI Ops'],futureMatch:83,backup:'Mechanical/Robotics backup for automation projects; Ready Now.',plan:'Food Safety basics, AI Ops fundamentals.',why:'Strong mechanical and robotics evidence directly relevant to the automation program.',futureGap:'Food Safety and AI Ops are the main gaps for broader 2027 automation ownership.'},
+{id:'grace',name:'Grace Wilson',role:'Mechanical Engineer',department:'Engineering',team:'Plant Engineering',confidence:.88,freshnessDays:33,growth:.12,interests:['equipment design','continuous improvement'],skills:{SAP:3.0,FoodSafety:3.2,Robotics:3.9,ColdChain:3.7,AIOps:3.3},certs:['Lean Six Sigma'],projects:['Equipment Redesign','Continuous Improvement Program'],gaps:['SAP','AI Ops'],futureMatch:81,backup:'Second Mechanical Engineering backup alongside Liam; Ready <6 Months.',plan:'SAP and AI Ops fundamentals, pair with Liam on redesign projects.',why:'Solid, growing mechanical profile with continuous-improvement focus.',futureGap:'SAP 3.0 → 3.8 and AI Ops 3.3 → 4.0 for 2027 mechanical-automation readiness.'}
+];
+
+const formerEmployees=[
+{id:'raj',name:'Raj Patel',formerRole:'Senior Process Engineer',department:'Engineering',leftYear:2025,tenureYears:6,skills:{SAP:4.4,FoodSafety:4.1,Robotics:4.0},description:'Former Process Engineering role-holder. Historical work can support cross-training for process and SAP coverage.',artifacts:['Packaging Line SOP','SAP changeover guide','Robotics commissioning notes']},
+{id:'nina',name:'Nina Foster',formerRole:'Process Engineer',department:'Engineering',leftYear:2024,tenureYears:4,skills:{FoodSafety:4.2,SAP:3.9,Robotics:3.7},description:'Former Process Engineer. Archived process-validation work can accelerate cross-training.',artifacts:['Yield-loss checklist','Process validation template','Packaging troubleshooting guide']},
+{id:'victor',name:'Victor Huang',formerRole:'Robotics Engineer',department:'Engineering',leftYear:2025,tenureYears:5,skills:{Robotics:4.8,AIOps:3.9,SAP:3.2},description:'Former Robotics Engineer. Commissioning and PLC documentation can accelerate robotics cross-training.',artifacts:['Robot commissioning checklist','PLC backup archive','Safety validation notes']},
+{id:'chloe',name:'Chloe Bennett',formerRole:'Robotics Engineer',department:'Engineering',leftYear:2024,tenureYears:4,skills:{Robotics:4.4,AIOps:4.0,ColdChain:3.3},description:'Former Robotics Engineer with reusable machine-vision and cobot knowledge.',artifacts:['Vision tuning guide','Cobot risk assessment','Robot maintenance handoff']},
+{id:'robert',name:'Robert King',formerRole:'Mechanical Engineer',department:'Engineering',leftYear:2025,tenureYears:8,skills:{Robotics:4.0,ColdChain:3.8,SAP:3.0},description:'Former Mechanical Engineer. Equipment drawings and failure history can support mechanical coverage.',artifacts:['Critical equipment drawings','Mechanical failure library','Engineering change notes']},
+{id:'elena',name:'Elena Garcia',formerRole:'Maintenance Engineer',department:'Operations',leftYear:2024,tenureYears:6,skills:{Robotics:4.1,ColdChain:3.5,FoodSafety:3.2},description:'Former Maintenance Engineer. Reliability documentation can support cross-training and outage coverage.',artifacts:['PM standard work','Failure-mode library','Maintenance handoff checklist']}
 ];
 
 const skills={
@@ -843,7 +870,7 @@ function refreshAll(){
   setText('donutText',r+'%');document.getElementById('readinessDonut').style.setProperty('--p',r);
   setText('overviewSuccession',sc+'%');setText('overviewEmerging',emergingTalent());setText('overviewStale',staleSkillCount());
   setText('briefReady',r+'%');setText('briefGaps',fg.length);setText('briefSingle',sp.length);setText('briefSucc',sc+'%');
-  renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();
+  renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();renderFormerStaffDirectory();
   const alexRemoved=employees.filter(e=>e.id!=='alex');setText('miniBefore',r+'%');setText('miniAfter',readiness(alexRemoved)+'%');setText('miniWhy','Why? Removing Alex reduces SAP and automation coverage; the score is recalculated from the remaining verified skill evidence.');runDiagnostics();
 }
 function setText(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
@@ -1037,12 +1064,31 @@ function renderDevelopment(){
 }
 
 function searchTalentEmployee(){
-  const q=document.getElementById('talentEmployeeSearch').value.trim().toLowerCase();
+  const raw=document.getElementById('talentEmployeeSearch').value.trim();
+  const q=raw.toLowerCase();
   const resultEl=document.getElementById('talentEmployeeSearchResult');
-  if(!q){resultEl.innerHTML='';return}
+  const roleEl=document.getElementById('roleCoverageResult');
+  if(!q){resultEl.innerHTML='';roleEl.innerHTML='';return}
+
+  const roleSet=[...new Set(employees.map(e=>e.role))];
+  const exactRole=roleSet.find(r=>r.toLowerCase()===q);
+  const substrRoles=roleSet.filter(r=>r.toLowerCase().includes(q));
+  const nameMatches=employees.filter(e=>e.name.toLowerCase().includes(q));
+
+  // A role search wins when the query is an exact role title, or a role-only substring
+  // match with no competing name match (so "priya" still opens her profile, not a role list).
+  const roleTitle=exactRole||(substrRoles.length===1&&!nameMatches.length?substrRoles[0]:null);
+
+  if(roleTitle){
+    resultEl.innerHTML='';
+    renderRoleCoverage(roleTitle,q);
+    return;
+  }
+  roleEl.innerHTML='';
+
   const matches=employees.filter(e=>e.name.toLowerCase().includes(q)||e.role.toLowerCase().includes(q)||e.department.toLowerCase().includes(q));
   if(!matches.length){
-    resultEl.innerHTML=`<div class="notice">No employee found matching "${q}".</div>`;
+    resultEl.innerHTML=`<div class="notice">No employee or role found matching "${raw}".</div>`;
     return;
   }
   if(matches.length===1){
@@ -1051,6 +1097,47 @@ function searchTalentEmployee(){
   } else {
     resultEl.innerHTML=`<div class="muted" style="margin-bottom:6px">${matches.length} matches — pick one:</div>`+matches.map(e=>`<div class="succession-person" onclick="openEmployee('${e.id}')"><strong>${e.name}</strong><span>${e.role} • ${e.department}</span></div>`).join('');
   }
+}
+function renderRoleCoverage(roleTitle,q){
+  const wrap=document.getElementById('roleCoverageResult');
+  const holders=employees.filter(e=>e.role===roleTitle);
+  if(!holders.length){wrap.innerHTML='';return}
+
+  // Derive a target skill profile from current role-holders, then rank everyone
+  // (including other roles) by fit against that profile - same weighting family
+  // as backupScores, just keyed to a role instead of a single skill.
+  const profile={};
+  Object.keys(skills).forEach(k=>{profile[k]=holders.reduce((s,e)=>s+effective(e,k),0)/holders.length});
+  const ranked=employees.map(e=>{
+    const isHolder=e.role===roleTitle;
+    let fitSum=0,fitCount=0;
+    Object.keys(skills).forEach(k=>{if(profile[k]>0){fitSum+=Math.min(1,effective(e,k)/Math.max(.5,profile[k]));fitCount++}});
+    const skillFit=fitCount?fitSum/fitCount:0;
+    const growth=Math.min(1,.55+e.growth*2);
+    const score=Math.round((skillFit*.65+e.confidence*.20+growth*.15)*100);
+    return {e,score,isHolder};
+  }).sort((a,b)=>b.score-a.score).slice(0,6);
+
+  const rows=ranked.map(({e,score,isHolder})=>`
+    <div class="match-card" style="margin-bottom:8px">
+      <div class="section-head"><h3 style="font-size:13px">${e.name}${isHolder?' <span class="tag blue" style="margin-left:6px">Current role-holder</span>':''}</h3><span class="tag ${score>=88?'green':score>=78?'blue':'amber'}">${score}% coverage match</span></div>
+      <div class="muted">${e.role} • ${e.department}</div>
+    </div>`).join('');
+
+  const relatedFormer=formerEmployees.filter(f=>f.formerRole.toLowerCase().includes(q)||q.includes(f.formerRole.toLowerCase()));
+  const formerHtml=relatedFormer.length?`
+    <div class="notice" style="margin-top:12px"><strong>Former staff knowledge available (${relatedFormer.length}):</strong> ${relatedFormer.map(f=>f.name).join(', ')} — historical documentation only, never counted toward active coverage.</div>`:'';
+
+  wrap.innerHTML=`<div class="match-banner"><strong>${roleTitle} coverage:</strong> ${holders.length} current holder${holders.length===1?'':'s'} (${holders.map(h=>h.name).join(', ')}). Ranked backups from across the company below.</div>${rows}${formerHtml}`;
+}
+function renderFormerStaffDirectory(){
+  const wrap=document.getElementById('formerStaffList');if(!wrap)return;
+  wrap.innerHTML=formerEmployees.map(f=>`
+    <div class="notice" style="margin-bottom:8px">
+      <strong>${f.name}</strong> <span class="muted">— Former ${f.formerRole} • ${f.department} • left ${f.leftYear} (${f.tenureYears} yrs)</span><br>
+      ${f.description}<br>
+      <span class="muted">${f.artifacts.join(' • ')}</span>
+    </div>`).join('');
 }
 function openEmployee(id){
   const e=employees.find(x=>x.id===id);if(!e)return;selectedDrawerEmployee=id;
