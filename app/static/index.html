@@ -207,10 +207,14 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .presentation-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#ffffff 0%,#f6faff 68%,#f4fbf8 100%);border:1px solid rgba(0,113,227,.10);border-radius:22px;padding:22px;margin-bottom:16px}
 .presentation-hero::after{content:"";position:absolute;width:250px;height:250px;border-radius:50%;right:-110px;top:-150px;background:radial-gradient(circle,rgba(0,113,227,.09),rgba(0,113,227,0) 70%)}
 .presentation-hero .hero{margin-bottom:0;position:relative;z-index:1}
-.sap-story{display:grid;grid-template-columns:1.2fr repeat(3,.65fr);gap:10px;margin-top:16px;position:relative;z-index:1}
-.sap-story-main,.sap-story-stat{border:1px solid var(--line);background:rgba(255,255,255,.88);border-radius:14px;padding:11px}
-.sap-story-main strong{font-size:12px}.sap-story-main span,.sap-story-stat span{display:block;color:var(--muted);font-size:9.5px;margin-top:4px;line-height:1.4}
-.sap-story-stat strong{display:block;font-size:19px;letter-spacing:-.035em}
+.sap-spotlight{display:flex;align-items:center;gap:16px;margin-top:16px;padding:16px 20px;border-radius:16px;background:linear-gradient(135deg,#fff5f4,#fffaf9);border:1px solid #f4cbc6;position:relative;z-index:1}
+.sap-spotlight-icon{flex:0 0 auto;width:44px;height:44px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:0 6px 16px rgba(217,45,32,.12)}
+.sap-spotlight-text{flex:1 1 240px;min-width:0}
+.sap-spotlight-text strong{display:block;font-size:14px}
+.sap-spotlight-text span{display:block;color:var(--muted);font-size:10.5px;margin-top:3px;line-height:1.4}
+.sap-spotlight-money{flex:0 0 auto;text-align:right}
+.sap-spotlight-money .money{font-size:32px;font-weight:850;letter-spacing:-.04em;color:var(--danger)}
+.sap-spotlight-money .muted{font-size:10px;margin-top:2px}
 .money-risk{font-size:11px;font-weight:820;color:var(--danger);white-space:nowrap;text-align:right}
 .money-risk small{display:block;font-weight:550;color:var(--muted);font-size:8.5px;margin-top:2px}
 .risk-row{grid-template-columns:9px 1fr auto auto auto}
@@ -233,8 +237,8 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .card{box-shadow:0 10px 32px rgba(16,24,40,.05)}
 .report-headline{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
 @media(max-width:900px){
-  .sap-story{grid-template-columns:1fr 1fr}
-  .sap-story-main{grid-column:1/-1}
+  .sap-spotlight{flex-wrap:wrap}
+  .sap-spotlight-money{text-align:left}
   .risk-row{grid-template-columns:9px 1fr}
   .risk-row .countdown,.risk-row .money-risk,.risk-row .tag{grid-column:2}
   .impact-banner{align-items:flex-start;flex-direction:column}
@@ -280,17 +284,21 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
     <div class="hero">
       <div>
         <div class="eyebrow">WORKFORCE OVERVIEW</div>
-        <h1>Know what the company can do, what it could lose, and who to develop next.</h1>
-        <p>SkillsPulse turns verified workforce evidence into current readiness, hidden knowledge risk, future capability gaps, internal backup candidates, and a measurable development plan.</p>
+        <h1>See the gap before it becomes a business problem.</h1>
         <div class="summary-pills" id="overviewPills"></div>
       </div>
-      <div class="actions"><button class="btn primary" onclick="simulateEmployee('alex');go('simulator')">Stress Test SAP Dependency</button></div>
     </div>
-    <div class="sap-story">
-      <div class="sap-story-main"><div class="story-label"><span class="inline-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9"/><circle cx="12" cy="17.5" r="1"/><path d="M10.2 4.2 3.5 18a2 2 0 0 0 1.8 2.9h13.4a2 2 0 0 0 1.8-2.9L13.8 4.2a2 2 0 0 0-3.6 0Z"/></svg></span>Hidden dependency</div><strong>SAP Configuration depends heavily on Alex Morgan</strong><span>Remove Alex and SkillsPulse recalculates readiness, succession coverage, business exposure, and internal backups from the workforce dataset.</span></div>
-      <div class="sap-story-stat"><span>Qualified SAP experts</span><strong id="sapExpertCount">0</strong></div>
-      <div class="sap-story-stat"><span>Action window</span><strong>47 days</strong></div>
-      <div class="sap-story-stat"><span>Exposure if unresolved</span><strong id="sapStoryMoney">$0</strong></div>
+    <div class="sap-spotlight">
+      <div class="sap-spotlight-icon"><svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" stroke="var(--danger)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5"/><circle cx="12" cy="17" r=".8"/></svg></div>
+      <div class="sap-spotlight-text">
+        <strong>SAP Configuration depends on one person.</strong>
+        <span>Alex Morgan is the only qualified expert. Everything below recalculates live from real workforce data — this isn't a scripted example.</span>
+      </div>
+      <div class="sap-spotlight-money">
+        <div class="money" id="sapStoryMoney">$0</div>
+        <div class="muted"><strong id="sapExpertCount">0</strong> qualified backup · 47-day window</div>
+      </div>
+      <button class="btn primary" onclick="simulateEmployee('alex');go('simulator')">Run stress test →</button>
     </div>
   </div>
 
