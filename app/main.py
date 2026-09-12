@@ -27,7 +27,7 @@ from .engine import (
     total_exposure,
 )
 
-app = FastAPI(title="SkillsPulse API", version="0.1.0")
+app = FastAPI(title="Foresight API", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

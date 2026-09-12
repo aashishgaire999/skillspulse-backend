@@ -1,6 +1,6 @@
-# SkillsPulse Backend — Deterministic Workforce Readiness Engine
+# Foresight Backend — Deterministic Workforce Readiness Engine
 
-This backend turns the SkillsPulse frontend from a visual prototype into a real calculation engine.
+This backend turns the Foresight frontend from a visual prototype into a real calculation engine.
 
 ## What is calculated
 

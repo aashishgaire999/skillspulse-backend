@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SkillsPulse — Know your workforce today. Prepare it for tomorrow.</title>
+<title>Foresight</title>
 <style>
 :root{
   --bg:#f5f5f7; --surface:#fff; --surface2:#fbfbfd; --text:#1d1d1f; --muted:#6e6e73;
@@ -23,7 +23,7 @@ button{cursor:pointer}
   width:246px;position:fixed;inset:0 auto 0 0;z-index:60;padding:18px 14px;
   background:rgba(250,250,252,.88);backdrop-filter:blur(26px);border-right:1px solid var(--line)
 }
-.brand{padding:8px 9px 20px}
+.brand{padding:8px 9px 10px}
 .brandline{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;letter-spacing:-.025em}
 .brandmark{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#dff4e6,#eef8ea);color:#50865d}
 .tagline{font-size:10px;color:var(--muted);line-height:1.35;margin:7px 0 0 44px}
@@ -135,7 +135,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 @media(max-width:760px){.sidebar{display:none}.main{margin:0}.content{padding:18px 13px}.topbar{padding:0 13px}.search-wrap{display:none}.grid-4,.grid-3,.grid-2,.future-grid,.compare-grid,.timeline,.data-actions{grid-template-columns:1fr}.hero{flex-direction:column}.filterbar{grid-template-columns:1fr}.risk-row{grid-template-columns:9px 1fr}.countdown{grid-column:2}}
 @media print{.sidebar,.topbar,.no-print{display:none!important}.main{margin:0}.page{display:none!important}#brief{display:block!important}.report{box-shadow:none;border:none}}
 
-/* ===== SkillsPulse V10 final quality + visualization pass ===== */
+/* ===== Foresight V10 final quality + visualization pass ===== */
 .help-link{border:0;background:none;color:var(--blue);font-size:10px;font-weight:750;padding:7px 0 0;cursor:pointer}
 .calc-box{display:none;margin-top:9px;padding:10px 11px;border-radius:11px;background:#f7f7f9;border:1px solid var(--line);font-size:10px;color:#555;line-height:1.55}
 .calc-box.show{display:block;animation:pageIn .18s ease forwards}
@@ -250,8 +250,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 <div class="app">
 <aside class="sidebar">
   <div class="brand">
-    <div class="brandline"><div class="brandmark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></div>SkillsPulse</div>
-    <div class="tagline">Know your workforce today.<br>Prepare it for tomorrow.</div>
+    <div class="brandline"><div class="brandmark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></div>Foresight</div>
   </div>
   <div class="nav-label">Workforce</div>
   <div class="nav-item active" data-page="overview"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span>Workforce Overview</div>
@@ -305,7 +304,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 
   <div class="grid-4">
-    <div class="card kpi"><div class="label">Workforce Readiness</div><div class="value animate" id="kpiReadiness">0%</div><div class="sub">Evidence-weighted current capability coverage</div><button class="help-link" onclick="toggleCalc('calcReadiness')">How calculated?</button><div id="calcReadiness" class="calc-box">For every business-critical skill, SkillsPulse combines the strongest verified employee coverage, evidence confidence, evidence freshness and skill criticality. Those weighted capability scores roll up into readiness.</div></div>
+    <div class="card kpi"><div class="label">Workforce Readiness</div><div class="value animate" id="kpiReadiness">0%</div><div class="sub">Evidence-weighted current capability coverage</div><button class="help-link" onclick="toggleCalc('calcReadiness')">How calculated?</button><div id="calcReadiness" class="calc-box">For every business-critical skill, Foresight combines the strongest verified employee coverage, evidence confidence, evidence freshness and skill criticality. Those weighted capability scores roll up into readiness.</div></div>
     <div class="card kpi"><div class="label">Critical Skill Gaps</div><div class="value animate" id="kpiGaps">0</div><div class="sub">Critical/High skills below required coverage</div><button class="help-link" onclick="toggleCalc('calcGaps')">How calculated?</button><div id="calcGaps" class="calc-box">A gap becomes critical when a Critical or High business skill has less than 76% evidence-adjusted coverage against its required target.</div></div>
     <div class="card kpi"><div class="label">Single-Point Knowledge Risks</div><div class="value animate" id="kpiSingle">0</div><div class="sub">Only one verified backup-capable expert</div><button class="help-link" onclick="toggleCalc('calcSingle')">How calculated?</button><div id="calcSingle" class="calc-box">A single-point risk exists when one or fewer people have evidence-adjusted proficiency at least 90% of the target for a critical capability.</div></div>
     <div class="card kpi"><div class="label">Future Readiness</div><div class="value animate" id="kpiFuture">0%</div><div class="sub">Against the selected 12-month strategy</div><button class="help-link" onclick="toggleCalc('calcFuture')">How calculated?</button><div id="calcFuture" class="calc-box">Future strategy produces editable capability targets. The same deterministic readiness engine compares today’s workforce against those future requirements.</div></div>
@@ -393,7 +392,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
     <div id="overviewRisks" class="risk-list"></div>
   </div>
 
-  <div class="notice" style="margin-top:15px"><strong>AI recommends; managers review and decide.</strong> SkillsPulse should only analyze authorized work-related skill and development data. It does not infer personality, loyalty, sensitive traits, or likelihood of quitting.</div>
+  <div class="notice" style="margin-top:15px"><strong>AI recommends; managers review and decide.</strong> Foresight should only analyze authorized work-related skill and development data. It does not infer personality, loyalty, sensitive traits, or likelihood of quitting.</div>
 </section>
 
 <!-- ============================================================
@@ -541,7 +540,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 
   <div class="card" style="margin-top:15px">
     <div class="section-head"><h3>Business Impact Model</h3><span class="tag blue">Editable assumptions</span></div>
-    <div class="notice"><strong>Why this is credible:</strong> SkillsPulse does not invent a dollar-loss number. A manager supplies the business impact assumptions; the system calculates the risk factor from verified workforce coverage and knowledge concentration.</div>
+    <div class="notice"><strong>Why this is credible:</strong> Foresight does not invent a dollar-loss number. A manager supplies the business impact assumptions; the system calculates the risk factor from verified workforce coverage and knowledge concentration.</div>
     <div class="table-wrap" style="margin-top:10px">
       <table>
         <thead><tr><th>Capability</th><th>Loss / hour</th><th>Potential disruption</th><th>Calculated risk factor</th><th>Exposure</th></tr></thead>
@@ -671,7 +670,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
   <div class="report">
     <div class="report-headline">
-      <div><h2 style="margin:0">SkillsPulse Leadership Summary</h2><p class="muted" style="margin:5px 0 0">Northstar Foods • Demo company</p></div>
+      <div><h2 style="margin:0">Foresight Leadership Summary</h2><p class="muted" style="margin:5px 0 0">Northstar Foods • Demo company</p></div>
       <span class="tag blue">Decision-ready</span>
     </div>
     <div class="leadership-exposure">
