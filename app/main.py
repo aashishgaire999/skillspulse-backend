@@ -93,7 +93,7 @@ async def call_gemini_json(prompt: str) -> dict:
     try:
         async with httpx.AsyncClient(timeout=30) as client:
             resp = await client.post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
                 headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
                 json={
                     "contents": [{"parts": [{"text": prompt}]}],
