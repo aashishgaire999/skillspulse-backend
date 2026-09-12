@@ -5,6 +5,7 @@ from typing import Dict, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 
 from .data import SKILLS, STATE, reset_state
@@ -57,6 +58,11 @@ class ImpactUpdateRequest(BaseModel):
     skill: str
     daily_downtime_cost: float = Field(ge=0)
     default_recovery_days: int = Field(ge=0, le=3650)
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/health")
