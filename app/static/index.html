@@ -267,6 +267,22 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 
 <div class="content">
 <section id="overview" class="page active">
+  <div class="card" style="margin-bottom:16px;border:1.5px solid var(--blue);background:linear-gradient(180deg,#f3f8ff,#ffffff)">
+    <div class="story-label"><span class="tag blue">01</span>&nbsp;OFFICIAL CHALLENGE BRIEF</div>
+    <h3 style="margin:8px 0 2px;font-size:17px">Talent Readiness &amp; Skills Intelligence Platform</h3>
+    <p class="muted" style="line-height:1.55;margin:8px 0">Organizations are facing rapid changes in technology, automation, AI, and workforce expectations. Yet many leaders lack visibility into the skills that exist within their workforce, the capabilities they will need in the future, and the risks created by knowledge concentration, skill shortages, and succession gaps.</p>
+    <p class="muted" style="line-height:1.55;margin:8px 0">Build a solution that helps organizations understand current workforce capabilities, identify critical skill and knowledge gaps, assess future talent needs, and accelerate workforce readiness through targeted development recommendations.</p>
+    <p style="margin:12px 0 6px;font-weight:700;font-size:12.5px">The platform should help answer questions such as:</p>
+    <ul class="muted" style="line-height:1.7;margin:0 0 10px;padding-left:18px">
+      <li>What skills and competencies exist across our workforce today?</li>
+      <li>What skills will be needed to support future business and technology strategies?</li>
+      <li>Which critical skills are concentrated in only a few individuals?</li>
+      <li>Where are our greatest capability gaps and succession risks?</li>
+      <li>How can employees close skill gaps through training, mentoring, certifications, job rotations, or project experiences?</li>
+    </ul>
+    <p class="muted" style="line-height:1.55;margin:8px 0 0">Solutions may include skills inventories, talent heat maps, AI-powered career development advisors, workforce readiness dashboards, personalized learning plans, knowledge transfer tools, or predictive analytics that help leaders build a workforce prepared for tomorrow's challenges.</p>
+  </div>
+
   <div class="presentation-hero">
     <div class="hero">
       <div>
@@ -329,6 +345,8 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <div><div class="muted">Highest exposure capability</div><div style="font-size:18px;font-weight:760;margin-top:5px" id="highestExposureSkill">—</div><div class="muted" id="highestExposureValue">—</div></div>
       <div><div class="muted">Formula</div><div class="notice" style="margin-top:5px"><strong>Loss/hour × disruption hours × risk factor</strong><br>Risk factor comes from actual coverage and knowledge concentration.</div></div>
     </div>
+    <div class="visual-title" style="margin-top:16px">Exposure by capability — highest risk first</div>
+    <div id="exposureChart" class="coverage-chart"><div class="muted">Loading…</div></div>
     <div class="actions" style="margin-top:11px"><button class="btn soft" onclick="go('simulator')">Review / edit impact assumptions</button></div>
   </div>
 
@@ -519,6 +537,16 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <h1>Find the strongest internal backup before a gap becomes a hire.</h1>
       <p>Match succession needs, roles and projects using existing skills, adjacent capability, evidence confidence, growth and career interests.</p>
     </div>
+  </div>
+
+  <div class="card" style="margin-bottom:15px">
+    <div class="section-head"><h3>Search an employee</h3><span class="tag blue">Full profile</span></div>
+    <div class="grid-3">
+      <input id="talentEmployeeSearch" class="input" placeholder="Search by name or role…" onkeydown="if(event.key==='Enter')searchTalentEmployee()">
+      <button class="btn blue" onclick="searchTalentEmployee()">Search</button>
+      <div></div>
+    </div>
+    <div id="talentEmployeeSearchResult" style="margin-top:10px"></div>
   </div>
 
   <div class="match-banner" id="talentPriorityBanner"><strong>Risk-priority:</strong> Select a risk or run a simulation to rank the strongest internal backups.</div>
@@ -811,8 +839,11 @@ function renderOverviewPills(r,fr,single){
 }
 function renderOverviewFuture(){
   const wrap=document.getElementById('overviewFutureSkills');wrap.innerHTML='';
-  Object.keys(skills).forEach(k=>{
+  const rows=Object.keys(skills).map(k=>{
     const curr=Math.round(currentCoverage(employees,k,skills[k].target)*100),future=Math.round(currentCoverage(employees,k,futureRequirements[k])*100),gap=Math.max(0,100-future);
+    return {k,curr,future,gap};
+  }).sort((a,b)=>b.gap-a.gap); // highest risk (biggest gap) first
+  rows.forEach(({k,curr,future,gap})=>{
     wrap.innerHTML+=`<div class="capability-row"><strong>${skills[k].label}</strong><span>Current ${curr}%</span><span>Required L${futureRequirements[k].toFixed(1)}</span><span style="color:${gap>24?'var(--red)':gap>14?'var(--amber)':'var(--green)'}">${gap}% gap</span></div>`;
   })
 }
@@ -824,7 +855,8 @@ function renderActionCenter(){
   document.getElementById('actionCenter').innerHTML=actions.slice(0,5).map((a,i)=>`<div class="metric"><span><strong>${i+1}. ${a.title}</strong><br><small class="muted">${a.why}</small></span><button class="btn soft" onclick="go('${a.go}')">Act</button></div>`).join('')
 }
 function renderOverviewRisks(){
-  document.getElementById('overviewRisks').innerHTML=riskDates.slice(0,3).map(r=>riskHtml(r)).join('');classifyCountdowns()
+  const sorted=[...riskDates].sort((a,b)=>riskExposure(b)-riskExposure(a)); // highest exposure (highest risk) first
+  document.getElementById('overviewRisks').innerHTML=sorted.slice(0,3).map(r=>riskHtml(r)).join('');classifyCountdowns()
 }
 function riskHtml(r){
   const d=daysUntil(r.date),level=d<30?'red':d<60?'amber':'green';
@@ -935,18 +967,26 @@ function rankCustomProject(){
 function showWhy(id,skillKey,score){const e=employees.find(x=>x.id===id);document.getElementById('whyModalText').innerHTML=`<strong>${e.name} — ${score}% match</strong><br><br>${e.why}<br><br>Evidence confidence: ${confidenceLabel(e)} • Last verified: ${lastVerified(e)} • Growth: ${Math.round(e.growth*100)}% • Target capability: ${skills[skillKey].label}.`;document.getElementById('whyModal').classList.add('show')}
 function closeWhyModal(){document.getElementById('whyModal').classList.remove('show')}
 
-function analyzeFutureStrategy(){
-  const text=document.getElementById('strategyInput').value.toLowerCase(),h=parseInt(document.getElementById('strategyHorizon').value);
-  let req={...futureRequirements};
-  if(text.includes('automat')){req.Robotics=Math.max(req.Robotics,4.6);req.SAP=Math.max(req.SAP,4.5)}
-  if(text.includes('ai'))req.AIOps=Math.max(req.AIOps,4.5);
-  if(text.includes('cold'))req.ColdChain=Math.max(req.ColdChain,4.4);
-  if(text.includes('food')||text.includes('safety'))req.FoodSafety=Math.max(req.FoodSafety,4.7);
-  const horizonBoost=h===6?.15:h===24?-.15:0;Object.keys(req).forEach(k=>req[k]=Math.max(1,Math.min(5,req[k]+horizonBoost)));
-  futureRequirements=req;renderFutureStrategyResults();refreshAll()
+async function analyzeFutureStrategy(){
+  const text=document.getElementById('strategyInput').value,h=parseInt(document.getElementById('strategyHorizon').value);
+  const resultsEl=document.getElementById('futureStrategyResults');
+  resultsEl.innerHTML='<div class="muted">Calling AI to translate this strategy into skill targets…</div>';
+  try{
+    const r=await fetch('/api/strategy/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({strategy:text,horizon_months:h})});
+    if(!r.ok){throw new Error((await r.text()).slice(0,220))}
+    const d=await r.json();
+    Object.entries(d.applied_adjustments).forEach(([k,v])=>{if(futureRequirements[k]!==undefined)futureRequirements[k]=v});
+    const changed=Object.keys(d.applied_adjustments);
+    resultsEl.innerHTML=`<div class="notice"><strong>Future readiness: ${d.future_readiness_pct}%</strong><br>AI (live call) adjusted ${changed.length?changed.map(k=>skills[k].label).join(', '):'no'} target(s) from this strategy text. Scores below are then calculated deterministically from verified workforce data.</div>`;
+    document.getElementById('futureEditTable').innerHTML=Object.keys(skills).map(k=>`<div class="capability-row"><strong>${skills[k].label}</strong><span>Current ${Math.round(currentCoverage(employees,k)*100)}%</span><span><input type="number" min="1" max="5" step=".1" value="${futureRequirements[k].toFixed(1)}" style="width:72px" onchange="futureRequirements['${k}']=parseFloat(this.value);refreshAll()"></span><span>Gap ${Math.max(0,100-Math.round(currentCoverage(employees,k,futureRequirements[k])*100))}%</span></div>`).join('');
+    refreshAll();
+    showToast(changed.length?`AI updated ${changed.length} future skill target(s) — live model call.`:'AI call succeeded but found no skills materially affected.');
+  }catch(err){
+    resultsEl.innerHTML=`<div class="notice"><strong>AI call failed.</strong><br>${String(err.message||err)}<br><span class="muted">Check that OPENAI_API_KEY is set on the server.</span></div>`;
+  }
 }
 function renderFutureStrategyResults(){
-  document.getElementById('futureStrategyResults').innerHTML=`<div class="notice"><strong>Future readiness: ${futureReadiness(employees)}%</strong><br>AI translated the business goal into editable target capabilities. Scores below are calculated deterministically from verified workforce data.</div>`;
+  document.getElementById('futureStrategyResults').innerHTML=`<div class="notice">Enter a business/technology strategy above and click <strong>Analyze strategy</strong> — a live AI call reads it and adjusts the future skill targets below. Scores are then calculated deterministically from verified workforce data.</div>`;
   document.getElementById('futureEditTable').innerHTML=Object.keys(skills).map(k=>`<div class="capability-row"><strong>${skills[k].label}</strong><span>Current ${Math.round(currentCoverage(employees,k)*100)}%</span><span><input type="number" min="1" max="5" step=".1" value="${futureRequirements[k].toFixed(1)}" style="width:72px" onchange="futureRequirements['${k}']=parseFloat(this.value);refreshAll()"></span><span>Gap ${Math.max(0,100-Math.round(currentCoverage(employees,k,futureRequirements[k])*100))}%</span></div>`).join('')
 }
 
@@ -963,6 +1003,22 @@ function renderDevelopment(){
   }).join('')
 }
 
+function searchTalentEmployee(){
+  const q=document.getElementById('talentEmployeeSearch').value.trim().toLowerCase();
+  const resultEl=document.getElementById('talentEmployeeSearchResult');
+  if(!q){resultEl.innerHTML='';return}
+  const matches=employees.filter(e=>e.name.toLowerCase().includes(q)||e.role.toLowerCase().includes(q)||e.department.toLowerCase().includes(q));
+  if(!matches.length){
+    resultEl.innerHTML=`<div class="notice">No employee found matching "${q}".</div>`;
+    return;
+  }
+  if(matches.length===1){
+    resultEl.innerHTML=`<div class="notice">Found <strong>${matches[0].name}</strong> — full profile opened →</div>`;
+    openEmployee(matches[0].id);
+  } else {
+    resultEl.innerHTML=`<div class="muted" style="margin-bottom:6px">${matches.length} matches — pick one:</div>`+matches.map(e=>`<div class="succession-person" onclick="openEmployee('${e.id}')"><strong>${e.name}</strong><span>${e.role} • ${e.department}</span></div>`).join('');
+  }
+}
 function openEmployee(id){
   const e=employees.find(x=>x.id===id);if(!e)return;selectedDrawerEmployee=id;
   setText('dName',e.name);setText('dMeta',`${e.role} • ${e.department}`);setText('dReady',employeeReadiness(e)+'%');setText('dMatch',e.futureMatch+'%');setText('dGaps',e.gaps.join(' • '));setText('dInterests',e.interests.join(', '));setText('dBackup',e.backup);setText('dFutureGap',e.futureGap);setText('dPlan',e.plan);setText('dWhy',e.why);setText('dSuccessionLabel','— '+e.backup);
@@ -1015,6 +1071,20 @@ function renderImpactModel(list=employees,req=null){
   }
   setText('briefExposure',money(baseline));setText('leadershipExposure',money(baseline));renderPresentationStory();
   setText('briefStressExposure',money(totalExposure(employees.filter(e=>e.id!=='alex'))));
+  renderExposureChart();
+}
+function renderExposureChart(){
+  const wrap=document.getElementById('exposureChart');if(!wrap)return;
+  const rows=Object.keys(skills).map(k=>({k,v:capabilityExposure(employees,k)})).sort((a,b)=>b.v-a.v); // highest risk first
+  const max=Math.max(1,...rows.map(r=>r.v));
+  wrap.innerHTML='';
+  rows.forEach(({k,v})=>{
+    const pct=Math.max(4,Math.round(v/max*100));
+    const col=document.createElement('div');col.className='coverage-col';
+    const barColor=pct>=70?'linear-gradient(180deg,#ff9a8f,#d92d20)':pct>=40?'linear-gradient(180deg,#ffd08a,#f79009)':'linear-gradient(180deg,#8fc0ff,#0071e3)';
+    col.innerHTML=`<div class="coverage-bars"><div class="coverage-bar" style="height:${pct}%;width:34px;background:${barColor}"></div></div><div class="coverage-label">${skills[k].label.replace(' Configuration','').replace(' Certification','').replace(' Operations','')}</div><div class="coverage-value">${money(v)}</div>`;
+    wrap.appendChild(col);
+  });
 }
 function updateImpactInput(key,field,value){
   const n=Math.max(0,parseFloat(value)||0);

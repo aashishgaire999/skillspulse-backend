@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import json
+import os
 from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Optional
 
+import httpx
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -59,6 +62,11 @@ class ImpactUpdateRequest(BaseModel):
     skill: str
     daily_downtime_cost: float = Field(ge=0)
     default_recovery_days: int = Field(ge=0, le=3650)
+
+
+class StrategyAnalysisRequest(BaseModel):
+    strategy: str
+    horizon_months: int = Field(default=12, ge=1, le=60)
 
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -200,6 +208,77 @@ def update_future_requirements(req: FutureRequirementsRequest):
         STATE["future_requirements"][k] = float(v)
     return {
         "ok": True,
+        "future_requirements": STATE["future_requirements"],
+        "future_readiness_pct": readiness(STATE["employees"], STATE["future_requirements"]),
+        "future_gaps": critical_gaps(STATE["employees"], STATE["future_requirements"]),
+    }
+
+
+@app.post("/api/strategy/analyze")
+async def analyze_strategy(req: StrategyAnalysisRequest):
+    """Translate a free-text business/technology strategy into future skill targets.
+
+    Real model call, not keyword matching: the model only ever returns adjustments
+    to the existing skill catalog (validated against SKILLS + clamped to 0..5),
+    so a bad or unexpected response can't corrupt state.
+    """
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise HTTPException(500, "OPENAI_API_KEY is not configured on the server")
+
+    catalog = {
+        key: {
+            "label": meta["label"],
+            "current_future_target": STATE["future_requirements"][key],
+            "criticality": meta["criticality"],
+        }
+        for key, meta in SKILLS.items()
+    }
+    prompt = (
+        "You translate a business/technology strategy into required workforce skill targets "
+        "for an internal workforce-readiness tool.\n\n"
+        f"Skill catalog (key, label, current future target on a 0-5 scale, criticality):\n"
+        f"{json.dumps(catalog, indent=2)}\n\n"
+        f'Business strategy: "{req.strategy}"\n'
+        f"Planning horizon: {req.horizon_months} months\n\n"
+        "Return ONLY a JSON object mapping affected skill keys to a new future target "
+        "(a number from 0 to 5, one decimal place). Only include skills materially "
+        "affected by this specific strategy. Never invent a skill key outside the catalog above."
+    )
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}"},
+                json={
+                    "model": "gpt-4o-mini",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "response_format": {"type": "json_object"},
+                    "temperature": 0.2,
+                },
+            )
+    except httpx.HTTPError as exc:
+        raise HTTPException(502, f"Could not reach AI provider: {exc}")
+
+    if resp.status_code != 200:
+        raise HTTPException(502, f"AI provider error ({resp.status_code}): {resp.text[:300]}")
+
+    content = resp.json()["choices"][0]["message"]["content"]
+    try:
+        adjustments = json.loads(content)
+    except json.JSONDecodeError:
+        raise HTTPException(502, "AI response was not valid JSON")
+
+    applied: Dict[str, float] = {}
+    for key, value in adjustments.items():
+        if key in SKILLS and isinstance(value, (int, float)) and 0 <= value <= 5:
+            STATE["future_requirements"][key] = float(value)
+            applied[key] = float(value)
+
+    return {
+        "ok": True,
+        "applied_adjustments": applied,
         "future_requirements": STATE["future_requirements"],
         "future_readiness_pct": readiness(STATE["employees"], STATE["future_requirements"]),
         "future_gaps": critical_gaps(STATE["employees"], STATE["future_requirements"]),
