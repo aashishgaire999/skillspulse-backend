@@ -533,20 +533,24 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 
   <div class="card" style="margin-top:15px">
-    <div class="section-head"><h3>Future capability requirements — editable</h3><span class="tag green">Managers stay in control</span></div>
-    <div id="futureEditTable"><div class="muted">Loading capability requirements…</div></div>
-  </div>
-
-  <div class="card" style="margin-top:15px">
-    <div class="section-head"><h3>Business Impact Model</h3><span class="tag blue">Editable assumptions</span></div>
-    <div class="notice"><strong>Why this is credible:</strong> Foresight does not invent a dollar-loss number. A manager supplies the business impact assumptions; the system calculates the risk factor from verified workforce coverage and knowledge concentration.</div>
-    <div class="table-wrap" style="margin-top:10px">
-      <table>
-        <thead><tr><th>Capability</th><th>Loss / hour</th><th>Potential disruption</th><th>Calculated risk factor</th><th>Exposure</th></tr></thead>
-        <tbody id="impactTable"><tr><td colspan="5" class="muted">Loading business impact model…</td></tr></tbody>
-      </table>
+    <div class="section-head" style="cursor:pointer" onclick="toggleAssumptions()">
+      <h3>Editable assumptions</h3>
+      <span class="tag gray" id="assumptionsToggleLabel">Show ▾</span>
     </div>
-    <div class="why"><strong>Formula:</strong> estimated operational exposure = loss per hour × potential disruption hours × calculated workforce risk factor. These are scenario estimates, not booked financial losses.</div>
+    <div class="muted" style="font-size:11px">Future capability targets, and the cost-per-hour / disruption-day inputs behind every exposure number on this page — nothing above is hardcoded, this is where those numbers actually come from.</div>
+    <div id="assumptionsPanel" style="display:none;margin-top:16px">
+      <h4 style="margin:0 0 8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)">Future capability requirements</h4>
+      <div id="futureEditTable"><div class="muted">Loading capability requirements…</div></div>
+      <h4 style="margin:20px 0 8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)">Business impact model</h4>
+      <div class="notice"><strong>Why this is credible:</strong> Foresight does not invent a dollar-loss number. A manager supplies the business impact assumptions; the system calculates the risk factor from verified workforce coverage and knowledge concentration.</div>
+      <div class="table-wrap" style="margin-top:10px">
+        <table>
+          <thead><tr><th>Capability</th><th>Loss / hour</th><th>Potential disruption</th><th>Calculated risk factor</th><th>Exposure</th></tr></thead>
+          <tbody id="impactTable"><tr><td colspan="5" class="muted">Loading business impact model…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="why"><strong>Formula:</strong> estimated operational exposure = loss per hour × potential disruption hours × calculated workforce risk factor. These are scenario estimates, not booked financial losses.</div>
+    </div>
   </div>
 </section>
 
@@ -1336,6 +1340,12 @@ function animateInitial(){document.querySelectorAll('.animate').forEach(el=>{con
 
 
 function toggleCalc(id){const el=document.getElementById(id);if(el)el.classList.toggle('show')}
+function toggleAssumptions(){
+  const panel=document.getElementById('assumptionsPanel'),label=document.getElementById('assumptionsToggleLabel');
+  const show=panel.style.display==='none';
+  panel.style.display=show?'block':'none';
+  label.textContent=show?'Hide ▲':'Show ▾';
+}
 function showToast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>el.classList.remove('show'),2300)}
 
 function renderExecutiveVisuals(){
