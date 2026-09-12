@@ -382,18 +382,13 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
     </div>
   </div>
 
-  <div class="grid-2" style="margin-top:15px">
-    <div class="card">
-      <div class="section-head"><h3>Mini stress test</h3><span class="tag red">Hero workflow</span></div>
-      <div class="metric"><span>Current readiness</span><strong id="miniBefore">0%</strong></div>
-      <div class="metric"><span>If Alex Morgan becomes unavailable</span><strong id="miniAfter">0%</strong></div>
-      <div class="why" id="miniWhy"><strong>Why?</strong></div>
-      <div class="actions" style="margin-top:10px"><button class="btn green" onclick="simulateEmployee('alex');go('simulator')">Open Risk Simulator</button></div>
+  <div class="card flat" style="margin-top:15px;padding:14px 18px;background:var(--surface2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div class="muted" style="font-size:11.5px">Quick check: readiness goes from <strong style="color:var(--text)" id="miniBefore">0%</strong> to <strong style="color:var(--red)" id="miniAfter">0%</strong> if Alex Morgan becomes unavailable.</div>
+      <button class="btn soft" onclick="simulateEmployee('alex');go('simulator')">Open Risk Simulator →</button>
     </div>
-    <div class="card">
-      <div class="section-head"><h3>Risk deadlines</h3><span class="tag amber">Real dates only</span></div>
-      <div id="overviewRisks" class="risk-list"><div class="muted">Loading risk deadlines…</div></div>
-    </div>
+    <div class="muted" style="font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin:14px 0 8px">Upcoming risk deadlines</div>
+    <div id="overviewRisks" class="risk-list"></div>
   </div>
 
   <div class="notice" style="margin-top:15px"><strong>AI recommends; managers review and decide.</strong> SkillsPulse should only analyze authorized work-related skill and development data. It does not infer personality, loyalty, sensitive traits, or likelihood of quitting.</div>
@@ -921,7 +916,7 @@ function renderOverviewRisks(){
 function riskHtml(r){
   const d=daysUntil(r.date),level=d<30?'red':d<60?'amber':'green';
   const exp=riskExposure(r);
-  return `<div class="risk-row"><span class="dot ${level}"></span><div><div class="risk-name">${r.name}</div><div class="risk-desc">${r.reason}</div></div><span class="countdown" data-days="${d}"><span class="clock-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span>${d} days</span><div class="money-risk">${money(exp)}<small>if unresolved</small></div><span class="tag ${r.criticality==='Critical'?'red':'amber'}">${r.criticality}</span></div>`
+  return `<div class="risk-row" style="padding:8px 11px;box-shadow:none" title="${r.reason}"><span class="dot ${level}"></span><div class="risk-name" style="font-size:11px">${r.name}</div><span class="countdown" data-days="${d}"><span class="clock-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span>${d} days</span><div class="money-risk" style="font-size:10px">${money(exp)}</div><span class="tag ${r.criticality==='Critical'?'red':'amber'}" style="font-size:9px">${r.criticality}</span></div>`
 }
 function classifyCountdowns(){document.querySelectorAll('.countdown').forEach(el=>{const d=parseInt(el.dataset.days||999);el.classList.remove('urgent','warning','safe');if(d<=7)el.classList.add('urgent');else if(d<=30)el.classList.add('warning');else el.classList.add('safe')})}
 
