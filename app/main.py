@@ -69,6 +69,16 @@ class StrategyAnalysisRequest(BaseModel):
     horizon_months: int = Field(default=12, ge=1, le=60)
 
 
+class SkillSuggestionRequest(BaseModel):
+    employee_id: str
+    employee_name: str
+    role: str
+    skill: str
+    current_score: float = Field(ge=0, le=5)
+    current_confidence: float = Field(ge=0, le=1)
+    evidence_text: str
+
+
 STATIC_DIR = Path(__file__).parent / "static"
 
 
@@ -282,6 +292,82 @@ async def analyze_strategy(req: StrategyAnalysisRequest):
         "future_requirements": STATE["future_requirements"],
         "future_readiness_pct": readiness(STATE["employees"], STATE["future_requirements"]),
         "future_gaps": critical_gaps(STATE["employees"], STATE["future_requirements"]),
+    }
+
+
+@app.post("/api/skills/suggest")
+async def suggest_skill_update(req: SkillSuggestionRequest):
+    """Suggest a skill-score update from new evidence text - a real model call.
+
+    Returns a proposed score only; it never writes to any employee record.
+    The caller (frontend) is responsible for applying it after human approval,
+    same human-in-the-loop pattern as the rest of the app.
+    """
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise HTTPException(500, "OPENAI_API_KEY is not configured on the server")
+    if req.skill not in SKILLS:
+        raise HTTPException(400, f"Unknown skill: {req.skill}")
+    if not req.evidence_text.strip():
+        raise HTTPException(400, "evidence_text is required")
+
+    meta = SKILLS[req.skill]
+    prompt = (
+        "You assess whether new work evidence justifies updating an employee's skill score "
+        "in an internal workforce-readiness tool.\n\n"
+        f"Employee: {req.employee_name}, {req.role}\n"
+        f"Skill: {meta['label']} (0-5 scale). Current score {req.current_score}, "
+        f"current evidence confidence {req.current_confidence}.\n\n"
+        f'New evidence: "{req.evidence_text}"\n\n'
+        "Return ONLY a JSON object with:\n"
+        '- "suggested_score": number 0-5, one decimal\n'
+        '- "confidence": number 0-1, how much you trust this evidence\n'
+        '- "reasoning": one short sentence\n\n'
+        "Be conservative: do not move the score by more than 1.0 point from the current "
+        "score based on a single piece of evidence, and do not invent specifics the "
+        "evidence doesn't support."
+    )
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}"},
+                json={
+                    "model": "gpt-4o-mini",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "response_format": {"type": "json_object"},
+                    "temperature": 0.2,
+                },
+            )
+    except httpx.HTTPError as exc:
+        raise HTTPException(502, f"Could not reach AI provider: {exc}")
+
+    if resp.status_code != 200:
+        raise HTTPException(502, f"AI provider error ({resp.status_code}): {resp.text[:300]}")
+
+    content = resp.json()["choices"][0]["message"]["content"]
+    try:
+        parsed = json.loads(content)
+        suggested_score = float(parsed["suggested_score"])
+        confidence = float(parsed["confidence"])
+        reasoning = str(parsed.get("reasoning", "")).strip()
+    except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+        raise HTTPException(502, "AI response was not in the expected format")
+
+    if not (0 <= suggested_score <= 5) or not (0 <= confidence <= 1):
+        raise HTTPException(502, "AI returned an out-of-range score or confidence")
+
+    return {
+        "ok": True,
+        "employee_id": req.employee_id,
+        "employee_name": req.employee_name,
+        "skill": req.skill,
+        "skill_label": meta["label"],
+        "current_score": req.current_score,
+        "suggested_score": round(suggested_score, 1),
+        "confidence": round(confidence, 2),
+        "reasoning": reasoning or "No reasoning returned.",
     }
 
 

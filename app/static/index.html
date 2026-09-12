@@ -431,10 +431,14 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 
   <div class="grid-2" style="margin-top:15px">
     <div class="card">
-      <div class="section-head"><h3>AI skill suggestion</h3><span class="tag amber" id="approvalStatus">Needs human review</span></div>
-      <div class="notice"><strong>Maria Santos — SAP Configuration</strong><br>Suggested: 3.7 → 4.1<br>Evidence: 3 recent SAP tasks • manager verification • rollout project • verified 21 days ago</div>
-      <div class="why"><strong>Why this recommendation?</strong> Multiple recent work artifacts and manager verification increased both confidence and freshness.</div>
-      <div class="actions" style="margin-top:10px"><button class="btn green" onclick="approveSuggestion()">Approve</button><button class="btn soft" onclick="adjustSuggestion()">Adjust</button><button class="btn soft" onclick="rejectSuggestion()">Reject</button></div>
+      <div class="section-head"><h3>AI skill suggestion</h3><span class="tag blue">Live model call</span></div>
+      <div class="grid-3">
+        <select id="aiSuggestEmployee"></select>
+        <select id="aiSuggestSkill"></select>
+        <button class="btn blue" onclick="requestSkillSuggestion()">Get AI suggestion</button>
+      </div>
+      <textarea id="aiSuggestEvidence" rows="2" style="margin-top:8px" placeholder="Paste recent evidence — a task, a manager note, a project outcome…">Led the SAP rollout this month, completed 3 configuration tasks, manager verified the work.</textarea>
+      <div id="aiSuggestResult" style="margin-top:12px"><div class="muted">Pick a person and skill, add evidence, and get a live suggestion.</div></div>
     </div>
     <div class="card">
       <div class="section-head"><h3>Business criticality</h3><span class="tag blue">Not all gaps are equal</span></div>
@@ -865,7 +869,7 @@ function refreshAll(){
   setText('donutText',r+'%');document.getElementById('readinessDonut').style.setProperty('--p',r);
   setText('overviewSuccession',sc+'%');setText('overviewEmerging',emergingTalent());setText('overviewStale',staleSkillCount());
   setText('briefReady',r+'%');setText('briefGaps',fg.length);setText('briefSingle',sp.length);setText('briefSucc',sc+'%');
-  renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();renderFormerStaffDirectory();
+  renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();renderFormerStaffDirectory();populateAiSuggestSelectors();
   const alexRemoved=employees.filter(e=>e.id!=='alex');setText('miniBefore',r+'%');setText('miniAfter',readiness(alexRemoved)+'%');setText('miniWhy','Why? Removing Alex reduces SAP and automation coverage; the score is recalculated from the remaining verified skill evidence.');runDiagnostics();
 }
 function setText(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
@@ -1323,19 +1327,80 @@ function renderSuccessionDepth(){
   wrap.innerHTML=col('Ready Now',now,'No verified ready-now backup')+col('Ready <6 Months',soon,'No candidate in this window')+col('Ready 6–12 Months',later,'No candidate in this window')
 }
 
+function populateAiSuggestSelectors(){
+  const empSel=document.getElementById('aiSuggestEmployee');if(!empSel)return;
+  const curEmp=empSel.value;
+  empSel.innerHTML=employees.map(e=>`<option value="${e.id}">${e.name} — ${e.role}</option>`).join('');
+  if(employees.some(e=>e.id===curEmp))empSel.value=curEmp;
+  const skillSel=document.getElementById('aiSuggestSkill');
+  if(skillSel&&!skillSel.options.length){
+    skillSel.innerHTML=Object.entries(skills).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+  }
+}
+let lastSuggestion=null;
+async function requestSkillSuggestion(){
+  const empId=document.getElementById('aiSuggestEmployee').value;
+  const skillKey=document.getElementById('aiSuggestSkill').value;
+  const evidence=document.getElementById('aiSuggestEvidence').value.trim();
+  const resultEl=document.getElementById('aiSuggestResult');
+  const emp=employees.find(e=>e.id===empId);
+  if(!emp||!evidence){resultEl.innerHTML='<div class="notice">Pick an employee and add evidence text first.</div>';return}
+  resultEl.innerHTML='<div class="muted">Calling AI…</div>';
+  try{
+    const r=await fetch('/api/skills/suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      employee_id:emp.id,employee_name:emp.name,role:emp.role,skill:skillKey,
+      current_score:emp.skills[skillKey]||0,current_confidence:emp.confidence,evidence_text:evidence
+    })});
+    if(!r.ok){throw new Error((await r.text()).slice(0,220))}
+    lastSuggestion=await r.json();
+    renderSkillSuggestion();
+  }catch(err){
+    resultEl.innerHTML=`<div class="notice"><strong>AI call failed.</strong><br>${String(err.message||err)}<br><span class="muted">Check that OPENAI_API_KEY is configured on the server.</span></div>`;
+  }
+}
+function renderSkillSuggestion(){
+  const d=lastSuggestion;if(!d)return;
+  const resultEl=document.getElementById('aiSuggestResult');
+  const delta=d.suggested_score-d.current_score;
+  const deltaColor=delta>0.05?'var(--good)':delta<-0.05?'var(--danger)':'var(--muted)';
+  resultEl.innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div><div class="muted" style="font-size:10px;text-transform:uppercase">Current</div><div style="font-size:26px;font-weight:800">${d.current_score.toFixed(1)}</div></div>
+      <div style="font-size:20px;color:var(--muted)">→</div>
+      <div><div class="muted" style="font-size:10px;text-transform:uppercase">AI suggests</div><div style="font-size:26px;font-weight:800;color:${deltaColor}">${d.suggested_score.toFixed(1)}</div></div>
+      <span class="tag ${d.confidence>=.8?'green':d.confidence>=.6?'amber':'gray'}">${Math.round(d.confidence*100)}% confidence</span>
+    </div>
+    <div class="muted" style="margin-top:8px;font-size:11px">${d.reasoning}</div>
+    <div class="actions" style="margin-top:10px"><button class="btn green" onclick="approveSuggestion()">Approve</button><button class="btn soft" onclick="adjustSuggestion()">Adjust</button><button class="btn soft" onclick="rejectSuggestion()">Reject</button></div>
+  `;
+}
 function adjustSuggestion(){
-  const v=prompt("Adjust Maria's suggested SAP proficiency (1–5):","4.0");
+  if(!lastSuggestion)return;
+  const v=prompt(`Override AI's suggested score for ${lastSuggestion.employee_name} (0–5):`,lastSuggestion.suggested_score.toFixed(1));
   if(v===null)return;
-  const n=parseFloat(v);if(!Number.isFinite(n)||n<1||n>5){showToast('Enter a value between 1 and 5.');return}
-  const e=document.getElementById('approvalStatus');e.textContent='Adjusted to '+n.toFixed(1)+' — needs approval';e.className='tag amber';
-  window.adjustedMariaSAP=n;showToast('Suggestion adjusted. Skill record is unchanged until approval.')
+  const n=parseFloat(v);if(!Number.isFinite(n)||n<0||n>5){showToast('Enter a value between 0 and 5.');return}
+  lastSuggestion.suggested_score=n;
+  renderSkillSuggestion();
+  showToast('Suggestion overridden. Click Approve to apply it.');
 }
 function approveSuggestion(){
-  const el=document.getElementById('approvalStatus');el.textContent='Approved';el.className='tag green';
-  if(window.adjustedMariaSAP){const m=employees.find(e=>e.id==='maria');m.skills.SAP=window.adjustedMariaSAP;window.adjustedMariaSAP=null;refreshAll()}
-  showToast('Human reviewer approved the skill suggestion.')
+  if(!lastSuggestion)return;
+  const emp=employees.find(e=>e.id===lastSuggestion.employee_id);
+  if(emp){
+    emp.skills[lastSuggestion.skill]=lastSuggestion.suggested_score;
+    emp.confidence=Math.max(emp.confidence,lastSuggestion.confidence);
+    emp.freshnessDays=0;
+    refreshAll();
+  }
+  document.getElementById('aiSuggestResult').innerHTML=`<div class="notice">Approved — ${lastSuggestion.employee_name}'s ${lastSuggestion.skill_label} is now ${lastSuggestion.suggested_score.toFixed(1)}, evidence refreshed to today.</div>`;
+  showToast('Human reviewer approved the AI suggestion. Skill record updated.');
+  lastSuggestion=null;
 }
-function rejectSuggestion(){const el=document.getElementById('approvalStatus');el.textContent='Rejected';el.className='tag red';window.adjustedMariaSAP=null;showToast('Suggestion rejected. Employee record was not changed.')}
+function rejectSuggestion(){
+  document.getElementById('aiSuggestResult').innerHTML='<div class="notice">Rejected — employee record unchanged.</div>';
+  showToast('Suggestion rejected. Employee record was not changed.');
+  lastSuggestion=null;
+}
 
 function verifyDevelopmentEvidence(){
   const m=employees.find(e=>e.id==='maria');if(!m)return;
