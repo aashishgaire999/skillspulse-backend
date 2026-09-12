@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from pathlib import Path
 from typing import Dict, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from .data import SKILLS, STATE, reset_state
@@ -60,9 +61,12 @@ class ImpactUpdateRequest(BaseModel):
     default_recovery_days: int = Field(ge=0, le=3650)
 
 
+STATIC_DIR = Path(__file__).parent / "static"
+
+
 @app.get("/", include_in_schema=False)
 def root():
-    return RedirectResponse(url="/docs")
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/health")

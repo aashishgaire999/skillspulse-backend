@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SkillsPulse</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --border: #e2e5ea;
+    --text: #1a1f29;
+    --muted: #5b6472;
+    --primary: #1f3a5f;
+    --primary-ink: #ffffff;
+    --danger: #b3261e;
+    --danger-bg: #fdecea;
+    --warn: #8a5a00;
+    --warn-bg: #fff4e0;
+    --good: #1e6b45;
+    --good-bg: #e8f5ee;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  header {
+    background: var(--primary);
+    color: var(--primary-ink);
+    padding: 20px 28px;
+  }
+  header h1 { margin: 0; font-size: 20px; letter-spacing: 0.2px; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.8; }
+  nav {
+    display: flex;
+    gap: 4px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  nav button {
+    border: none;
+    background: none;
+    padding: 14px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  nav button.active { color: var(--primary); border-bottom-color: var(--primary); }
+  main { max-width: 980px; margin: 0 auto; padding: 24px; }
+  section { display: none; }
+  section.active { display: block; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 18px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .stat .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  .stat .value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+  .stat .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  h2 { font-size: 15px; margin: 24px 0 10px; color: var(--text); }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 14px; font-size: 13.5px; border-bottom: 1px solid var(--border); }
+  th { background: #fafbfc; color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11.5px; font-weight: 600; }
+  .badge.danger { background: var(--danger-bg); color: var(--danger); }
+  .badge.warn { background: var(--warn-bg); color: var(--warn); }
+  .badge.good { background: var(--good-bg); color: var(--good); }
+  .controls { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+  select, button.action {
+    font-size: 14px; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card);
+  }
+  button.action.primary { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); cursor: pointer; font-weight: 600; }
+  button.action.primary:disabled { opacity: 0.5; cursor: default; }
+  .empty { color: var(--muted); font-size: 13.5px; padding: 20px; text-align: center; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .compare .card .value { font-size: 22px; }
+  .delta-down { color: var(--danger); }
+  .delta-up { color: var(--good); }
+  footer { text-align: center; padding: 24px; font-size: 12px; color: var(--muted); }
+  footer button { background: none; border: none; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SkillsPulse</h1>
+  <p>Workforce readiness, succession risk, and internal talent matching</p>
+</header>
+
+<nav>
+  <button class="tab active" data-tab="overview">Overview</button>
+  <button class="tab" data-tab="whatif">What-If Simulator</button>
+  <button class="tab" data-tab="match">Talent Match</button>
+</nav>
+
+<main>
+
+  <section id="overview" class="active">
+    <div class="grid" id="overview-stats"></div>
+    <h2>Critical Skill Gaps</h2>
+    <div id="gaps-table"></div>
+    <h2>Single-Point Knowledge Risks</h2>
+    <div id="risks-table"></div>
+  </section>
+
+  <section id="whatif">
+    <div class="controls">
+      <select id="whatif-employee"><option>Loading employees…</option></select>
+      <button class="action primary" id="whatif-run" disabled>Simulate departure</button>
+    </div>
+    <div id="whatif-result"><div class="empty">Pick a person and simulate what happens if they're unavailable tomorrow.</div></div>
+  </section>
+
+  <section id="match">
+    <div class="controls">
+      <select id="match-skill"></select>
+      <button class="action primary" id="match-run">Find matches</button>
+    </div>
+    <div id="match-result"></div>
+  </section>
+
+</main>
+
+<footer>
+  SkillsPulse · <button id="reset-demo">Reset demo data</button>
+</footer>
+
+<script>
+const fmtPct = v => (v === null || v === undefined) ? "—" : v.toFixed(1) + "%";
+const fmtUsd = v => "$" + Math.round(v).toLocaleString();
+
+function riskBadge(qualified, required) {
+  if (qualified <= 1) return '<span class="badge danger">' + qualified + ' of ' + required + ' needed</span>';
+  if (qualified < required) return '<span class="badge warn">' + qualified + ' of ' + required + ' needed</span>';
+  return '<span class="badge good">' + qualified + ' of ' + required + '</span>';
+}
+
+// ---- Tabs ----
+document.querySelectorAll("nav .tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("nav .tab").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll("main section").forEach(s => s.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ---- Overview ----
+async function loadOverview() {
+  const r = await fetch("/api/overview");
+  const d = await r.json();
+
+  document.getElementById("overview-stats").innerHTML = `
+    <div class="card stat">
+      <div class="label">Workforce Readiness Today</div>
+      <div class="value">${fmtPct(d.workforce_readiness_pct)}</div>
+    </div>
+    <div class="card stat">
+      <div class="label">Future Readiness</div>
+      <div class="value">${fmtPct(d.future_readiness_pct)}</div>
+      <div class="sub">against forecast skill targets</div>
+    </div>
+    <div class="card stat">
+      <div class="label">Succession Coverage</div>
+      <div class="value">${fmtPct(d.succession_coverage_pct)}</div>
+      <div class="sub">critical skills with 2+ qualified people</div>
+    </div>
+    <div class="card stat">
+      <div class="label">Current Business Exposure</div>
+      <div class="value">${fmtUsd(d.business_exposure.estimated_exposure)}</div>
+      <div class="sub">estimated, from editable cost assumptions</div>
+    </div>
+  `;
+
+  const gapsRows = d.critical_skill_gaps.length
+    ? d.critical_skill_gaps.map(g => `
+        <tr>
+          <td>${g.label}</td>
+          <td><span class="badge ${g.criticality === "Critical" ? "danger" : "warn"}">${g.criticality}</span></td>
+          <td>${fmtPct(g.coverage_pct)}</td>
+          <td>${riskBadge(g.qualified_people, g.required_experts)}</td>
+        </tr>`).join("")
+    : "";
+  document.getElementById("gaps-table").innerHTML = gapsRows
+    ? `<table><thead><tr><th>Skill</th><th>Criticality</th><th>Coverage</th><th>Qualified people</th></tr></thead><tbody>${gapsRows}</tbody></table>`
+    : `<div class="empty">No critical gaps right now.</div>`;
+
+  const riskRows = d.single_point_knowledge_risks.length
+    ? d.single_point_knowledge_risks.map(r => `
+        <tr>
+          <td>${r.label}</td>
+          <td>${riskBadge(r.qualified_people, r.required_experts)}</td>
+          <td>${fmtPct(r.coverage_pct)}</td>
+        </tr>`).join("")
+    : "";
+  document.getElementById("risks-table").innerHTML = riskRows
+    ? `<table><thead><tr><th>Skill</th><th>Qualified people</th><th>Coverage</th></tr></thead><tbody>${riskRows}</tbody></table>`
+    : `<div class="empty">No single-point-of-failure skills right now.</div>`;
+}
+
+// ---- What-If Simulator ----
+async function loadEmployeesIntoSelect() {
+  const r = await fetch("/api/employees");
+  const employees = await r.json();
+  const sel = document.getElementById("whatif-employee");
+  sel.innerHTML = employees.map(e => `<option value="${e.id}">${e.name} — ${e.role}</option>`).join("");
+  document.getElementById("whatif-run").disabled = false;
+}
+
+async function runWhatIf() {
+  const id = document.getElementById("whatif-employee").value;
+  const btn = document.getElementById("whatif-run");
+  btn.disabled = true;
+  btn.textContent = "Simulating…";
+  const r = await fetch("/api/simulations/employee-unavailable", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ employee_id: id }),
+  });
+  const d = await r.json();
+  btn.disabled = false;
+  btn.textContent = "Simulate departure";
+
+  const backupRows = d.recommended_backups.map(b => `
+    <tr>
+      <td>${b.name}<div class="sub" style="color:var(--muted)">${b.role} · ${b.department}</div></td>
+      <td>${b.match_pct.toFixed(1)}%</td>
+      <td>${b.succession_depth}</td>
+      <td>${b.career_interest_aligned ? '<span class="badge good">Interest-aligned</span>' : ""}</td>
+    </tr>`).join("");
+
+  document.getElementById("whatif-result").innerHTML = `
+    <div class="card" style="margin-bottom:18px;">
+      <strong>${d.employee.name}</strong> (${d.employee.role}) becomes unavailable.
+      Primary risk skill: <strong>${d.primary_risk_skill}</strong>.
+    </div>
+    <div class="compare">
+      <div class="card">
+        <div class="label" style="font-size:12px;color:var(--muted);text-transform:uppercase;">Before</div>
+        <div class="value">${fmtPct(d.before.readiness_pct)} readiness</div>
+        <div class="sub">${d.before.single_point_risk_count} single-point risks · ${fmtUsd(d.before.business_exposure)} exposure</div>
+      </div>
+      <div class="card">
+        <div class="label" style="font-size:12px;color:var(--muted);text-transform:uppercase;">After</div>
+        <div class="value delta-down">${fmtPct(d.after.readiness_pct)} readiness</div>
+        <div class="sub">${d.after.single_point_risk_count} single-point risks · ${fmtUsd(d.after.business_exposure)} exposure</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:18px;">
+      <div class="label" style="font-size:12px;color:var(--muted);text-transform:uppercase;">Incremental business impact</div>
+      <div class="value delta-down">+${fmtUsd(d.incremental_business_impact)}</div>
+      <div class="sub">formula: expert-equivalent gap × downtime cost/day × recovery days</div>
+    </div>
+    <h2>Recommended backups</h2>
+    <table><thead><tr><th>Candidate</th><th>Match</th><th>Ready</th><th></th></tr></thead><tbody>${backupRows}</tbody></table>
+  `;
+}
+
+// ---- Talent Match ----
+async function loadSkillsIntoSelect() {
+  const r = await fetch("/api/skills");
+  const skills = await r.json();
+  const sel = document.getElementById("match-skill");
+  sel.innerHTML = Object.entries(skills).map(([key, meta]) => `<option value="${key}">${meta.label}</option>`).join("");
+}
+
+async function runMatch() {
+  const skill = document.getElementById("match-skill").value;
+  const r = await fetch("/api/talent-match", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ skill }),
+  });
+  const d = await r.json();
+  const rows = d.matches.map(m => `
+    <tr>
+      <td>${m.name}<div class="sub" style="color:var(--muted)">${m.role} · ${m.department}</div></td>
+      <td>${m.match_pct.toFixed(1)}%</td>
+      <td>${m.succession_depth}</td>
+      <td>${m.career_interest_aligned ? '<span class="badge good">Interest-aligned</span>' : ""}</td>
+    </tr>`).join("");
+  document.getElementById("match-result").innerHTML =
+    `<table><thead><tr><th>Candidate</th><th>Match</th><th>Ready</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+document.getElementById("whatif-run").addEventListener("click", runWhatIf);
+document.getElementById("match-run").addEventListener("click", runMatch);
+document.getElementById("reset-demo").addEventListener("click", async () => {
+  await fetch("/api/reset-demo", { method: "POST" });
+  loadOverview();
+  alert("Demo data reset.");
+});
+
+loadOverview();
+loadEmployeesIntoSelect();
+loadSkillsIntoSelect();
+</script>
+
+</body>
+</html>
