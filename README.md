@@ -1,8 +1,22 @@
-# Foresight Backend — Deterministic Workforce Readiness Engine
+# Foresight Backend
 
-This backend turns the Foresight frontend from a visual prototype into a real calculation engine.
+The live product (`app/static/index.html`) is a self-contained frontend with its
+own tested JavaScript calculation engine — it does not call this backend for
+readiness, coverage, risk, succession, or match numbers. This FastAPI backend
+serves that page and hosts the two real AI calls (`/api/strategy/analyze`,
+`/api/skills/suggest`, both calling Gemini).
 
-## What is calculated
+`app/engine.py` is a separate, real, unit-tested (`pytest -q`, 8 tests)
+implementation of similar workforce-readiness math, described below. It is
+**not currently wired to any live number in the UI** — only `readiness()` and
+`critical_gaps()` from it are used, and only inside `/api/strategy/analyze`'s
+response payload. Its formulas differ in places from the frontend's (e.g.
+capability coverage is a 70/30 blend here vs. a top-N-ratio average in the
+frontend) — this is a known, intentional gap, not a bug: unifying the two
+was evaluated and deliberately deferred as disproportionate risk for a
+hackathon timeline, since no live number actually depends on the mismatch.
+
+## What `app/engine.py` calculates
 
 ### 1. Effective skill
 
@@ -82,24 +96,25 @@ Health check:
 
 `http://127.0.0.1:8000/health`
 
-## Main endpoints
+## Endpoints
 
-- `GET /api/overview`
-- `GET /api/employees`
-- `GET /api/employees/{id}`
-- `POST /api/simulations/employee-unavailable`
-- `POST /api/talent-match`
-- `POST /api/skills/verify`
-- `POST /api/future-requirements`
-- `POST /api/business-impact`
-- `POST /api/reset-demo`
+- `GET /` — serves the frontend
+- `GET /health`
+- `POST /api/strategy/analyze` — Gemini call, translates a strategy into future skill targets
+- `POST /api/skills/suggest` — Gemini call, proposes a skill-score update from evidence text
+
+`app/engine.py`'s other functions (`capability_coverage`, `backup_scores`,
+`succession_coverage`, `total_exposure`, `scenario_employee_unavailable`,
+`qualified_count`, `single_point_risks`) have no corresponding REST route —
+they exist only as tested library code. Their previous routes
+(`/api/overview`, `/api/employees`, `/api/talent-match`,
+`/api/simulations/employee-unavailable`, `/api/skills/verify`,
+`/api/future-requirements`, `/api/business-impact`, `/api/reset-demo`) were
+removed since the frontend never called them and an unused, differently-
+calculated API surface is more confusing than no API surface.
 
 ## Test
 
 ```bash
 pytest -q
 ```
-
-## Next step
-
-Wire the current `skillspulse-sap-final.html` to these endpoints so the UI reads all KPI, scenario, match, and exposure values from this backend instead of browser-side calculations.
