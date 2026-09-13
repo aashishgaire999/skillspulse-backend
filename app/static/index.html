@@ -1754,11 +1754,22 @@ async function importFile(){
     return;
   }
 
+  const lines=csvText.trim().split(/\r?\n/);
+  const headers=lines[0].split(',').map(x=>x.trim().toLowerCase());
+  const looksLikeWorkforceData=headers.includes('name')&&headers.some(h=>['role','department','team','skill','title'].some(k=>h.includes(k)));
+
   // Gemini decides whether this content is actually workforce-related before
   // anything gets parsed into employee records — a wrong file (a recipe, an
   // invoice, an unrelated spreadsheet) gets rejected with a reason, never
-  // imported.
+  // imported. But the AI check is a quality layer on top of the real gate,
+  // not the only gate: if the call itself fails (network issue, or Gemini's
+  // free-tier quota, which does run out), we fall back to the same
+  // name+role/department/team/skill column check rather than blocking the
+  // upload outright — a flaky third-party API shouldn't take down the
+  // entire "bring your own data" feature. Only an explicit "no" from Gemini
+  // blocks a file that passes the basic column check.
   btn.textContent='Checking file…';
+  let aiUnavailableNote='';
   try{
     const r=await fetch('/api/data/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:file.name,content:csvText.slice(0,6000)})});
     if(!r.ok){throw new Error((await r.text()).slice(0,220))}
@@ -1768,14 +1779,14 @@ async function importFile(){
       return;
     }
   }catch(err){
-    showFileWarning('Could not verify this file',String(err.message||err));
-    return;
+    if(!looksLikeWorkforceData){
+      showFileWarning('Can\'t verify this file',`The AI check is unavailable right now (${String(err.message||err).slice(0,120)}), and this file doesn't have the columns Foresight looks for either.<br><br>Make sure it has a <strong>name</strong> column plus role/department/team, or try again in a moment.`);
+      return;
+    }
+    aiUnavailableNote=' (AI check unavailable — imported based on column format only)';
   }finally{
     btn.disabled=false;btn.textContent='Upload File';
   }
-
-  const lines=csvText.trim().split(/\r?\n/);
-  const headers=lines[0].split(',').map(x=>x.trim().toLowerCase());
   let count=0;
   lines.slice(1).forEach(line=>{
     const cols=line.split(',').map(x=>x.trim()),o={};
@@ -1786,7 +1797,7 @@ async function importFile(){
     }
   });
   document.getElementById('csvFile').value='';
-  setDataStatus('+ File import ('+count+')');
+  setDataStatus('+ File import ('+count+')'+aiUnavailableNote);
   refreshAll();
 }
 
