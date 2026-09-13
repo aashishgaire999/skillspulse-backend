@@ -1322,6 +1322,13 @@ function showWhy(id,skillKey,score){const e=employees.find(x=>x.id===id);documen
 function closeWhyModal(){document.getElementById('whyModal').classList.remove('show')}
 function showFileWarning(title,text){document.getElementById('fileWarningTitle').textContent='⚠️ '+title;document.getElementById('fileWarningText').innerHTML=text;document.getElementById('fileWarningModal').classList.add('show')}
 function closeFileWarningModal(){document.getElementById('fileWarningModal').classList.remove('show')}
+function aiFailureNote(err){
+  const msg=String((err&&err.message)||err||'');
+  if(/GEMINI_API_KEY is not configured/i.test(msg))return "The AI provider isn't configured on the server right now.";
+  if(/\(429\)/.test(msg)||/quota/i.test(msg))return "The AI provider's free-tier usage limit was hit — try again in a minute.";
+  if(/Could not reach AI provider/i.test(msg))return "Couldn't reach the AI provider — check your connection and try again.";
+  return 'The AI call didn\'t go through — try again shortly.';
+}
 
 async function analyzeFutureStrategy(){
   const text=document.getElementById('strategyInput').value,h=parseInt(document.getElementById('strategyHorizon').value);
@@ -1338,7 +1345,7 @@ async function analyzeFutureStrategy(){
     refreshAll();
     showToast(changed.length?`AI updated ${changed.length} future skill target(s) — live model call.`:'AI call succeeded but found no skills materially affected.');
   }catch(err){
-    resultsEl.innerHTML=`<div class="notice"><strong>AI call failed.</strong><br>${String(err.message||err)}<br><span class="muted">Check that GEMINI_API_KEY is set on the server.</span></div>`;
+    resultsEl.innerHTML=`<div class="notice"><strong>AI is unavailable right now.</strong><br>${aiFailureNote(err)} This only affects this live call — calculated readiness and gap numbers elsewhere are unaffected.<br><span class="muted">You can still adjust future targets manually below.</span></div>`;
   }
 }
 function renderFutureStrategyResults(){
@@ -1758,7 +1765,7 @@ async function importFile(){
     }
   }catch(err){
     if(!looksLikeWorkforceData){
-      showFileWarning('Can\'t verify this file',`The AI check is unavailable right now (${String(err.message||err).slice(0,120)}), and this file doesn't have the columns Foresight looks for either.<br><br>Make sure it has a <strong>name</strong> column plus role/department/team, or try again in a moment.`);
+      showFileWarning('Can\'t verify this file',`${aiFailureNote(err)} And this file doesn't have the columns Foresight looks for either.<br><br>Make sure it has a <strong>name</strong> column plus role/department/team, or try again in a moment.`);
       return;
     }
     aiUnavailableNote=' (AI check unavailable — imported based on column format only)';
@@ -1885,7 +1892,7 @@ async function requestSkillSuggestion(){
     lastSuggestion=await r.json();
     renderSkillSuggestion();
   }catch(err){
-    resultEl.innerHTML=`<div class="notice"><strong>AI call failed.</strong><br>${String(err.message||err)}<br><span class="muted">Check that GEMINI_API_KEY is configured on the server.</span></div>`;
+    resultEl.innerHTML=`<div class="notice"><strong>AI is unavailable right now.</strong><br>${aiFailureNote(err)} No score was changed — nothing to undo.</div>`;
   }
 }
 function renderSkillSuggestion(){

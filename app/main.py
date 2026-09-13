@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 from pathlib import Path
@@ -44,38 +45,60 @@ class SkillSuggestionRequest(BaseModel):
     evidence_text: str
 
 
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent"
+
+
+async def _post_to_gemini(api_key: str, prompt: str) -> httpx.Response:
+    async with httpx.AsyncClient(timeout=30) as client:
+        return await client.post(
+            GEMINI_URL,
+            headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
+            json={
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"temperature": 0.2, "responseMimeType": "application/json"},
+            },
+        )
+
+
 async def call_gemini_json(prompt: str) -> dict:
     """Call Gemini with a prompt that requests JSON back; return it parsed.
 
-    Raises HTTPException on any failure (missing key, network error, non-200,
-    or a response that isn't valid JSON), so callers can just `await` this
-    and let FastAPI turn the exception into a clean error response.
+    Tries GEMINI_API_KEY, then GEMINI_API_KEY_2 if it's set, so a second
+    free-tier key can absorb quota overflow from the first. A 429 (quota
+    exhausted) moves straight to the next key since retrying won't help;
+    a network error or 5xx gets one retry on the same key first.
+
+    Raises HTTPException on total failure (no key configured, network error,
+    non-200, or a response that isn't valid JSON), so callers can just
+    `await` this and let FastAPI turn it into a clean error response.
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+    keys = [k for k in (os.environ.get("GEMINI_API_KEY"), os.environ.get("GEMINI_API_KEY_2")) if k]
+    if not keys:
         raise HTTPException(500, "GEMINI_API_KEY is not configured on the server")
 
-    try:
-        async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
-                headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
-                json={
-                    "contents": [{"parts": [{"text": prompt}]}],
-                    "generationConfig": {"temperature": 0.2, "responseMimeType": "application/json"},
-                },
-            )
-    except httpx.HTTPError as exc:
-        raise HTTPException(502, f"Could not reach AI provider: {exc}")
+    last_error = HTTPException(502, "AI call failed")
+    for key in keys:
+        for attempt in range(2):
+            try:
+                resp = await _post_to_gemini(key, prompt)
+            except httpx.HTTPError as exc:
+                last_error = HTTPException(502, f"Could not reach AI provider: {exc}")
+                await asyncio.sleep(1.5)
+                continue
 
-    if resp.status_code != 200:
-        raise HTTPException(502, f"AI provider error ({resp.status_code}): {resp.text[:300]}")
+            if resp.status_code == 200:
+                try:
+                    text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+                    return json.loads(text)
+                except (KeyError, IndexError, json.JSONDecodeError) as exc:
+                    raise HTTPException(502, f"AI response was not in the expected format: {exc}")
 
-    try:
-        text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
-        return json.loads(text)
-    except (KeyError, IndexError, json.JSONDecodeError) as exc:
-        raise HTTPException(502, f"AI response was not in the expected format: {exc}")
+            last_error = HTTPException(502, f"AI provider error ({resp.status_code}): {resp.text[:300]}")
+            if resp.status_code == 429:
+                break  # this key is out of quota - retrying it won't help, move to the next key
+            await asyncio.sleep(1.5)  # transient server-side error - retry same key once
+
+    raise last_error
 
 
 STATIC_DIR = Path(__file__).parent / "static"
