@@ -662,8 +662,6 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <button class="search-hero-btn" onclick="searchTalentEmployee()" title="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
     </div>
     <div class="role-chips" id="roleChipsRow"></div>
-    <div id="talentEmployeeSearchResult" style="margin-top:12px"></div>
-    <div id="roleCoverageResult" style="margin-top:12px"></div>
 
     <button class="help-link" id="projectMatchToggle" onclick="toggleProjectMatch()" style="margin-top:14px">+ Or match a hypothetical project instead</button>
     <div id="projectMatchPanel" style="display:none;margin-top:12px;padding-top:14px;border-top:1px dashed var(--line)">
@@ -1299,12 +1297,21 @@ function searchRoleChip(btn){
   document.getElementById('talentEmployeeSearch').value=btn.dataset.role;
   searchTalentEmployee();
 }
+function simpleMatchRow(e,i){
+  return `<div class="match-row">
+    <div class="match-rank${i<3?' r'+(i+1):''}">${i+1}</div>
+    <div class="match-avatar" style="background:${avatarColor(e.id)}">${initials(e.name)}</div>
+    <div class="match-identity"><strong>${e.name}</strong><span class="muted">${e.role} • ${e.department}</span></div>
+    <div class="match-row-actions"><button class="btn blue" onclick="openEmployee('${e.id}')">Open →</button></div>
+  </div>`;
+}
 function searchTalentEmployee(){
   const raw=document.getElementById('talentEmployeeSearch').value.trim();
   const q=raw.toLowerCase();
-  const resultEl=document.getElementById('talentEmployeeSearchResult');
-  const roleEl=document.getElementById('roleCoverageResult');
-  if(!q){resultEl.innerHTML='';roleEl.innerHTML='';return}
+  // Search results and the default ranked-backups view share one results area
+  // (talentPriorityBanner + talentCards) so there's never a stale list left
+  // showing under a new search.
+  if(!q){renderTalent();return}
 
   const roleSet=[...new Set(employees.map(e=>e.role))];
   const exactRole=roleSet.find(r=>r.toLowerCase()===q);
@@ -1314,30 +1321,25 @@ function searchTalentEmployee(){
   // A role search wins when the query is an exact role title, or a role-only substring
   // match with no competing name match (so "priya" still opens her profile, not a role list).
   const roleTitle=exactRole||(substrRoles.length===1&&!nameMatches.length?substrRoles[0]:null);
+  if(roleTitle){renderRoleCoverage(roleTitle,q);return}
 
-  if(roleTitle){
-    resultEl.innerHTML='';
-    renderRoleCoverage(roleTitle,q);
-    return;
-  }
-  roleEl.innerHTML='';
-
+  const banner=document.getElementById('talentPriorityBanner'),cardsEl=document.getElementById('talentCards');
   const matches=employees.filter(e=>e.name.toLowerCase().includes(q)||e.role.toLowerCase().includes(q)||e.department.toLowerCase().includes(q));
   if(!matches.length){
-    resultEl.innerHTML=`<div class="notice">No employee or role found matching "${raw}".</div>`;
+    banner.innerHTML=`No employee or role matches "<strong>${raw}</strong>".`;
+    cardsEl.innerHTML='';
     return;
   }
-  if(matches.length===1){
-    resultEl.innerHTML=`<div class="notice">Found <strong>${matches[0].name}</strong> — full profile opened →</div>`;
-    openEmployee(matches[0].id);
-  } else {
-    resultEl.innerHTML=`<div class="muted" style="margin-bottom:6px">${matches.length} matches — pick one:</div>`+matches.map(e=>`<div class="succession-person" onclick="openEmployee('${e.id}')"><strong>${e.name}</strong><span>${e.role} • ${e.department}</span></div>`).join('');
-  }
+  banner.innerHTML=matches.length===1
+    ? `<strong>${matches[0].name}</strong> — profile opened. ${matches[0].role} • ${matches[0].department}.`
+    : `<strong>${matches.length} matches for "${raw}":</strong> pick one to open their profile.`;
+  cardsEl.innerHTML=`<div class="match-list">${matches.map(simpleMatchRow).join('')}</div>`;
+  if(matches.length===1)openEmployee(matches[0].id);
 }
 function renderRoleCoverage(roleTitle,q){
-  const wrap=document.getElementById('roleCoverageResult');
   const holders=employees.filter(e=>e.role===roleTitle);
-  if(!holders.length){wrap.innerHTML='';return}
+  const banner=document.getElementById('talentPriorityBanner'),cardsEl=document.getElementById('talentCards');
+  if(!holders.length){banner.innerHTML='';cardsEl.innerHTML='';return}
 
   // Derive a target skill profile from current role-holders, then rank everyone
   // (including other roles) by fit against that profile - same weighting family
@@ -1354,17 +1356,27 @@ function renderRoleCoverage(roleTitle,q){
     return {e,score,isHolder};
   }).sort((a,b)=>b.score-a.score).slice(0,6);
 
-  const rows=ranked.map(({e,score,isHolder})=>`
-    <div class="match-card" style="margin-bottom:8px">
-      <div class="section-head"><h3 style="font-size:13px">${e.name}${isHolder?' <span class="tag blue" style="margin-left:6px">Current role-holder</span>':''}</h3><span class="tag ${score>=88?'green':score>=78?'blue':'amber'}">${score}% coverage match</span></div>
-      <div class="muted">${e.role} • ${e.department}</div>
-    </div>`).join('');
+  banner.innerHTML=`<strong>${roleTitle} coverage:</strong> ${holders.length} current holder${holders.length===1?'':'s'} (${holders.map(h=>h.name).join(', ')}). Ranked backups from across the company below.`;
+
+  const rows=ranked.map(({e,score,isHolder},i)=>{
+    const ringColor=score>=88?'var(--green)':score>=78?'var(--blue)':'var(--amber)';
+    return `<div class="match-row">
+      <div class="match-rank${i<3?' r'+(i+1):''}">${i+1}</div>
+      <div class="match-avatar" style="background:${avatarColor(e.id)}">${initials(e.name)}</div>
+      <div class="match-identity">
+        <strong>${e.name}</strong>
+        <span class="muted">${e.role} • ${e.department}</span>
+        ${isHolder?'<div class="match-pills"><span class="match-pill">Current role-holder</span></div>':''}
+      </div>
+      <div class="match-ring" style="--p:${score};background:conic-gradient(${ringColor} calc(var(--p)*1%),#ececf0 0)"><span>${score}%</span></div>
+      <div class="match-row-actions"><button class="btn blue" onclick="openEmployee('${e.id}')">Open →</button></div>
+    </div>`;
+  }).join('');
 
   const relatedFormer=formerEmployees.filter(f=>f.formerRole.toLowerCase().includes(q)||q.includes(f.formerRole.toLowerCase()));
-  const formerHtml=relatedFormer.length?`
-    <div class="notice" style="margin-top:12px"><strong>Former staff knowledge available (${relatedFormer.length}):</strong> ${relatedFormer.map(f=>f.name).join(', ')} — historical documentation only, never counted toward active coverage.</div>`:'';
+  const formerHtml=relatedFormer.length?`<div class="notice" style="margin-top:12px"><strong>Former staff knowledge available (${relatedFormer.length}):</strong> ${relatedFormer.map(f=>f.name).join(', ')} — historical documentation only, never counted toward active coverage.</div>`:'';
 
-  wrap.innerHTML=`<div class="match-banner"><strong>${roleTitle} coverage:</strong> ${holders.length} current holder${holders.length===1?'':'s'} (${holders.map(h=>h.name).join(', ')}). Ranked backups from across the company below.</div>${rows}${formerHtml}`;
+  cardsEl.innerHTML=`<div class="match-list">${rows}</div>${formerHtml}`;
 }
 function renderFormerStaffDirectory(){
   const wrap=document.getElementById('formerStaffList');if(!wrap)return;
