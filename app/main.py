@@ -111,6 +111,11 @@ def root():
     return FileResponse(STATIC_DIR / "index.html")
 
 
+@app.get("/logo.jpeg", include_in_schema=False)
+def logo():
+    return FileResponse(STATIC_DIR / "logo.jpeg")
+
+
 @app.get("/health")
 def health():
     return {"ok": True, "service": "skillspulse-api", "version": app.version}
