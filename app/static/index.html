@@ -124,6 +124,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .match-rank{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:#f1f1f3;color:#777;font-size:11px;font-weight:800;display:grid;place-items:center}
 .match-rank.r1{background:#fff1cf;color:#8a5a00}.match-rank.r2{background:#eef1f3;color:#54616b}.match-rank.r3{background:#fbe6d6;color:#96501c}
 .match-avatar{flex:0 0 auto;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;font-weight:800;color:#fff}
+.mini-avatar{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;font-size:9px;font-weight:800;color:#fff;vertical-align:-7px;margin-right:8px}
 .match-identity{flex:1 1 220px;min-width:0}
 .match-identity strong{display:block;font-size:12.5px}
 .match-identity .muted{font-size:10.5px}
@@ -1199,7 +1200,7 @@ function renderDevelopment(){
     else if(weeks<20){statusClass='verify';statusLabel='Ready Soon'}
     else if(weeks<=45){statusClass='progress';statusLabel='In Progress'}
     else{statusClass='attention';statusLabel='Needs Support'}
-    return `<tr><td><span class="employee-link" onclick="openEmployee('${e.id}')">${e.name}</span></td><td>${e.futureMatch}%</td><td>${skills[top.k].label} ${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)}</td><td>${action}</td><td>${weeks<=0?'Ready Now':weeks<52?`~${weeks} weeks`:`~${Math.round(weeks/4.33)} months`}</td><td><span class="status ${statusClass}">${statusLabel}</span></td></tr>`
+    return `<tr><td><span class="mini-avatar" style="background:${avatarColor(e.id)}">${initials(e.name)}</span><span class="employee-link" onclick="openEmployee('${e.id}')">${e.name}</span></td><td>${e.futureMatch}%</td><td>${skills[top.k].label} ${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)}</td><td>${action}</td><td>${weeks<=0?'Ready Now':weeks<52?`~${weeks} weeks`:`~${Math.round(weeks/4.33)} months`}</td><td><span class="status ${statusClass}">${statusLabel}</span></td></tr>`
   }).join('')
 }
 
