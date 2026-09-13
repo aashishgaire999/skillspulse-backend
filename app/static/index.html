@@ -125,7 +125,6 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .match-rank.r1{background:#fff1cf;color:#8a5a00}.match-rank.r2{background:#eef1f3;color:#54616b}.match-rank.r3{background:#fbe6d6;color:#96501c}
 .match-avatar{flex:0 0 auto;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;font-weight:800;color:#fff}
 .mini-avatar{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;font-size:9px;font-weight:800;color:#fff;vertical-align:-7px;margin-right:8px}
-.good-choice{color:var(--green)}
 .match-identity{flex:1 1 220px;min-width:0}
 .match-identity strong{display:block;font-size:12.5px}
 .match-identity .muted{font-size:10.5px}
@@ -662,19 +661,13 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
     </div>
   </div>
 
-  <div class="grid-2">
-    <div class="card">
-      <div class="section-head"><h3>30 / 60 / 90-day roadmap</h3><span class="tag green">Executable</span></div>
-      <div class="timeline">
-        <div class="t-card"><strong>Today</strong><div class="r">Identify</div><div class="muted">Gap selected</div><span class="status">Not Started</span></div>
-        <div class="t-card"><strong>Day 30</strong><div class="r">Learn</div><div class="muted">Training done</div><span class="status progress">In Progress</span></div>
-        <div class="t-card"><strong>Day 60</strong><div class="r">Apply</div><div class="muted">Supervised work</div><span class="status verify">Ready for Verification</span></div>
-        <div class="t-card"><strong>Day 90</strong><div class="r">Verify</div><div class="muted">Evidence confirmed</div><span class="status done">Verified</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="section-head"><h3>Train vs Transfer vs Hire</h3><span class="tag blue">Calculated guidance</span></div>
-      <div id="decisionSupport"><div class="muted">Loading decision support…</div></div>
+  <div class="card">
+    <div class="section-head"><h3>30 / 60 / 90-day roadmap</h3><span class="tag green">Executable</span></div>
+    <div class="timeline">
+      <div class="t-card"><strong>Today</strong><div class="r">Identify</div><div class="muted">Gap selected</div><span class="status">Not Started</span></div>
+      <div class="t-card"><strong>Day 30</strong><div class="r">Learn</div><div class="muted">Training done</div><span class="status progress">In Progress</span></div>
+      <div class="t-card"><strong>Day 60</strong><div class="r">Apply</div><div class="muted">Supervised work</div><span class="status verify">Ready for Verification</span></div>
+      <div class="t-card"><strong>Day 90</strong><div class="r">Verify</div><div class="muted">Evidence confirmed</div><span class="status done">Verified</span></div>
     </div>
   </div>
 
@@ -1158,7 +1151,6 @@ function rankCustomProject(){
   const key=keys[0]||'Robotics';window.targetSkill=key;rankBackups(key);
   document.getElementById('talentPriorityBanner').innerHTML=`<strong>${document.getElementById('projectName').value}:</strong> ranking employees using ${keys.map(k=>skills[k].label).join(', ')||skills[key].label}, confidence, growth, evidence and career interest.`
 }
-function showGenericWhy(title,text){document.getElementById('whyModalText').innerHTML=`<strong>${title}</strong><br><br>${text}`;document.getElementById('whyModal').classList.add('show')}
 function showWhy(id,skillKey,score){const e=employees.find(x=>x.id===id);document.getElementById('whyModalText').innerHTML=`<strong>${e.name} — ${score}% match</strong><br><br>${e.why}<br><br>Evidence confidence: ${confidenceLabel(e)} • Last verified: ${lastVerified(e)} • Growth: ${Math.round(e.growth*100)}% • Target capability: ${skills[skillKey].label}.`;document.getElementById('whyModal').classList.add('show')}
 function closeWhyModal(){document.getElementById('whyModal').classList.remove('show')}
 
@@ -1186,13 +1178,6 @@ function renderFutureStrategyResults(){
 }
 
 function renderDevelopment(){
-  const bestSAP=backupScores('SAP','alex')[0],bestFood=backupScores('FoodSafety',null)[0],bestRob=backupScores('Robotics',null)[0];
-  const decisionWhy=`Internal candidate ${bestSAP.e.name} already has ${bestSAP.e.skills.SAP.toFixed(1)}/5 SAP capability and ${confidenceLabel(bestSAP.e)} evidence confidence.`;
-  document.getElementById('decisionSupport').innerHTML=`
-    <div class="metric"><span>Train internal talent</span><strong class="good-choice">${bestSAP.weeks<=12?bestSAP.weeks+' weeks':'12+ weeks'} · preferred</strong></div>
-    <div class="metric"><span>Temporary transfer</span><strong>2–4 weeks</strong></div>
-    <div class="metric"><span>External hire</span><strong>12+ weeks</strong></div>
-    <button class="help-link" onclick="showGenericWhy('Why train internal talent?','${decisionWhy.replace(/'/g,"&apos;")}')">Why this recommendation?</button>`;
   document.getElementById('futureNeedsTable').innerHTML=employees.map(e=>{
     const gaps=Object.keys(skills).map(k=>({k,g:futureRequirements[k]-e.skills[k]})).sort((a,b)=>b.g-a.g);const top=gaps[0];const action=top.g<=.3?'Verify on live work':top.k==='FoodSafety'?'Certification + shadowing':top.k==='Robotics'?'Project rotation + mentoring':'Training + project experience';const weeks=Math.max(0,Math.ceil(Math.max(0,top.g)/Math.max(.08,e.growth)*2));
     // Thresholds calibrated to this system's actual output range (roughly 10-70 weeks given
