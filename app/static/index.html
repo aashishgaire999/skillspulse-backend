@@ -120,7 +120,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .match-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px}.match-score{font-size:25px;font-weight:820}.match-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.mini-box{background:#f7f7f9;border-radius:10px;padding:9px}.mini-box strong{display:block;font-size:14px}.mini-box span{font-size:9.5px;color:var(--muted)}
 .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.t-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px}.t-card .r{font-size:22px;font-weight:800;margin:5px 0}
 .status{font-size:10px;padding:5px 8px;border-radius:999px;background:#f1f1f3;color:#555}
-.status.progress{background:#eef6ff;color:#0064c6}.status.verify{background:#fff4dc;color:#9b5f05}.status.done{background:#eaf8f0;color:#24774e}
+.status.progress{background:#eef6ff;color:#0064c6}.status.verify{background:#fff4dc;color:#9b5f05}.status.done{background:#eaf8f0;color:#24774e}.status.attention{background:#fde8e6;color:#c0392b}
 .data-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .upload-zone{padding:22px;border:1px dashed #c9c9cf;border-radius:15px;text-align:center;background:#fafafa}
 .report{max-width:900px;margin:auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:25px;box-shadow:var(--shadow)}
@@ -180,6 +180,18 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .chart-caption{font-size:9.5px;color:var(--muted);margin-top:8px;line-height:1.45}
 @media(max-width:980px){.visual-grid{grid-template-columns:1fr}.dep-map{grid-template-columns:1fr}.dep-arrow{transform:rotate(90deg)}.succession-grid{grid-template-columns:1fr}.verify-flow{grid-template-columns:1fr 1fr}.verify-step::after{display:none}}
 @media(max-width:620px){.verify-flow{grid-template-columns:1fr}}
+
+/* ===== Development Plan page: legibility + structure ===== */
+#development table th,#development table td{font-size:12.5px;padding:11px 10px}
+#development .timeline .muted{font-size:10.5px}
+#development .verify-step strong{font-size:11px}
+#development .verify-step span{font-size:10px}
+.verify-action{margin-top:16px;padding:16px;border-radius:13px;background:#f6faf7;border:1px solid #dbeee1}
+.verify-action .field-label{display:block;font-size:9.5px;font-weight:750;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px}
+.flow-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:11.5px}
+.flow-strip+.flow-strip{margin-top:8px}
+.flow-strip .flow-node{font-weight:750}
+.flow-strip .flow-arrow{color:#b0b0b6;font-weight:900;font-size:13px}
 
 
 /* ===== Presentation Final Pass ===== */
@@ -257,7 +269,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   <div class="nav-item" data-page="skills"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 20c.5-4 2.7-6 5.5-6s5 2 5.5 6"/><path d="M14 15c3.5-.7 5.7 1.1 6.5 4"/></svg></span>Team Skills</div>
   <div class="nav-item" data-page="simulator"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9"/><circle cx="12" cy="17.5" r="1"/><path d="M10.2 4.2 3.5 18a2 2 0 0 0 1.8 2.9h13.4a2 2 0 0 0 1.8-2.9L13.8 4.2a2 2 0 0 0-3.6 0Z"/></svg></span>Risk Simulator</div>
   <div class="nav-item" data-page="talent"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/><circle cx="10.5" cy="9" r="2"/><path d="M7.5 14c.7-1.6 1.8-2.5 3-2.5s2.3.9 3 2.5"/></svg></span>Find Talent</div>
-  <div class="nav-item" data-page="development"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h7"/><path d="m8 3 4 4-4 4"/><path d="M20 17h-7"/><path d="m16 13-4 4 4 4"/></svg></span>Talent Match</div>
+  <div class="nav-item" data-page="development"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h7"/><path d="m8 3 4 4-4 4"/><path d="M20 17h-7"/><path d="m16 13-4 4 4 4"/></svg></span>Development Plan</div>
   <div class="nav-item" data-page="brief"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>Leadership Summary</div>
   <div class="nav-label">Data</div>
   <div class="nav-item" data-page="data"><span class="nav-svg"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span>Connect Your Data</div>
@@ -605,15 +617,15 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 </section>
 
 <!-- ============================================================
-     PAGE: TALENT MATCH (sidebar label; section id is "development")
+     PAGE: DEVELOPMENT PLAN (sidebar label; section id is "development")
      30/60/90 roadmap, train-vs-transfer-vs-hire, future-needs table
      ============================================================ -->
 <section id="development" class="page">
   <div class="hero">
     <div>
-      <div class="eyebrow">TALENT MATCH</div>
-      <h1>Turn the right talent match into verified readiness.</h1>
-      <p>Training, mentoring, certifications, job rotations, project experiences and knowledge transfer — each tied to the business problem it solves.</p>
+      <div class="eyebrow">DEVELOPMENT PLAN</div>
+      <h1>Turn every skill gap into a tracked plan, not a wish.</h1>
+      <p>Training, mentoring, certifications, job rotations and project experience — each tied to a specific gap, a specific person, and a manager sign-off before any score moves.</p>
     </div>
   </div>
 
@@ -652,20 +664,24 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <div class="verify-step"><strong>Manager Verified</strong><span>evidence reviewed</span></div>
       <div class="verify-step"><strong>Skill Updated</strong><span>readiness recalculated</span></div>
     </div>
-    <div class="grid-3" style="margin-top:12px">
-      <select id="verifyEmployee"></select>
-      <select id="verifySkill"></select>
-      <input id="verifyScore" class="input" type="number" min="0" max="5" step="0.1" placeholder="New verified score (0-5)">
+    <div class="verify-action">
+      <div class="muted" style="font-size:11px;margin-bottom:12px"><strong>Step 4 — Manager Verified:</strong> pick who and what you're signing off on below, then confirm.</div>
+      <div class="grid-3">
+        <div><span class="field-label">Person</span><select id="verifyEmployee"></select></div>
+        <div><span class="field-label">Skill</span><select id="verifySkill"></select></div>
+        <div><span class="field-label">New verified score (0–5)</span><input id="verifyScore" class="input" type="number" min="0" max="5" step="0.1" placeholder="e.g. 4.0"></div>
+      </div>
+      <div class="actions" style="margin-top:14px"><button class="btn green" onclick="verifyDevelopmentEvidence()">Mark as manager-verified →</button></div>
+      <div id="verifyStatus" class="muted" style="margin-top:10px">This step is intentionally manual — a manager confirms real evidence, not AI, before a score moves.</div>
     </div>
-    <div class="actions" style="margin-top:10px"><button class="btn green" onclick="verifyDevelopmentEvidence()">Mark as manager-verified</button></div>
-    <div id="verifyStatus" class="muted" style="margin-top:8px">This step is intentionally manual — a manager confirms real evidence, not AI, before a score moves.</div>
   </div>
 
   <div class="card" style="margin-top:15px">
     <div class="section-head"><h3>Knowledge protection workflow</h3><span class="tag amber">For single-point risks</span></div>
-    <div class="capability-row"><strong>Expert</strong><span>→ Backup</span><span>→ Documentation</span><span>→ Shadowing</span></div>
-    <div class="capability-row"><strong>Supervised Work</strong><span>→ Evidence</span><span>→ Independent Verification</span><span>→ Coverage Recalculated</span></div>
-    <div id="knowledgeProtectionResult" class="notice" style="margin-top:10px">Run “Protect This Knowledge” from the Risk Simulator to generate a named plan.</div>
+    <div class="muted" style="font-size:11px;margin-bottom:10px">The path from "only one person knows this" to "coverage is real," in order:</div>
+    <div class="flow-strip"><span class="flow-node">Expert identified</span><span class="flow-arrow">→</span><span class="flow-node">Backup assigned</span><span class="flow-arrow">→</span><span class="flow-node">Documentation</span><span class="flow-arrow">→</span><span class="flow-node">Shadowing</span></div>
+    <div class="flow-strip"><span class="flow-node">Supervised work</span><span class="flow-arrow">→</span><span class="flow-node">Evidence captured</span><span class="flow-arrow">→</span><span class="flow-node">Independent verification</span><span class="flow-arrow">→</span><span class="flow-node">Coverage recalculated</span></div>
+    <div id="knowledgeProtectionResult" class="notice" style="margin-top:12px">Run "Protect This Knowledge" from the Risk Simulator to generate a named plan.</div>
   </div>
 </section>
 
@@ -1125,7 +1141,15 @@ function renderDevelopment(){
     <div class="why"><strong>Why this recommendation?</strong> Internal candidate ${bestSAP.e.name} already has ${bestSAP.e.skills.SAP.toFixed(1)}/5 SAP capability and ${confidenceLabel(bestSAP.e)} evidence confidence.</div>`;
   document.getElementById('futureNeedsTable').innerHTML=employees.map(e=>{
     const gaps=Object.keys(skills).map(k=>({k,g:futureRequirements[k]-e.skills[k]})).sort((a,b)=>b.g-a.g);const top=gaps[0];const action=top.g<=.3?'Verify on live work':top.k==='FoodSafety'?'Certification + shadowing':top.k==='Robotics'?'Project rotation + mentoring':'Training + project experience';const weeks=Math.max(0,Math.ceil(Math.max(0,top.g)/Math.max(.08,e.growth)*2));
-    return `<tr><td><span class="employee-link" onclick="openEmployee('${e.id}')">${e.name}</span></td><td>${e.futureMatch}%</td><td>${skills[top.k].label} ${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)}</td><td>${action}</td><td>${weeks<=0?'Ready Now':weeks<24?`~${weeks} weeks`:'6–12 months'}</td><td><span class="status ${weeks<=0?'done':weeks<10?'verify':'progress'}">${weeks<=0?'Verified':weeks<10?'Ready for Verification':'In Progress'}</span></td></tr>`
+    // Thresholds calibrated to this system's actual output range (roughly 10-70 weeks given
+    // realistic gap/growth combinations) so status genuinely differentiates people instead of
+    // everyone landing in one bucket.
+    let statusClass,statusLabel;
+    if(weeks<=0){statusClass='done';statusLabel='Verified'}
+    else if(weeks<20){statusClass='verify';statusLabel='Ready Soon'}
+    else if(weeks<=45){statusClass='progress';statusLabel='In Progress'}
+    else{statusClass='attention';statusLabel='Needs Support'}
+    return `<tr><td><span class="employee-link" onclick="openEmployee('${e.id}')">${e.name}</span></td><td>${e.futureMatch}%</td><td>${skills[top.k].label} ${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)}</td><td>${action}</td><td>${weeks<=0?'Ready Now':weeks<52?`~${weeks} weeks`:`~${Math.round(weeks/4.33)} months`}</td><td><span class="status ${statusClass}">${statusLabel}</span></td></tr>`
   }).join('')
 }
 
