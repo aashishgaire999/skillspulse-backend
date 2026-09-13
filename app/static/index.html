@@ -1693,6 +1693,7 @@ function readFileAsArrayBuffer(file){return new Promise((resolve,reject)=>{const
 const TEXT_EXTENSIONS=['.csv','.txt'];
 const EXCEL_EXTENSIONS=['.xlsx','.xls'];
 const UNREADABLE_FORMATS={'.pdf':'PDF','.doc':'Word','.docx':'Word'};
+const NAME_HEADER_ALIASES=['name','full name','employee name','employee','staff name'];
 
 async function importFile(){
   const errEl=document.getElementById('csvError'),btn=document.getElementById('csvImportBtn');
@@ -1733,7 +1734,7 @@ async function importFile(){
 
   const lines=csvText.trim().split(/\r?\n/);
   const headers=lines[0].split(',').map(x=>x.trim().toLowerCase());
-  const looksLikeWorkforceData=headers.includes('name')&&headers.some(h=>['role','department','team','skill','title'].some(k=>h.includes(k)));
+  const looksLikeWorkforceData=headers.some(h=>NAME_HEADER_ALIASES.includes(h))&&headers.some(h=>['role','department','team','skill','title'].some(k=>h.includes(k)));
 
   // Gemini decides whether this content is actually workforce-related before
   // anything gets parsed into employee records — a wrong file (a recipe, an
@@ -1764,16 +1765,29 @@ async function importFile(){
   }finally{
     btn.disabled=false;btn.textContent='Upload File';
   }
+  // The AI check above judges content ("does this look like a workforce
+  // file") which is more lenient than exact column names - it'll happily
+  // approve a file whose name column is called "Employee Name" or "Full
+  // Name". The parser below has to actually find that column by name, so
+  // it checks the same NAME_HEADER_ALIASES instead of only the literal
+  // "name" - otherwise a file could pass validation and then silently
+  // import zero rows, which is worse than rejecting it outright.
+  const nameHeader=headers.find(h=>NAME_HEADER_ALIASES.includes(h));
   let count=0;
   lines.slice(1).forEach(line=>{
     const cols=line.split(',').map(x=>x.trim()),o={};
     headers.forEach((h,i)=>o[h]=cols[i]);
-    if(o.name){
-      employees.push({id:'csv'+Date.now()+count,name:o.name,role:o.role||'Employee',department:o.department||'General',team:o.team||'General',confidence:.55,freshnessDays:0,growth:.05,interests:['career development'],skills:{SAP:1,FoodSafety:1,Robotics:1,ColdChain:1,AIOps:1},certs:[],projects:[],gaps:['Evidence required'],futureMatch:40,backup:'Not assessed.',plan:'Add skill evidence and manager verification.',why:'Imported profile has no validated skill evidence yet.',futureGap:'Future readiness pending evidence.'});
+    const name=nameHeader?o[nameHeader]:null;
+    if(name){
+      employees.push({id:'csv'+Date.now()+count,name,role:o.role||'Employee',department:o.department||'General',team:o.team||'General',confidence:.55,freshnessDays:0,growth:.05,interests:['career development'],skills:{SAP:1,FoodSafety:1,Robotics:1,ColdChain:1,AIOps:1},certs:[],projects:[],gaps:['Evidence required'],futureMatch:40,backup:'Not assessed.',plan:'Add skill evidence and manager verification.',why:'Imported profile has no validated skill evidence yet.',futureGap:'Future readiness pending evidence.'});
       count++;
     }
   });
   document.getElementById('csvFile').value='';
+  if(!count){
+    showFileWarning('No rows imported',`Foresight couldn't find a name column to import from.<br><br>Columns found: <strong>${headers.join(', ')||'(none)'}</strong><br>Expected one of: <strong>${NAME_HEADER_ALIASES.join(', ')}</strong>, plus role/department/team.`);
+    return;
+  }
   setDataStatus('+ File import ('+count+')'+aiUnavailableNote);
   refreshAll();
 }
