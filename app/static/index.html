@@ -363,7 +363,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
      PAGE: WORKFORCE OVERVIEW (sidebar: "Workforce Overview")
      ============================================================ -->
 <section id="overview" class="page active">
-  <div class="urgency urgency-top">
+  <div class="urgency urgency-top" id="urgencyBanner">
     <div><span class="clock-icon" style="width:16px;height:16px;margin-right:6px"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span><strong>First critical workforce deadline is approaching.</strong><div style="font-size:11px;opacity:.86;margin-top:3px">Food Safety Certification backup coverage must be verified before the audit-readiness date.</div></div>
     <div class="days" id="urgencyDays">16 DAYS</div>
   </div>
@@ -376,7 +376,8 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
         <div class="summary-pills" id="overviewPills"></div>
       </div>
     </div>
-    <div class="sap-spotlight">
+    <div id="overviewEmpty"></div>
+    <div class="sap-spotlight" id="sapSpotlight">
       <div class="sap-spotlight-icon"><svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" stroke="var(--danger)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5"/><circle cx="12" cy="17" r=".8"/></svg></div>
       <div class="sap-spotlight-text">
         <strong>SAP Configuration depends on one person.</strong>
@@ -471,7 +472,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 
   <div class="card flat" style="margin-top:15px;padding:14px 18px;background:var(--surface2)">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div id="quickCheckRow" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
       <div class="muted" style="font-size:11.5px">Quick check: readiness goes from <strong style="color:var(--text)" id="miniBefore">0%</strong> to <strong style="color:var(--red)" id="miniAfter">0%</strong> if Derek Falkner becomes unavailable.</div>
       <button class="btn soft" onclick="simulateEmployee('alex');go('simulator')">Open Risk Simulator →</button>
     </div>
@@ -550,6 +551,8 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
     </div>
   </div>
 
+  <div id="simulatorEmpty"></div>
+  <div id="simulatorContent">
   <div class="impact-banner" id="simImpactBanner">
     <div>
       <div class="impact-kicker">Estimated Business Impact</div>
@@ -638,6 +641,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       </div>
       <div class="why"><strong>Formula:</strong> estimated operational exposure = loss per hour × potential disruption hours × calculated workforce risk factor. These are scenario estimates, not booked financial losses.</div>
     </div>
+  </div>
   </div>
 </section>
 
@@ -941,7 +945,11 @@ const skills={
  ColdChain:{label:'Cold Chain Operations',target:4.3,weight:.18,criticality:'High',futureTarget:4.6,requiredExperts:3},
  AIOps:{label:'AI-Assisted Operations',target:4.3,weight:.17,criticality:'High',futureTarget:4.8,requiredExperts:2}
 };
-let employees=JSON.parse(JSON.stringify(demoEmployees));
+// New sessions start with zero employees, same as a real new account would -
+// the demo roster is something you explicitly load from Connect Your Data,
+// never something already sitting there when you open the app.
+let employees=[];
+function emptyState(message){return `<div class="notice" style="text-align:center;padding:22px 16px"><strong>No employees loaded yet.</strong><br>${message}<br><br><button class="btn primary" onclick="go('data')">Go to Connect Your Data →</button></div>`}
 let futureRequirements=Object.fromEntries(Object.entries(skills).map(([k,v])=>[k,v.futureTarget]));
 // Named thresholds - the single source of truth for these two numbers.
 // Anywhere the app describes them in prose (the two "How calculated?" boxes
@@ -1032,8 +1040,13 @@ function readiness(list, req=null){
   return Math.round(total/weight*100)
 }
 function qualifiedCount(list,key,target=skills[key].target){return list.filter(e=>effective(e,key)>=target*QUALIFIED_THRESHOLD).length}
-function singlePointRisks(list){return Object.keys(skills).filter(k=>['Critical','High'].includes(skills[k].criticality)&&qualifiedCount(list,k)<=1)}
+// Zero employees is "no data," not "maximum risk" - a single-point risk or a
+// critical gap is a finding about a real workforce that has thin coverage,
+// which isn't the same claim as an empty roster. Both return no findings
+// when there's no one to assess yet, instead of flagging every skill.
+function singlePointRisks(list){if(!list.length)return [];return Object.keys(skills).filter(k=>['Critical','High'].includes(skills[k].criticality)&&qualifiedCount(list,k)<=1)}
 function criticalGaps(list,req=null){
+  if(!list.length)return [];
   return Object.keys(skills).filter(k=>{
     const target=req?req[k]:skills[k].target;
     return ['Critical','High'].includes(skills[k].criticality)&&currentCoverage(list,k,target)<CRITICAL_GAP_THRESHOLD
@@ -1058,7 +1071,12 @@ function refreshAll(){
   setText('donutText',r+'%');document.getElementById('readinessDonut').style.setProperty('--p',r);
   setText('overviewSuccession',sc+'%');setText('overviewEmerging',emergingTalent());setText('overviewStale',staleSkillCount());
   renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();renderFormerStaffDirectory();populateAiSuggestSelectors();populateVerifySelectors();populateRoleChips();
-  const alexRemoved=employees.filter(e=>e.id!=='alex');setText('miniBefore',r+'%');setText('miniAfter',readiness(alexRemoved)+'%');setText('miniWhy','Why? Removing Derek reduces SAP and automation coverage; the score is recalculated from the remaining verified skill evidence.');runDiagnostics();
+  const quickCheck=document.getElementById('quickCheckRow');
+  if(quickCheck)quickCheck.style.display=employees.length?'':'none';
+  if(employees.length){
+    const alexRemoved=employees.filter(e=>e.id!=='alex');setText('miniBefore',r+'%');setText('miniAfter',readiness(alexRemoved)+'%');setText('miniWhy','Why? Removing Derek reduces SAP and automation coverage; the score is recalculated from the remaining verified skill evidence.');
+  }
+  runDiagnostics();
 }
 function setText(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
 
@@ -1075,6 +1093,7 @@ function renderWorkforceComposition(){
   setText('avgConfidence',avgConf+'%');
   setText('compEmerging',emergingTalent());
   const wrap=document.getElementById('departmentChart');if(!wrap)return;
+  if(!employees.length){wrap.innerHTML='<div class="muted">No employees loaded yet.</div>';return}
   const max=Math.max(1,...Object.values(byDept));
   wrap.innerHTML='';
   depts.sort((a,b)=>byDept[b]-byDept[a]).forEach(d=>{
@@ -1086,6 +1105,7 @@ function renderWorkforceComposition(){
 }
 function renderOverviewFuture(){
   const wrap=document.getElementById('overviewFutureSkills');wrap.innerHTML='';
+  if(!employees.length){wrap.innerHTML=emptyState('Capability gaps need a workforce to measure against.');return}
   const rows=Object.keys(skills).map(k=>{
     const curr=Math.round(currentCoverage(employees,k,skills[k].target)*100),future=Math.round(currentCoverage(employees,k,futureRequirements[k])*100),gap=Math.max(0,100-future);
     return {k,curr,future,gap};
@@ -1095,15 +1115,19 @@ function renderOverviewFuture(){
   })
 }
 function renderActionCenter(){
+  const el=document.getElementById('actionCenter');
+  if(!employees.length){el.innerHTML=emptyState('Priority actions are calculated from real skill gaps and risks.');return}
   const actions=[];
   singlePointRisks(employees).forEach(k=>actions.push({p:3,title:`Protect ${skills[k].label} knowledge`,why:`Only ${qualifiedCount(employees,k)} verified expert(s).`,go:'simulator'}));
   criticalGaps(employees,futureRequirements).forEach(k=>actions.push({p:2,title:`Build ${skills[k].label} readiness`,why:`Future coverage below target.`,go:'development'}));
   actions.sort((a,b)=>b.p-a.p);
-  document.getElementById('actionCenter').innerHTML=actions.slice(0,5).map((a,i)=>`<div class="metric"><span><strong>${i+1}. ${a.title}</strong><br><small class="muted">${a.why}</small></span><button class="btn soft" onclick="go('${a.go}')">Act</button></div>`).join('')
+  el.innerHTML=actions.length?actions.slice(0,5).map((a,i)=>`<div class="metric"><span><strong>${i+1}. ${a.title}</strong><br><small class="muted">${a.why}</small></span><button class="btn soft" onclick="go('${a.go}')">Act</button></div>`).join(''):'<div class="notice">No priority actions — all tracked skills meet target coverage.</div>'
 }
 function renderOverviewRisks(){
+  const el=document.getElementById('overviewRisks');
+  if(!employees.length){el.innerHTML=emptyState('Risk deadlines are priced against your actual workforce coverage.');return}
   const sorted=[...riskDates].sort((a,b)=>riskExposure(b)-riskExposure(a)); // highest exposure (highest risk) first
-  document.getElementById('overviewRisks').innerHTML=sorted.slice(0,3).map(r=>riskHtml(r)).join('');classifyCountdowns()
+  el.innerHTML=sorted.slice(0,3).map(r=>riskHtml(r)).join('');classifyCountdowns()
 }
 function riskHtml(r){
   const d=daysUntil(r.date),level=d<30?'red':d<60?'amber':'green';
@@ -1121,6 +1145,7 @@ function resetFilters(){['filterDept','filterRole','filterSkill','filterTeam'].f
 function renderSkills(){
   const dept=document.getElementById('filterDept')?.value||'',role=document.getElementById('filterRole')?.value||'',skill=document.getElementById('filterSkill')?.value||'',team=document.getElementById('filterTeam')?.value||'';
   const list=employees.filter(e=>(!dept||e.department===dept)&&(!role||e.role===role)&&(!team||e.team===team)&&(!skill||(e.skills[skill]||0)>0));
+  if(!employees.length){document.getElementById('skillsBody').innerHTML=`<tr><td colspan="10">${emptyState('Load a company or add your team to see a skills heatmap.')}</td></tr>`;return}
   document.getElementById('skillsBody').innerHTML=list.map(e=>{
     const cls=v=>v>=4.5?'s5':v>=3.8?'s4':v>=3?'s3':'s2';
     const cell=k=>`<span class="skill ${cls(e.skills[k])}" title="${skills[k].label}: ${e.skills[k].toFixed(1)}/5 • ${confidenceLabel(e)} confidence • ${lastVerified(e)} • ${trend(e)}">${e.skills[k].toFixed(1)} <span style="font-size:9px;opacity:.72">${trend(e)}</span></span>`;
@@ -1133,6 +1158,14 @@ function populateSimulator(){
   const sel=document.getElementById('simEmployee');const cur=sel.value||selectedSimEmployee;sel.innerHTML=employees.map(e=>`<option value="${e.id}">${e.name} — ${e.role}</option>`).join('');sel.value=employees.some(e=>e.id===cur)?cur:employees[0]?.id;selectedSimEmployee=sel.value
 }
 function renderSimBaseline(){
+  const content=document.getElementById('simulatorContent'),empty=document.getElementById('simulatorEmpty');
+  if(!employees.length){
+    if(content)content.style.display='none';
+    if(empty)empty.innerHTML=emptyState('There\'s no one to run a scenario against yet.');
+    return;
+  }
+  if(content)content.style.display='';
+  if(empty)empty.innerHTML='';
   setText('simBeforeReady',readiness(employees)+'%');
   setText('simBeforeGaps',criticalGaps(employees).length);
   setText('simBeforeSingle',singlePointRisks(employees).length);
@@ -1206,9 +1239,15 @@ function backupScores(skillKey,excludeId=null){
   }).sort((a,b)=>b.score-a.score)
 }
 function rankBackups(skillKey='SAP'){
+  const banner=document.getElementById('talentPriorityBanner'),cardsEl=document.getElementById('talentCards');
+  if(!employees.length){
+    if(banner)banner.innerHTML='No employees loaded yet — there\'s no one to rank.';
+    if(cardsEl)cardsEl.innerHTML=emptyState('Load a company or add your team to search for backups.');
+    setTimeout(renderSuccessionDepth,0);
+    return;
+  }
   const cards=backupScores(skillKey,selectedSimEmployee).slice(0,5);
   renderTalentCards(cards,skillKey);
-  const banner=document.getElementById('talentPriorityBanner');
   if(banner)banner.innerHTML=`<strong>Default view:</strong> ranked backups for ${skills[skillKey].label} — run a stress test on Risk Simulator, or search/define a project above, to change this.`;
   setTimeout(renderSuccessionDepth,0)
 }
@@ -1276,6 +1315,11 @@ function renderFutureStrategyResults(){
 }
 
 function renderDevelopment(){
+  if(!employees.length){
+    document.getElementById('devStatusSummary').innerHTML='';
+    document.getElementById('futureNeedsTable').innerHTML=`<tr><td colspan="6">${emptyState('Development plans are built from real skill gaps once you have a workforce loaded.')}</td></tr>`;
+    return;
+  }
   // Thresholds calibrated to this system's actual output range (roughly 10-70 weeks given
   // realistic gap/growth combinations) so status genuinely differentiates people instead of
   // everyone landing in one bucket.
@@ -1424,6 +1468,16 @@ function createDevelopmentFromDrawer(){const e=employees.find(x=>x.id===selected
 
 
 function renderPresentationStory(){
+  const spotlight=document.getElementById('sapSpotlight'),urgency=document.getElementById('urgencyBanner'),empty=document.getElementById('overviewEmpty');
+  if(!employees.length){
+    if(spotlight)spotlight.style.display='none';
+    if(urgency)urgency.style.display='none';
+    if(empty)empty.innerHTML=emptyState('This is what a brand-new account looks like — nothing pre-loaded. Load the demo company to see it fully populated, or add your own team.');
+    return;
+  }
+  if(spotlight)spotlight.style.display='';
+  if(urgency)urgency.style.display='';
+  if(empty)empty.innerHTML='';
   const sapExperts=qualifiedCount(employees,'SAP');
   setText('sapExpertCount',sapExperts);
   setText('sapStoryMoney',money(capabilityExposure(employees,'SAP')));
@@ -1441,39 +1495,44 @@ function renderScenarioImpact(list=lastScenarioList||employees,req=lastScenarioR
 }
 
 function renderImpactModel(list=employees,req=null){
+  // Exposure needs a real workforce to measure risk against - with zero
+  // employees there is no coverage to assess, so this shows "Insufficient
+  // data" rather than a computed dollar figure that would otherwise look
+  // like a real (and alarmingly large) finding from no data at all.
+  const hasData=list.length>0;
   const tbody=document.getElementById('impactTable');
   if(tbody){
     tbody.innerHTML=Object.keys(skills).map(k=>{
       const target=req?req[k]:skills[k].target;
-      const factor=exposureFactor(list,k,target);
-      const exposure=capabilityExposure(list,k,target);
+      const factor=hasData?exposureFactor(list,k,target):null;
+      const exposure=hasData?capabilityExposure(list,k,target):null;
       return `<tr>
         <td><strong>${skills[k].label}</strong></td>
         <td><input aria-label="${skills[k].label} loss per hour" type="number" min="0" step="1000" value="${impactInputs[k].lossPerHour}" style="width:105px" onchange="updateImpactInput('${k}','lossPerHour',this.value)"></td>
         <td><input aria-label="${skills[k].label} disruption hours" type="number" min="0" step="1" value="${impactInputs[k].disruptionHours}" style="width:80px" onchange="updateImpactInput('${k}','disruptionHours',this.value)"> hrs</td>
-        <td>${Math.round(factor*100)}%</td>
-        <td><strong>${money(exposure)}</strong></td>
+        <td>${factor===null?'—':Math.round(factor*100)+'%'}</td>
+        <td><strong>${exposure===null?'Insufficient data':money(exposure)}</strong></td>
       </tr>`
     }).join('');
   }
-  const baseline=totalExposure(employees);
-  setText('overviewExposure',money(baseline));
-  const highest=Object.keys(skills).map(k=>({k,v:capabilityExposure(employees,k)})).sort((a,b)=>b.v-a.v)[0];
-  if(highest){
-    setText('highestExposureSkill',skills[highest.k].label);
-    setText('highestExposureValue',money(highest.v)+' estimated exposure');
-  }
-  setText('briefExposure',money(baseline));renderPresentationStory();
-  const stressExposure=totalExposure(employees.filter(e=>e.id!=='alex'));
-  setText('briefStressExposure',money(stressExposure));
-  const expMax=Math.max(baseline,stressExposure,1);
+  const overviewHasData=employees.length>0;
+  const baseline=overviewHasData?totalExposure(employees):null;
+  setText('overviewExposure',baseline===null?'—':money(baseline));
+  const highest=overviewHasData?Object.keys(skills).map(k=>({k,v:capabilityExposure(employees,k)})).sort((a,b)=>b.v-a.v)[0]:null;
+  setText('highestExposureSkill',highest?skills[highest.k].label:'—');
+  setText('highestExposureValue',highest?money(highest.v)+' estimated exposure':'No workforce data yet');
+  setText('briefExposure',baseline===null?'—':money(baseline));renderPresentationStory();
+  const stressExposure=overviewHasData?totalExposure(employees.filter(e=>e.id!=='alex')):null;
+  setText('briefStressExposure',stressExposure===null?'—':money(stressExposure));
+  const expMax=Math.max(baseline||0,stressExposure||0,1);
   const expBarCurrent=document.getElementById('expBarCurrent'),expBarStress=document.getElementById('expBarStress');
-  if(expBarCurrent)expBarCurrent.style.width=Math.max(4,Math.round(baseline/expMax*100))+'%';
-  if(expBarStress)expBarStress.style.width=Math.max(4,Math.round(stressExposure/expMax*100))+'%';
+  if(expBarCurrent)expBarCurrent.style.width=overviewHasData?Math.max(4,Math.round((baseline||0)/expMax*100))+'%':'0%';
+  if(expBarStress)expBarStress.style.width=overviewHasData?Math.max(4,Math.round((stressExposure||0)/expMax*100))+'%':'0%';
   renderExposureChart();
 }
 function renderExposureChart(){
   const wrap=document.getElementById('exposureChart');if(!wrap)return;
+  if(!employees.length){wrap.innerHTML='<div class="muted">No workforce data yet — exposure can\'t be estimated with zero employees.</div>';return}
   const rows=Object.keys(skills).map(k=>({k,v:capabilityExposure(employees,k)})).sort((a,b)=>b.v-a.v); // highest risk first
   const max=Math.max(1,...rows.map(r=>r.v));
   wrap.innerHTML='';
@@ -1496,6 +1555,14 @@ function updateImpactInput(key,field,value){
 }
 
 function renderBrief(){
+  if(!employees.length){
+    document.getElementById('briefKpis').innerHTML='';
+    document.getElementById('briefRisks').innerHTML='<div class="muted">No workforce loaded.</div>';
+    document.getElementById('briefFuture').innerHTML='<div class="muted">No workforce loaded.</div>';
+    document.getElementById('briefActions').innerHTML=emptyState('Load a company to generate a leadership summary.');
+    setText('briefImproveCurrent','—');setText('briefImproveTarget','—');
+    return;
+  }
   const r=readiness(employees),sc=successionCoverage(employees);
   const riskKeys=singlePointRisks(employees).slice(0,3);
   const gapKeys=criticalGaps(employees,futureRequirements).slice(0,3);
@@ -1518,7 +1585,9 @@ function renderBrief(){
   if(riskKeys[0]){
     usedKeys.add(riskKeys[0]);
     const {expert,backup}=bestBackupFor(riskKeys[0]);
-    actions.push(`Protect <strong>${skills[riskKeys[0]].label}</strong> — ${expert.name} is the only qualified expert. Develop ${backup.e.name} as a verified backup (${readyLabel(backup.weeks)}).`);
+    actions.push(backup
+      ? `Protect <strong>${skills[riskKeys[0]].label}</strong> — ${expert.name} is the only qualified expert. Develop ${backup.e.name} as a verified backup (${readyLabel(backup.weeks)}).`
+      : `Protect <strong>${skills[riskKeys[0]].label}</strong> — ${expert.name} is the only qualified expert, with no one else on the team to develop as a backup yet. Add more employees to identify a candidate.`);
   }
   const gapPick=gapKeys.find(k=>!usedKeys.has(k))||gapKeys[0];
   if(gapPick){
@@ -1529,7 +1598,7 @@ function renderBrief(){
   const thirdKey=[...riskKeys,...gapKeys].find(k=>!usedKeys.has(k));
   if(thirdKey){
     const {backup}=bestBackupFor(thirdKey);
-    actions.push(`Verify progress on <strong>${skills[thirdKey].label}</strong> — next backup is ${backup.e.name}, ${readyLabel(backup.weeks)} out.`);
+    if(backup)actions.push(`Verify progress on <strong>${skills[thirdKey].label}</strong> — next backup is ${backup.e.name}, ${readyLabel(backup.weeks)} out.`);
   }
   document.getElementById('briefActions').innerHTML=actions.length?`<ol><li>${actions.join('</li><li>')}</li></ol>`:'<div class="notice">No urgent workforce actions — every critical skill has a verified backup.</div>';
 
@@ -1560,7 +1629,7 @@ document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.addEventListener(
 
 function runDiagnostics(){
   const weightSum=Object.values(skills).reduce((a,s)=>a+s.weight,0);
-  const topSapId=backupScores('SAP')[0].e.id;
+  const topSap=backupScores('SAP')[0];
   const overviewReady=document.getElementById('kpiReadiness')?.textContent;
   const simReady=document.getElementById('simBeforeReady')?.textContent;
   const pctFields=[readiness(employees),successionCoverage(employees),futureReadiness(employees)];
@@ -1568,7 +1637,7 @@ function runDiagnostics(){
     ['Employees loaded',employees.length>0,employees.length+' records'],
     ['Skills model',Object.keys(skills).length===5,Object.keys(skills).length+' capabilities'],
     ['Readiness calc',Number.isFinite(readiness(employees)),readiness(employees)+'%'],
-    ['Financial exposure',Number.isFinite(totalExposure(employees)),money(totalExposure(employees))],
+    ['Financial exposure',employees.length?Number.isFinite(totalExposure(employees)):true,employees.length?money(totalExposure(employees)):'insufficient data'],
     ['Future targets',Object.keys(futureRequirements).length===Object.keys(skills).length,'editable'],
     ['Search index',buildSearchIndex('SAP').length>0,'indexed'],
     ['Risk dates',riskDates.every(r=>Number.isFinite(daysUntil(r.date))),riskDates.length+' dated'],
@@ -1577,7 +1646,7 @@ function runDiagnostics(){
     ['Capability weights = 100%',Math.round(weightSum*100)===100,Math.round(weightSum*100)+'%'],
     ['Overview = Risk Sim baseline',!!overviewReady&&overviewReady===simReady,`${overviewReady||'?'} / ${simReady||'?'}`],
     ['Former staff excluded from roster',formerEmployees.every(f=>!employees.some(e=>e.id===f.id)),formerEmployees.length+' former, 0 counted'],
-    ['Losing top performer can\'t raise readiness',readiness(employees.filter(e=>e.id!==topSapId))<=readiness(employees),'checked'],
+    ['Losing top performer can\'t raise readiness',!topSap||readiness(employees.filter(e=>e.id!==topSap.e.id))<=readiness(employees),topSap?'checked':'no employees to check'],
     ['All percentages in 0-100 range',pctFields.every(p=>p>=0&&p<=100),'readiness/succession/future'],
     ['No zero-required-expert skills',Object.values(skills).every(s=>s.requiredExperts>0),'div-by-zero guard']
   ];
@@ -1652,6 +1721,7 @@ const dependencyMeta={
 function renderDependencyMap(empId=null, riskState=false, recovering=false){
   const wrap=document.getElementById('dependencyMap');if(!wrap)return;
   const emp=employees.find(e=>e.id===(empId||selectedSimEmployee))||employees[0];
+  if(!emp){wrap.innerHTML='<div class="muted">Run a scenario to see capability dependencies.</div>';return}
   const key=topCriticalSkill(emp),meta=dependencyMeta[key]||{process:'Critical workflow',business:'Business capability'};
   const stateClass=riskState?' at-risk':recovering?' recovering':'';
   wrap.innerHTML=`
@@ -1774,7 +1844,7 @@ function verifyDevelopmentEvidence(){
 
 setText('calcGaps',`A gap becomes critical when a Critical or High business skill has less than ${Math.round(CRITICAL_GAP_THRESHOLD*100)}% evidence-adjusted coverage against its required target.`);
 setText('calcSingle',`A single-point risk exists when one or fewer people have evidence-adjusted proficiency at least ${Math.round(QUALIFIED_THRESHOLD*100)}% of the target for a critical capability.`);
-setDataStatus('Demo — Northstar Foods');refreshAll();renderFutureStrategyResults();classifyCountdowns();renderExecutiveVisuals();renderSuccessionDepth();renderDependencyMap('alex',false,false);animateInitial();
+setDataStatus('No data loaded');refreshAll();renderFutureStrategyResults();classifyCountdowns();renderExecutiveVisuals();renderSuccessionDepth();renderDependencyMap('alex',false,false);animateInitial();
 </script>
 </body>
 </html>
