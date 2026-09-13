@@ -696,6 +696,12 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
     </div>
   </div>
 
+  <div class="card" id="employeePlanCard" style="display:none;margin-bottom:15px">
+    <div class="section-head"><h3 id="employeePlanTitle">Talent Plan</h3><span class="tag blue">For this employee</span></div>
+    <div id="employeePlanDetail"></div>
+    <div class="actions" style="margin-top:12px"><button class="btn soft" onclick="clearEmployeePlan()">Close — view all employees</button></div>
+  </div>
+
   <div class="card">
     <div class="section-head"><h3>30 / 60 / 90-day roadmap</h3><span class="tag green">Executable</span></div>
     <div class="timeline">
@@ -1041,6 +1047,7 @@ function money(v){
 
 let selectedSimEmployee='alex';
 let selectedDrawerEmployee=null;
+let selectedPlanEmployee=null;
 const riskDates=[
  {name:'Food Safety Certification',date:'2026-09-28',skill:'FoodSafety',criticality:'Critical',reason:'Backup certification must be verified before audit readiness.'},
  {name:'SAP Configuration',date:'2026-10-29',skill:'SAP',criticality:'Critical',reason:'Knowledge-transfer milestone for critical system coverage.'},
@@ -1353,24 +1360,29 @@ function renderFutureStrategyResults(){
   document.getElementById('futureEditTable').innerHTML=Object.keys(skills).map(k=>`<div class="capability-row"><strong>${skills[k].label}</strong><span>Current ${Math.round(currentCoverage(employees,k)*100)}%</span><span><input type="number" min="1" max="5" step=".1" value="${futureRequirements[k].toFixed(1)}" style="width:72px" onchange="futureRequirements['${k}']=parseFloat(this.value);refreshAll()"></span><span>Gap ${Math.max(0,100-Math.round(currentCoverage(employees,k,futureRequirements[k])*100))}%</span></div>`).join('')
 }
 
+// Single source of truth for "what's this employee's development plan" - the
+// roster table and the single-employee Talent Plan card both call this, so
+// the two views can never show different numbers for the same person.
+// Thresholds calibrated to this system's actual output range (roughly 10-70
+// weeks given realistic gap/growth combinations) so status genuinely
+// differentiates people instead of everyone landing in one bucket.
+function planFor(e){
+  const gaps=Object.keys(skills).map(k=>({k,g:futureRequirements[k]-e.skills[k]})).sort((a,b)=>b.g-a.g);const top=gaps[0];const action=top.g<=.3?'Verify on live work':top.k==='FoodSafety'?'Certification + shadowing':top.k==='Robotics'?'Project rotation + mentoring':'Training + project experience';const weeks=Math.max(0,Math.ceil(Math.max(0,top.g)/Math.max(.08,e.growth)*2));
+  let statusClass,statusLabel;
+  if(weeks<=0){statusClass='done';statusLabel='Verified'}
+  else if(weeks<20){statusClass='verify';statusLabel='Ready Soon'}
+  else if(weeks<=45){statusClass='progress';statusLabel='In Progress'}
+  else{statusClass='attention';statusLabel='Needs Support'}
+  return {e,top,action,weeks,statusClass,statusLabel};
+}
 function renderDevelopment(){
   if(!employees.length){
     document.getElementById('devStatusSummary').innerHTML='';
     document.getElementById('futureNeedsTable').innerHTML=`<tr><td colspan="6">${emptyState('Development plans are built from real skill gaps once you have a workforce loaded.')}</td></tr>`;
+    renderEmployeePlanCard();
     return;
   }
-  // Thresholds calibrated to this system's actual output range (roughly 10-70 weeks given
-  // realistic gap/growth combinations) so status genuinely differentiates people instead of
-  // everyone landing in one bucket.
-  const rows=employees.map(e=>{
-    const gaps=Object.keys(skills).map(k=>({k,g:futureRequirements[k]-e.skills[k]})).sort((a,b)=>b.g-a.g);const top=gaps[0];const action=top.g<=.3?'Verify on live work':top.k==='FoodSafety'?'Certification + shadowing':top.k==='Robotics'?'Project rotation + mentoring':'Training + project experience';const weeks=Math.max(0,Math.ceil(Math.max(0,top.g)/Math.max(.08,e.growth)*2));
-    let statusClass,statusLabel;
-    if(weeks<=0){statusClass='done';statusLabel='Verified'}
-    else if(weeks<20){statusClass='verify';statusLabel='Ready Soon'}
-    else if(weeks<=45){statusClass='progress';statusLabel='In Progress'}
-    else{statusClass='attention';statusLabel='Needs Support'}
-    return {e,top,action,weeks,statusClass,statusLabel};
-  });
+  const rows=employees.map(planFor);
 
   const segColors={done:'#24774e',verify:'#9b5f05',progress:'#0064c6',attention:'#c0392b'};
   const segLabels={done:'Verified',verify:'Ready Soon',progress:'In Progress',attention:'Needs Support'};
@@ -1390,7 +1402,46 @@ function renderDevelopment(){
     const ringColor=e.futureMatch>=88?'var(--green)':e.futureMatch>=78?'var(--blue)':'var(--amber)';
     return `<tr><td><span class="mini-avatar" style="background:${avatarColor(e.id)}">${initials(e.name)}</span><span class="employee-link" onclick="openEmployee('${e.id}')">${e.name}</span></td><td><div class="match-ring" style="--p:${e.futureMatch};background:conic-gradient(${ringColor} calc(var(--p)*1%),#ececf0 0)"><span>${e.futureMatch}%</span></div></td><td>${skills[top.k].label} ${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)}</td><td>${action}</td><td>${weeks<=0?'Ready Now':weeks<52?`~${weeks} weeks`:`~${Math.round(weeks/4.33)} months`}</td><td><span class="status ${statusClass}">${statusLabel}</span></td></tr>`
   }).join('')
+  renderEmployeePlanCard();
 }
+
+// Single-employee 30/60/90 detail, shown above the full roster when someone
+// arrives via "Create Talent Plan" from an employee's drawer. Self-contained
+// (own container, own state var) so it can gain more content later without
+// touching the roster table, the generic roadmap card, or any other page.
+function renderEmployeePlanCard(){
+  const card=document.getElementById('employeePlanCard');
+  if(!card)return;
+  const e=selectedPlanEmployee?employees.find(x=>x.id===selectedPlanEmployee):null;
+  if(!e){card.style.display='none';return}
+  const {top,action,weeks,statusClass,statusLabel}=planFor(e);
+  const readyLabel=weeks<=0?'Ready now':weeks<52?`~${weeks} weeks`:`~${Math.round(weeks/4.33)} months`;
+  // One real computed bucket (statusClass) spread across the 4 stages: stages
+  // before it are complete, the matching stage shows the real label, stages
+  // after it haven't started - not 4 independently invented statuses.
+  const stageIndex={attention:1,progress:2,verify:3,done:4}[statusClass];
+  const stages=[
+    {day:'Today',r:'Identify',desc:`${skills[top.k].label} gap selected`},
+    {day:'Day 30',r:'Learn',desc:action},
+    {day:'Day 60',r:'Apply',desc:`Supervised work on ${skills[top.k].label}`},
+    {day:'Day 90',r:'Verify',desc:'Manager confirms evidence, skill score updated'}
+  ];
+  document.getElementById('employeePlanTitle').textContent=`Talent Plan — ${e.name}`;
+  document.getElementById('employeePlanDetail').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+      <span class="mini-avatar" style="background:${avatarColor(e.id)}">${initials(e.name)}</span>
+      <div><strong>${e.name}</strong><br><span class="muted">${e.role} • ${e.department}</span></div>
+      <span class="status ${statusClass}" style="margin-left:auto">${statusLabel}</span>
+    </div>
+    <div class="muted" style="margin-bottom:10px">Main 2027 gap: <strong>${skills[top.k].label}</strong> ${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)} • Estimated time to readiness: <strong>${readyLabel}</strong></div>
+    <div class="timeline">${stages.map((s,i)=>{
+      const cls=i+1<stageIndex?'done':i+1===stageIndex?statusClass:'';
+      const label=i+1<stageIndex?'Complete':i+1===stageIndex?statusLabel:'Not Started';
+      return `<div class="t-card"><strong>${s.day}</strong><div class="r">${s.r}</div><div class="muted">${s.desc}</div><span class="status ${cls}">${label}</span></div>`;
+    }).join('')}</div>`;
+  card.style.display='';
+}
+function clearEmployeePlan(){selectedPlanEmployee=null;renderEmployeePlanCard()}
 
 function populateRoleChips(){
   const wrap=document.getElementById('roleChipsRow');if(!wrap)return;
@@ -1479,7 +1530,7 @@ function openEmployee(id){
   document.getElementById('drawerBackdrop').classList.add('show');document.getElementById('drawer').classList.add('show')
 }
 function closeDrawer(){document.getElementById('drawerBackdrop').classList.remove('show');document.getElementById('drawer').classList.remove('show')}
-function createDevelopmentFromDrawer(){const e=employees.find(x=>x.id===selectedDrawerEmployee);if(e){document.getElementById('knowledgeProtectionResult').innerHTML=`<strong>${e.name}</strong><br>${e.plan}<br><br>Status: Not Started → In Progress → Ready for Verification → Verified.`}closeDrawer();go('development')}
+function createDevelopmentFromDrawer(){selectedPlanEmployee=selectedDrawerEmployee;closeDrawer();renderEmployeePlanCard();go('development')}
 
 
 
