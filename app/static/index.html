@@ -820,7 +820,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
     <div class="source-tile" onclick="toggleDataPanel('csv')" role="button" title="Upload File">
       <div class="source-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
       <h3>Upload File</h3>
-      <div class="cap">CSV, Excel, or text</div>
+      <div class="cap">CSV, Excel, Word, PDF, or text</div>
     </div>
     <div class="source-tile" onclick="toggleDataPanel('manual')" role="button" title="Add Person">
       <div class="source-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21v-1a7 7 0 0 1 7-7h1.5"/><path d="M17 8v6M14 11h6"/></svg></div>
@@ -830,10 +830,9 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   </div>
 
   <div id="csvPanel" class="card source-panel-card">
-    <div class="upload-zone"><input type="file" id="csvFile" accept=".csv,.txt,.xlsx,.xls"></div>
+    <div class="upload-zone"><input type="file" id="csvFile" accept=".csv,.txt,.xlsx,.xls,.pdf,.doc,.docx"></div>
     <div class="col-chip-row"><span class="col-chip">name</span><span class="col-chip">role</span><span class="col-chip">department</span><span class="col-chip">team</span></div>
     <button class="btn blue" id="csvImportBtn" style="margin-top:12px;width:100%" onclick="importFile()">Upload File</button>
-    <div id="csvWarning" style="display:none;margin-top:10px;padding:10px 12px;border-radius:11px;background:#fff4dc;border:1px solid #f1dfbb;color:#8a5a00;font-size:11px;line-height:1.5"></div>
     <div id="csvError" class="muted" style="font-size:10px;color:var(--red);margin-top:8px;min-height:12px"></div>
   </div>
 
@@ -873,6 +872,13 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 
 <div id="whyModal" class="modal" onclick="if(event.target===this)closeWhyModal()">
   <div class="modal-card"><div class="section-head"><h3>Why this recommendation?</h3><button class="btn soft" onclick="closeWhyModal()">Close</button></div><div id="whyModalText" class="notice"></div></div>
+</div>
+
+<div id="fileWarningModal" class="modal" onclick="if(event.target===this)closeFileWarningModal()">
+  <div class="modal-card">
+    <div class="section-head"><h3 id="fileWarningTitle" style="color:var(--red)">⚠️ File not accepted</h3><button class="btn soft" onclick="closeFileWarningModal()">Close</button></div>
+    <div id="fileWarningText" class="notice" style="background:#fff8f7;border-color:#f0d5d2"></div>
+  </div>
 </div>
 
 <script>
@@ -1292,6 +1298,8 @@ function rankCustomProject(){
 }
 function showWhy(id,skillKey,score){const e=employees.find(x=>x.id===id);document.getElementById('whyModalText').innerHTML=`<strong>${e.name} — ${score}% match</strong><br><br>${e.why}<br><br>Evidence confidence: ${confidenceLabel(e)} • Last verified: ${lastVerified(e)} • Growth: ${Math.round(e.growth*100)}% • Target capability: ${skills[skillKey].label}.`;document.getElementById('whyModal').classList.add('show')}
 function closeWhyModal(){document.getElementById('whyModal').classList.remove('show')}
+function showFileWarning(title,text){document.getElementById('fileWarningTitle').textContent='⚠️ '+title;document.getElementById('fileWarningText').innerHTML=text;document.getElementById('fileWarningModal').classList.add('show')}
+function closeFileWarningModal(){document.getElementById('fileWarningModal').classList.remove('show')}
 
 async function analyzeFutureStrategy(){
   const text=document.getElementById('strategyInput').value,h=parseInt(document.getElementById('strategyHorizon').value);
@@ -1677,17 +1685,41 @@ function addManualEmployee(){
 function readFileAsText(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsText(file)})}
 function readFileAsArrayBuffer(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsArrayBuffer(file)})}
 
+// Formats we can actually extract real text from client-side. Word/PDF are
+// selectable in the file picker (so someone trying to upload their HR export
+// isn't left guessing why it's greyed out), but we don't have a parser for
+// them yet - selecting one gets an immediate, honest "can't read this"
+// popup instead of silently feeding garbled binary bytes to Gemini and
+// hoping it reasons its way to the right answer (and burning a call against
+// an already-tight quota in the process).
+const TEXT_EXTENSIONS=['.csv','.txt'];
+const EXCEL_EXTENSIONS=['.xlsx','.xls'];
+const UNREADABLE_FORMATS={'.pdf':'PDF','.doc':'Word','.docx':'Word'};
+
 async function importFile(){
-  const errEl=document.getElementById('csvError'),warnEl=document.getElementById('csvWarning'),btn=document.getElementById('csvImportBtn');
-  errEl.textContent='';warnEl.style.display='none';
+  const errEl=document.getElementById('csvError'),btn=document.getElementById('csvImportBtn');
+  errEl.textContent='';
   const file=document.getElementById('csvFile').files[0];
   if(!file){errEl.textContent='Choose a file first.';return}
+
+  const dot=file.name.lastIndexOf('.');
+  const ext=dot>=0?file.name.slice(dot).toLowerCase():'';
+
+  if(UNREADABLE_FORMATS[ext]){
+    showFileWarning('Can\'t read this file',`Foresight can't extract data from ${UNREADABLE_FORMATS[ext]} files yet.<br><br>Export your data as <strong>CSV</strong> or <strong>Excel (.xlsx)</strong> and upload that instead.`);
+    document.getElementById('csvFile').value='';
+    return;
+  }
+  if(!TEXT_EXTENSIONS.includes(ext)&&!EXCEL_EXTENSIONS.includes(ext)){
+    showFileWarning('Unsupported file type',`"${file.name}" isn't a format Foresight can read.<br><br>Supported: CSV, Excel (.xlsx/.xls), and plain text (.txt).`);
+    document.getElementById('csvFile').value='';
+    return;
+  }
 
   btn.disabled=true;btn.textContent='Reading file…';
   let csvText;
   try{
-    const name=file.name.toLowerCase();
-    if(name.endsWith('.xlsx')||name.endsWith('.xls')){
+    if(EXCEL_EXTENSIONS.includes(ext)){
       if(typeof XLSX==='undefined')throw new Error('Excel support failed to load — try a CSV or text file.');
       const buf=await readFileAsArrayBuffer(file);
       const wb=XLSX.read(buf,{type:'array'});
@@ -1696,26 +1728,26 @@ async function importFile(){
       csvText=await readFileAsText(file);
     }
   }catch(err){
-    errEl.textContent='Could not read this file: '+String(err.message||err);
     btn.disabled=false;btn.textContent='Upload File';
+    showFileWarning('Can\'t read this file',String(err.message||err));
     return;
   }
 
   // Gemini decides whether this content is actually workforce-related before
   // anything gets parsed into employee records — a wrong file (a recipe, an
-  // invoice, an unrelated PDF) gets rejected with a reason, never imported.
+  // invoice, an unrelated spreadsheet) gets rejected with a reason, never
+  // imported.
   btn.textContent='Checking file…';
   try{
     const r=await fetch('/api/data/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:file.name,content:csvText.slice(0,6000)})});
     if(!r.ok){throw new Error((await r.text()).slice(0,220))}
     const d=await r.json();
     if(!d.is_relevant){
-      warnEl.style.display='block';
-      warnEl.innerHTML=`<strong>⚠️ Wrong file sent.</strong> This looks like ${d.detected_type||'an unrelated file'}, not employee or workforce data.${d.reason?' '+d.reason:''}`;
+      showFileWarning('Wrong file sent',`This looks like <strong>${d.detected_type||'an unrelated file'}</strong>, not employee or workforce data.${d.reason?'<br><br>'+d.reason:''}`);
       return;
     }
   }catch(err){
-    errEl.textContent='Could not verify this file: '+String(err.message||err);
+    showFileWarning('Could not verify this file',String(err.message||err));
     return;
   }finally{
     btn.disabled=false;btn.textContent='Upload File';
