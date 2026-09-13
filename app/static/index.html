@@ -1244,7 +1244,8 @@ function topCriticalSkill(emp){return Object.keys(emp.skills).sort((a,b)=>(emp.s
 function protectKnowledge(){
   const emp=employees.find(e=>e.id===document.getElementById('simEmployee').value),skillKey=topCriticalSkill(emp),matches=backupScores(skillKey,emp.id),backup=matches[0]?.e;
   document.getElementById('knowledgeProtectionResult').innerHTML=`<strong>${skills[skillKey].label}</strong><br>Expert: ${emp.name} → Backup: ${backup?.name||'TBD'} → Documentation → Shadowing → Supervised Work → Independent Verification. <br><br><strong>Succession coverage will only increase after new work evidence is verified.</strong>`;
-  go('development')
+  go('development');
+  document.getElementById('knowledgeProtectionResult').scrollIntoView({behavior:'smooth',block:'center'})
 }
 
 // Single shared match-scoring model, used by every "who fits this need" ranking
