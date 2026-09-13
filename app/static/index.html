@@ -579,9 +579,11 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
     </div>
   </div>
 
-  <div class="card" style="margin-bottom:15px">
-    <div class="section-head"><h3>Who can cover this?</h3><span class="tag blue">Person or role</span></div>
-    <div class="muted" style="margin:-4px 0 10px">Search a person for their full profile, or a role (e.g. "Process Engineer") to see current holders, ranked backups from other roles, and former-employee knowledge.</div>
+  <div class="card">
+    <div class="section-head"><h3>Who can cover this?</h3><span class="tag blue">Two ways to search</span></div>
+
+    <div class="muted" style="font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:750;margin-bottom:8px">Search a specific person or role</div>
+    <div class="muted" style="margin:-4px 0 10px;font-size:11px">Type a name for their full profile, or a role (e.g. "Process Engineer") to see current holders, ranked backups from other roles, and former-employee knowledge.</div>
     <div class="grid-3">
       <input id="talentEmployeeSearch" class="input" placeholder="Search by name or role…" onkeydown="if(event.key==='Enter')searchTalentEmployee()">
       <button class="btn blue" onclick="searchTalentEmployee()">Search</button>
@@ -589,12 +591,10 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
     </div>
     <div id="talentEmployeeSearchResult" style="margin-top:10px"></div>
     <div id="roleCoverageResult" style="margin-top:10px"></div>
-  </div>
 
-  <div class="match-banner" id="talentPriorityBanner"><strong>Risk-priority:</strong> Select a risk or run a simulation to rank the strongest internal backups.</div>
+    <div style="border-top:1px dashed var(--line);margin:18px 0 14px"></div>
 
-  <div class="card">
-    <div class="section-head"><h3>New project / role requirements</h3><span class="tag blue">Editable</span></div>
+    <div class="muted" style="font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:750;margin-bottom:8px">Or describe a hypothetical project</div>
     <div class="grid-3">
       <input id="projectName" class="input" value="Automation Readiness Lead" placeholder="Project or role">
       <input id="projectSkills" class="input" value="Robotics,SAP,AI Ops" placeholder="Required skills, comma separated">
@@ -602,6 +602,8 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
     </div>
   </div>
 
+  <div class="section-head" style="margin-top:20px;margin-bottom:10px"><h3>Ranked matches</h3></div>
+  <div class="match-banner" id="talentPriorityBanner"></div>
   <div class="grid-3" id="talentCards" style="margin-top:15px"></div>
 
   <div class="card" style="margin-top:15px">
@@ -1084,6 +1086,8 @@ function backupScores(skillKey,excludeId=null){
 function rankBackups(skillKey='SAP'){
   const cards=backupScores(skillKey,selectedSimEmployee).slice(0,5);
   renderTalentCards(cards,skillKey);
+  const banner=document.getElementById('talentPriorityBanner');
+  if(banner)banner.innerHTML=`<strong>Default view:</strong> ranked backups for ${skills[skillKey].label} — run a stress test on Risk Simulator, or search/define a project above, to change this.`;
   setTimeout(renderSuccessionDepth,0)
 }
 function renderTalent(){
