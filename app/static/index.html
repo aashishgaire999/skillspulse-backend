@@ -274,8 +274,20 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .impact-banner .impact-kicker{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
 .impact-banner .impact-value{font-size:34px;font-weight:860;letter-spacing:-.05em;margin-top:2px}
 .impact-banner .impact-detail{font-size:10px;opacity:.86;line-height:1.45}
-.leadership-exposure{background:linear-gradient(135deg,#fff2f0,#fffafa);border:1px solid #f4cbc6;border-radius:17px;padding:15px 17px;margin:15px 0}
-.leadership-exposure .money{font-size:34px;font-weight:850;letter-spacing:-.05em;color:var(--danger)}
+.kpi-ring{--p:0;width:64px;height:64px;border-radius:50%;position:relative;margin-top:2px}
+.kpi-ring::after{content:"";position:absolute;inset:9px;border-radius:50%;background:#fff}
+.kpi-ring span{position:absolute;inset:0;z-index:1;display:grid;place-items:center;font-size:14px;font-weight:800}
+.exposure-bars{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.exposure-bar-row{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:10px;font-size:11px;color:var(--muted)}
+.exposure-bar-track{height:9px;border-radius:6px;background:#f1e2e0;overflow:hidden}
+.exposure-bar-fill{height:100%;border-radius:6px}
+.risk-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
+.improve-bar-row{display:flex;align-items:center;gap:18px;margin-top:6px}
+.improve-point{text-align:center}
+.improve-point strong{display:block;font-size:28px;letter-spacing:-.03em}
+.improve-point span{font-size:10px;color:var(--muted)}
+.improve-point.good strong{color:var(--green)}
+.improve-arrow{font-size:20px;color:var(--muted)}
 .heatmap-legend{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .heat-legend-item{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted)}
 .heat-swatch{width:15px;height:15px;border-radius:5px;border:1px solid rgba(0,0,0,.04)}
@@ -725,7 +737,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
      ============================================================ -->
 <section id="brief" class="page">
   <div class="hero no-print">
-    <div><div class="eyebrow">LEADERSHIP SUMMARY</div><h1>The workforce decisions leadership needs in one page.</h1><p>Readiness, top gaps, knowledge risks, succession problems, future requirements, top actions and expected improvement.</p></div>
+    <div><div class="eyebrow">LEADERSHIP SUMMARY</div><h1>Everything leadership needs, at a glance.</h1><p>Readiness, risk, and the plan to close the gap.</p></div>
     <button class="btn primary" onclick="window.print()">Print / Save PDF</button>
   </div>
   <div class="report">
@@ -733,29 +745,28 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <div><h2 style="margin:0">Foresight Leadership Summary</h2><p class="muted" style="margin:5px 0 0">Northstar Foods • Demo company</p></div>
       <span class="tag blue">Decision-ready</span>
     </div>
-    <div class="leadership-exposure">
-      <div class="muted">Business Exposure</div>
-      <div class="money" id="leadershipExposure">$0</div>
-      <div class="muted">Estimated current operational exposure from capability gaps and knowledge concentration</div>
-    </div>
-    <div class="grid-4">
-      <div class="card kpi"><div class="label">Readiness</div><div class="value" id="briefReady">0%</div></div>
-      <div class="card kpi"><div class="label">Critical Gaps</div><div class="value" id="briefGaps">0</div></div>
-      <div class="card kpi"><div class="label">Single-Point Risks</div><div class="value" id="briefSingle">0</div></div>
-      <div class="card kpi"><div class="label">Succession Coverage</div><div class="value" id="briefSucc">0%</div></div>
-    </div>
+    <div class="grid-4" id="briefKpis"></div>
     <div class="card flat" style="margin-top:14px;background:#fff8f7;border-color:#f0d5d2">
       <div class="section-head"><h3>Calculated Business Exposure</h3><span class="tag red">Scenario estimate</span></div>
       <div class="grid-2">
         <div><div class="muted">Current workforce exposure</div><div style="font-size:28px;font-weight:820" id="briefExposure">$0</div></div>
         <div><div class="muted">Employee-loss stress test</div><div style="font-size:28px;font-weight:820;color:var(--red)" id="briefStressExposure">$0</div></div>
       </div>
+      <div class="exposure-bars">
+        <div class="exposure-bar-row"><span>Current</span><div class="exposure-bar-track"><div class="exposure-bar-fill" id="expBarCurrent" style="background:var(--blue)"></div></div></div>
+        <div class="exposure-bar-row"><span>If key person leaves</span><div class="exposure-bar-track"><div class="exposure-bar-fill" id="expBarStress" style="background:var(--red)"></div></div></div>
+      </div>
       <div class="why"><strong>Source:</strong> editable business impact assumptions × workforce coverage/concentration risk. Not a hardcoded loss figure.</div>
     </div>
     <h3>Top workforce risks</h3><div id="briefRisks"><div class="muted">Loading workforce risks…</div></div>
     <h3>Future requirements</h3><div id="briefFuture"><div class="muted">Loading future requirements…</div></div>
     <h3>Top actions</h3><div id="briefActions"><div class="muted">Loading actions…</div></div>
-    <h3>Expected improvement</h3><p id="briefImprovement"></p>
+    <h3>Expected improvement</h3>
+    <div class="improve-bar-row">
+      <div class="improve-point"><strong id="briefImproveCurrent">0%</strong><span>today</span></div>
+      <div class="improve-arrow">→</div>
+      <div class="improve-point good"><strong id="briefImproveTarget">0%</strong><span>with verified plan</span></div>
+    </div>
     <div class="notice"><strong>AI recommends; managers review and decide.</strong> Only authorized work-related skill and development evidence should be analyzed.<div class="qa-status" style="margin-top:8px"> Demo calculations are generated from the embedded employee dataset</div></div>
   </div>
 </section>
@@ -986,7 +997,6 @@ function refreshAll(){
   setText('kpiReadiness',r+'%');setText('kpiGaps',fg.length);setText('kpiSingle',sp.length);setText('kpiFuture',fr+'%');
   setText('donutText',r+'%');document.getElementById('readinessDonut').style.setProperty('--p',r);
   setText('overviewSuccession',sc+'%');setText('overviewEmerging',emergingTalent());setText('overviewStale',staleSkillCount());
-  setText('briefReady',r+'%');setText('briefGaps',fg.length);setText('briefSingle',sp.length);setText('briefSucc',sc+'%');
   renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();renderFormerStaffDirectory();populateAiSuggestSelectors();populateVerifySelectors();populateRoleChips();
   const alexRemoved=employees.filter(e=>e.id!=='alex');setText('miniBefore',r+'%');setText('miniAfter',readiness(alexRemoved)+'%');setText('miniWhy','Why? Removing Alex reduces SAP and automation coverage; the score is recalculated from the remaining verified skill evidence.');runDiagnostics();
 }
@@ -1359,8 +1369,13 @@ function renderImpactModel(list=employees,req=null){
     setText('highestExposureSkill',skills[highest.k].label);
     setText('highestExposureValue',money(highest.v)+' estimated exposure');
   }
-  setText('briefExposure',money(baseline));setText('leadershipExposure',money(baseline));renderPresentationStory();
-  setText('briefStressExposure',money(totalExposure(employees.filter(e=>e.id!=='alex'))));
+  setText('briefExposure',money(baseline));renderPresentationStory();
+  const stressExposure=totalExposure(employees.filter(e=>e.id!=='alex'));
+  setText('briefStressExposure',money(stressExposure));
+  const expMax=Math.max(baseline,stressExposure,1);
+  const expBarCurrent=document.getElementById('expBarCurrent'),expBarStress=document.getElementById('expBarStress');
+  if(expBarCurrent)expBarCurrent.style.width=Math.max(4,Math.round(baseline/expMax*100))+'%';
+  if(expBarStress)expBarStress.style.width=Math.max(4,Math.round(stressExposure/expMax*100))+'%';
   renderExposureChart();
 }
 function renderExposureChart(){
@@ -1387,13 +1402,45 @@ function updateImpactInput(key,field,value){
 }
 
 function renderBrief(){
-  const risks=singlePointRisks(employees).slice(0,3);
-  document.getElementById('briefRisks').innerHTML=risks.map(k=>`<div class="metric"><span>${skills[k].label}</span><strong>Single-point knowledge risk</strong></div>`).join('');
-  document.getElementById('briefFuture').innerHTML=criticalGaps(employees,futureRequirements).slice(0,3).map(k=>`<div class="metric"><span>${skills[k].label}</span><strong>Target ${futureRequirements[k].toFixed(1)}/5</strong></div>`).join('');
-  document.getElementById('briefActions').innerHTML=`<ol><li>Protect the most concentrated critical skill through verified knowledge transfer.</li><li>Develop the highest-ranked internal backup before external hiring.</li><li>Close 2027 robotics / AI Operations gaps through project experience and verification.</li></ol>`;
-  document.getElementById('briefImprovement').textContent=`Applying the current development plan is projected to improve future readiness from ${futureReadiness(employees)}% toward ${Math.min(95,futureReadiness(employees)+14)}%, but the score should only increase after new evidence is verified.`;
-  setText('briefExposure',money(totalExposure(employees)));
-  setText('briefStressExposure',money(totalExposure(employees.filter(e=>e.id!=='alex'))))
+  const r=readiness(employees),sc=successionCoverage(employees);
+  const riskKeys=singlePointRisks(employees).slice(0,3);
+  const gapKeys=criticalGaps(employees,futureRequirements).slice(0,3);
+  const health=pct=>pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+
+  document.getElementById('briefKpis').innerHTML=`
+    <div class="card kpi"><div class="label">Readiness</div><div class="kpi-ring" style="background:conic-gradient(${health(r)} calc(${r}*1%),#ececf0 0)"><span>${r}%</span></div></div>
+    <div class="card kpi"><div class="label">Critical Gaps</div><div class="value" style="color:${gapKeys.length?'var(--red)':'var(--green)'}">${gapKeys.length}</div></div>
+    <div class="card kpi"><div class="label">Single-Point Risks</div><div class="value" style="color:${riskKeys.length?'var(--red)':'var(--green)'}">${riskKeys.length}</div></div>
+    <div class="card kpi"><div class="label">Succession Coverage</div><div class="kpi-ring" style="background:conic-gradient(${health(sc)} calc(${sc}*1%),#ececf0 0)"><span>${sc}%</span></div></div>`;
+
+  document.getElementById('briefRisks').innerHTML=riskKeys.length?riskKeys.map(k=>`<div class="metric"><span><span class="risk-dot" style="background:${skills[k].criticality==='Critical'?'var(--red)':'var(--amber)'}"></span>${skills[k].label}</span><strong>Single-point knowledge risk</strong></div>`).join(''):'<div class="notice">No single-point knowledge risks in the current dataset.</div>';
+
+  document.getElementById('briefFuture').innerHTML=gapKeys.length?gapKeys.map(k=>`<div class="metric"><span><span class="risk-dot" style="background:${skills[k].criticality==='Critical'?'var(--red)':'var(--amber)'}"></span>${skills[k].label}</span><strong>Target ${futureRequirements[k].toFixed(1)}/5</strong></div>`).join(''):'<div class="notice">No critical future gaps in the current dataset.</div>';
+
+  const readyLabel=w=>w<=0?'ready now':`~${w} weeks`;
+  const bestBackupFor=k=>{const expert=backupScores(k)[0].e;return {expert,backup:backupScores(k,expert.id)[0]}};
+  const usedKeys=new Set();
+  const actions=[];
+  if(riskKeys[0]){
+    usedKeys.add(riskKeys[0]);
+    const {expert,backup}=bestBackupFor(riskKeys[0]);
+    actions.push(`Protect <strong>${skills[riskKeys[0]].label}</strong> — ${expert.name} is the only qualified expert. Develop ${backup.e.name} as a verified backup (${readyLabel(backup.weeks)}).`);
+  }
+  const gapPick=gapKeys.find(k=>!usedKeys.has(k))||gapKeys[0];
+  if(gapPick){
+    usedKeys.add(gapPick);
+    const best=backupScores(gapPick)[0];
+    actions.push(`Close the <strong>${skills[gapPick].label}</strong> 2027 gap — ${best.e.name} is the best-fit internal candidate, ${readyLabel(best.weeks)}.`);
+  }
+  const thirdKey=[...riskKeys,...gapKeys].find(k=>!usedKeys.has(k));
+  if(thirdKey){
+    const {backup}=bestBackupFor(thirdKey);
+    actions.push(`Verify progress on <strong>${skills[thirdKey].label}</strong> — next backup is ${backup.e.name}, ${readyLabel(backup.weeks)} out.`);
+  }
+  document.getElementById('briefActions').innerHTML=actions.length?`<ol><li>${actions.join('</li><li>')}</li></ol>`:'<div class="notice">No urgent workforce actions — every critical skill has a verified backup.</div>';
+
+  const fr2=futureReadiness(employees),target=Math.min(95,fr2+14);
+  setText('briefImproveCurrent',fr2+'%');setText('briefImproveTarget',target+'%');
 }
 
 function buildSearchIndex(q){
