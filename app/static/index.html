@@ -148,8 +148,31 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .dev-legend{display:flex;flex-wrap:wrap;gap:8px 18px}
 .dev-legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#444}
 .dev-legend-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
-.data-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .upload-zone{padding:22px;border:1px dashed #c9c9cf;border-radius:15px;text-align:center;background:#fafafa}
+.source-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.source-tile{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;transition:.15s;box-shadow:0 10px 32px rgba(16,24,40,.05)}
+.source-tile:hover{box-shadow:0 14px 38px rgba(16,24,40,.09);transform:translateY(-2px)}
+.source-tile-icon{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;margin:0 auto 12px;background:#eef6ff;color:var(--blue)}
+.source-tile h3{font-size:14px;margin:6px 0 4px}
+.source-tile .cap{font-size:10.5px;color:var(--muted)}
+.source-panel-card{display:none;margin-top:14px}
+.col-chip-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.col-chip{font-size:10px;padding:4px 10px;border-radius:999px;background:#f1f1f3;color:#555;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.data-status-card{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 20px;box-shadow:0 10px 32px rgba(16,24,40,.05)}
+.data-status-icon{width:46px;height:46px;border-radius:50%;background:#eaf8f0;color:var(--green);display:grid;place-items:center;flex:0 0 auto}
+.data-status-count{font-size:30px;font-weight:820;letter-spacing:-.03em;line-height:1}
+.data-status-label{font-size:10.5px;color:var(--muted)}
+.diag-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.diag-tile{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:10px 12px}
+.diag-icon{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;font-size:12px;font-weight:800}
+.diag-icon.ok{background:#eaf8f0;color:var(--green)}
+.diag-icon.fail{background:#fde8e6;color:var(--red)}
+.diag-text{min-width:0}
+.diag-name{font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diag-value{font-size:9.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diag-summary-ring{--p:0;width:46px;height:46px;border-radius:50%;position:relative;flex:0 0 auto}
+.diag-summary-ring::after{content:"";position:absolute;inset:6px;border-radius:50%;background:#fff}
+.diag-summary-ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:800;z-index:1}
 .report{max-width:900px;margin:auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:25px;box-shadow:var(--shadow)}
 .drawer-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.18);z-index:80}.drawer-backdrop.show{display:block}
 .drawer{position:fixed;top:0;right:-520px;width:500px;max-width:94vw;height:100vh;z-index:90;background:#fff;box-shadow:-18px 0 55px rgba(0,0,0,.13);transition:.28s;padding:23px;overflow:auto}.drawer.show{right:0}
@@ -159,7 +182,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .skill-bars{display:flex;flex-direction:column;gap:8px}.skill-line{display:grid;grid-template-columns:110px 1fr 42px;gap:8px;align-items:center;font-size:10.5px}.track{height:7px;border-radius:99px;background:#ececf0;overflow:hidden}.fill{height:100%;border-radius:99px;background:var(--blue)}
 .modal{display:none;position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.2);place-items:center}.modal.show{display:grid}.modal-card{width:560px;max-width:92vw;background:#fff;border-radius:18px;padding:20px;box-shadow:0 20px 70px rgba(0,0,0,.2)}
 @media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr)}.filterbar{grid-template-columns:1fr 1fr}.sidebar{width:208px}.main{margin-left:208px}.search-wrap{width:250px}}
-@media(max-width:760px){.sidebar{display:none}.main{margin:0}.content{padding:18px 13px}.topbar{padding:0 13px}.search-wrap{display:none}.grid-4,.grid-3,.grid-2,.future-grid,.compare-grid,.timeline,.data-actions{grid-template-columns:1fr}.hero{flex-direction:column}.filterbar{grid-template-columns:1fr}.risk-row{grid-template-columns:9px 1fr}.countdown{grid-column:2}}
+@media(max-width:760px){.sidebar{display:none}.main{margin:0}.content{padding:18px 13px}.topbar{padding:0 13px}.search-wrap{display:none}.grid-4,.grid-3,.grid-2,.future-grid,.compare-grid,.timeline,.source-tiles,.diag-grid{grid-template-columns:1fr}.hero{flex-direction:column}.filterbar{grid-template-columns:1fr}.risk-row{grid-template-columns:9px 1fr}.countdown{grid-column:2}}
 @media print{.sidebar,.topbar,.no-print{display:none!important}.main{margin:0}.page{display:none!important}#brief{display:block!important}.report{box-shadow:none;border:none}}
 
 /* ===== Foresight V10 final quality + visualization pass ===== */
@@ -776,17 +799,50 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
      ============================================================ -->
 <section id="data" class="page">
   <div class="hero">
-    <div><div class="eyebrow">CONNECT YOUR DATA</div><h1>Start with trusted work evidence.</h1><p>Load the demo company instantly, upload a simple CSV, or add an employee manually.</p></div>
+    <div><div class="eyebrow">CONNECT YOUR DATA</div><h1>Start with trusted work evidence.</h1><p>Pick a source below.</p></div>
   </div>
-  <div class="data-actions">
-    <div class="card"><h3>Demo Company</h3><p class="muted">Reload the complete Northstar Foods workforce dataset.</p><button class="btn primary" onclick="loadDemo()">Load Demo Company</button></div>
-    <div class="card"><h3>CSV Upload</h3><div class="upload-zone"><input type="file" id="csvFile" accept=".csv"><div class="muted" style="margin-top:8px">Columns: name, role, department, team</div></div><button class="btn blue" style="margin-top:10px" onclick="importCSV()">Import CSV</button></div>
-    <div class="card"><h3>Manual Employee</h3><input id="newName" class="input" placeholder="Name"><input id="newRole" class="input" placeholder="Role" style="margin-top:7px"><input id="newDept" class="input" placeholder="Department" style="margin-top:7px"><button class="btn green" style="margin-top:10px" onclick="addManualEmployee()">Add employee</button></div>
+
+  <div class="data-status-card">
+    <div class="data-status-icon"><svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <div><div class="data-status-count" id="dataStatusCount">0</div><div class="data-status-label">employees loaded</div></div>
+    <span class="tag blue" id="dataStatusTag" style="margin-left:auto">Demo</span>
   </div>
-  <div id="dataStatus" class="notice" style="margin-top:15px">Demo company loaded: <strong>Northstar Foods</strong>.</div>
+
+  <div class="source-tiles" style="margin-top:15px">
+    <div class="source-tile" onclick="loadDemo()" role="button" title="Load Demo Company">
+      <div class="source-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></div>
+      <h3>Demo Company</h3>
+      <div class="cap">16 employees, instantly</div>
+    </div>
+    <div class="source-tile" onclick="toggleDataPanel('csv')" role="button" title="CSV Upload">
+      <div class="source-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
+      <h3>CSV Upload</h3>
+      <div class="cap">Bring your own file</div>
+    </div>
+    <div class="source-tile" onclick="toggleDataPanel('manual')" role="button" title="Add Person">
+      <div class="source-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21v-1a7 7 0 0 1 7-7h1.5"/><path d="M17 8v6M14 11h6"/></svg></div>
+      <h3>Add Person</h3>
+      <div class="cap">One employee</div>
+    </div>
+  </div>
+
+  <div id="csvPanel" class="card source-panel-card">
+    <div class="upload-zone"><input type="file" id="csvFile" accept=".csv"></div>
+    <div class="col-chip-row"><span class="col-chip">name</span><span class="col-chip">role</span><span class="col-chip">department</span><span class="col-chip">team</span></div>
+    <button class="btn blue" style="margin-top:12px;width:100%" onclick="importCSV()">Import CSV</button>
+    <div id="csvError" class="muted" style="font-size:10px;color:var(--red);margin-top:8px;min-height:12px"></div>
+  </div>
+
+  <div id="manualPanel" class="card source-panel-card">
+    <input id="newName" class="input" placeholder="Name">
+    <input id="newRole" class="input" placeholder="Role" style="margin-top:8px">
+    <input id="newDept" class="input" placeholder="Department" style="margin-top:8px">
+    <button class="btn green" style="margin-top:12px;width:100%" onclick="addManualEmployee()">Add employee</button>
+  </div>
+
   <div class="card" style="margin-top:15px">
-    <div class="section-head"><h3>Demo Diagnostics</h3><span class="tag green" id="diagnosticBadge">Checking…</span></div>
-    <div id="diagnostics" class="grid-3"><div class="notice">Running core checks…</div></div>
+    <div class="section-head"><h3>Demo Diagnostics</h3><div class="diag-summary-ring" id="diagRing"><span id="diagRingText">0/9</span></div></div>
+    <div id="diagnostics" class="diag-grid"><div class="notice">Running core checks…</div></div>
   </div>
 </section>
 </div>
@@ -1468,29 +1524,40 @@ function runDiagnostics(){
   const checks=[
     ['Employees loaded',employees.length>0,employees.length+' records'],
     ['Skills model',Object.keys(skills).length===5,Object.keys(skills).length+' capabilities'],
-    ['Readiness calculation',Number.isFinite(readiness(employees)),readiness(employees)+'%'],
+    ['Readiness calc',Number.isFinite(readiness(employees)),readiness(employees)+'%'],
     ['Financial exposure',Number.isFinite(totalExposure(employees)),money(totalExposure(employees))],
-    ['Future requirements',Object.keys(futureRequirements).length===Object.keys(skills).length,'editable targets'],
-    ['Search index',buildSearchIndex('SAP').length>0,'employees / skills / risks / projects'],
-    ['Risk dates',riskDates.every(r=>Number.isFinite(daysUntil(r.date))),riskDates.length+' dated risks'],
-    ['Employee simulation',Number.isFinite(readiness(employees.filter(e=>e.id!=='alex'))),'recalculates from data'],
-    ['Succession matching',backupScores('SAP','alex').length>0,'ranked backups']
+    ['Future targets',Object.keys(futureRequirements).length===Object.keys(skills).length,'editable'],
+    ['Search index',buildSearchIndex('SAP').length>0,'indexed'],
+    ['Risk dates',riskDates.every(r=>Number.isFinite(daysUntil(r.date))),riskDates.length+' dated'],
+    ['Simulation',Number.isFinite(readiness(employees.filter(e=>e.id!=='alex'))),'live'],
+    ['Succession match',backupScores('SAP','alex').length>0,'ranked']
   ];
   const wrap=document.getElementById('diagnostics');
-  if(wrap)wrap.innerHTML=checks.map(([name,ok,detail])=>`<div class="notice"><strong>${ok?'':''} ${name}</strong><br>${detail}</div>`).join('');
-  const all=checks.every(x=>x[1]);
-  const badge=document.getElementById('diagnosticBadge');
-  if(badge){badge.textContent=all?'All core checks passed':'Needs attention';badge.className='tag '+(all?'green':'red')}
+  if(wrap)wrap.innerHTML=checks.map(([name,ok,detail])=>`<div class="diag-tile"><div class="diag-icon ${ok?'ok':'fail'}">${ok?'✓':'✕'}</div><div class="diag-text"><div class="diag-name">${name}</div><div class="diag-value">${detail}</div></div></div>`).join('');
+  const passed=checks.filter(x=>x[1]).length,total=checks.length;
+  const ring=document.getElementById('diagRing');
+  if(ring){ring.style.background=`conic-gradient(${passed===total?'var(--green)':'var(--red)'} calc(${passed/total*100}*1%),#ececf0 0)`;setText('diagRingText',`${passed}/${total}`)}
 }
 
-function loadDemo(){employees=JSON.parse(JSON.stringify(demoEmployees));futureRequirements=Object.fromEntries(Object.entries(skills).map(([k,v])=>[k,v.futureTarget]));document.getElementById('dataStatus').innerHTML='Demo company loaded: <strong>Northstar Foods</strong> with '+employees.length+' employees.';refreshAll()}
+function setDataStatus(tag){const c=document.getElementById('dataStatusCount'),t=document.getElementById('dataStatusTag');if(c)c.textContent=employees.length;if(t)t.textContent=tag}
+function toggleDataPanel(which){
+  const csv=document.getElementById('csvPanel'),manual=document.getElementById('manualPanel');
+  const target=which==='csv'?csv:manual,other=which==='csv'?manual:csv;
+  const show=target.style.display!=='block';
+  target.style.display=show?'block':'none';
+  other.style.display='none';
+}
+function loadDemo(){employees=JSON.parse(JSON.stringify(demoEmployees));futureRequirements=Object.fromEntries(Object.entries(skills).map(([k,v])=>[k,v.futureTarget]));setDataStatus('Demo — Northstar Foods');refreshAll()}
 function addManualEmployee(){
   const name=document.getElementById('newName').value.trim(),role=document.getElementById('newRole').value.trim(),department=document.getElementById('newDept').value.trim();if(!name)return;
-  employees.push({id:'e'+Date.now(),name,role:role||'Employee',department:department||'General',team:'General',confidence:.6,freshnessDays:0,growth:.05,interests:['career development'],skills:{SAP:1,FoodSafety:1,Robotics:1,ColdChain:1,AIOps:1},certs:[],projects:[],gaps:['Skill evidence required'],futureMatch:45,backup:'Not yet assessed.',plan:'Submit work evidence and complete manager verification.',why:'Insufficient evidence; profile needs verification.',futureGap:'Future role gap cannot be assessed until evidence is verified.'});document.getElementById('dataStatus').textContent=`Added ${name}. Skill scores remain low-confidence until evidence is verified.`;refreshAll()
+  employees.push({id:'e'+Date.now(),name,role:role||'Employee',department:department||'General',team:'General',confidence:.6,freshnessDays:0,growth:.05,interests:['career development'],skills:{SAP:1,FoodSafety:1,Robotics:1,ColdChain:1,AIOps:1},certs:[],projects:[],gaps:['Skill evidence required'],futureMatch:45,backup:'Not yet assessed.',plan:'Submit work evidence and complete manager verification.',why:'Insufficient evidence; profile needs verification.',futureGap:'Future role gap cannot be assessed until evidence is verified.'});
+  document.getElementById('newName').value='';document.getElementById('newRole').value='';document.getElementById('newDept').value='';
+  setDataStatus('+ Manual entry');refreshAll()
 }
 function importCSV(){
-  const file=document.getElementById('csvFile').files[0];if(!file){document.getElementById('dataStatus').textContent='Choose a CSV file first.';return}
-  const reader=new FileReader();reader.onload=()=>{const lines=reader.result.trim().split(/\r?\n/);const headers=lines[0].split(',').map(x=>x.trim().toLowerCase());let count=0;lines.slice(1).forEach(line=>{const cols=line.split(',').map(x=>x.trim()),o={};headers.forEach((h,i)=>o[h]=cols[i]);if(o.name){employees.push({id:'csv'+Date.now()+count,name:o.name,role:o.role||'Employee',department:o.department||'General',team:o.team||'General',confidence:.55,freshnessDays:0,growth:.05,interests:['career development'],skills:{SAP:1,FoodSafety:1,Robotics:1,ColdChain:1,AIOps:1},certs:[],projects:[],gaps:['Evidence required'],futureMatch:40,backup:'Not assessed.',plan:'Add skill evidence and manager verification.',why:'Imported profile has no validated skill evidence yet.',futureGap:'Future readiness pending evidence.'});count++}});document.getElementById('dataStatus').textContent=`Imported ${count} employee records. Skill evidence still requires verification.`;refreshAll()};reader.readAsText(file)
+  const errEl=document.getElementById('csvError');
+  const file=document.getElementById('csvFile').files[0];if(!file){errEl.textContent='Choose a CSV file first.';return}
+  const reader=new FileReader();reader.onload=()=>{const lines=reader.result.trim().split(/\r?\n/);const headers=lines[0].split(',').map(x=>x.trim().toLowerCase());let count=0;lines.slice(1).forEach(line=>{const cols=line.split(',').map(x=>x.trim()),o={};headers.forEach((h,i)=>o[h]=cols[i]);if(o.name){employees.push({id:'csv'+Date.now()+count,name:o.name,role:o.role||'Employee',department:o.department||'General',team:o.team||'General',confidence:.55,freshnessDays:0,growth:.05,interests:['career development'],skills:{SAP:1,FoodSafety:1,Robotics:1,ColdChain:1,AIOps:1},certs:[],projects:[],gaps:['Evidence required'],futureMatch:40,backup:'Not assessed.',plan:'Add skill evidence and manager verification.',why:'Imported profile has no validated skill evidence yet.',futureGap:'Future readiness pending evidence.'});count++}});errEl.textContent='';document.getElementById('csvFile').value='';setDataStatus('+ CSV import ('+count+')');refreshAll()};reader.readAsText(file)
 }
 
 function animateInitial(){document.querySelectorAll('.animate').forEach(el=>{const txt=el.textContent,target=parseInt(txt)||0,suffix=txt.includes('%')?'%':'';let n=0;const timer=setInterval(()=>{n++;el.textContent=Math.round(target*n/25)+suffix;if(n>=25)clearInterval(timer)},20)})}
@@ -1656,7 +1723,7 @@ function verifyDevelopmentEvidence(){
   refreshAll();renderDependencyMap(e.id,false,true);showToast('Manager verified new evidence. Readiness and succession coverage recalculated.')
 }
 
-refreshAll();renderFutureStrategyResults();classifyCountdowns();renderExecutiveVisuals();renderSuccessionDepth();renderDependencyMap('alex',false,false);animateInitial();
+setDataStatus('Demo — Northstar Foods');refreshAll();renderFutureStrategyResults();classifyCountdowns();renderExecutiveVisuals();renderSuccessionDepth();renderDependencyMap('alex',false,false);animateInitial();
 </script>
 </body>
 </html>
