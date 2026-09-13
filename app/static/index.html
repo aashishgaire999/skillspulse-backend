@@ -140,6 +140,14 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.t-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px}.t-card .r{font-size:22px;font-weight:800;margin:5px 0}
 .status{font-size:10px;padding:5px 8px;border-radius:999px;background:#f1f1f3;color:#555}
 .status.progress{background:#eef6ff;color:#0064c6}.status.verify{background:#fff4dc;color:#9b5f05}.status.done{background:#eaf8f0;color:#24774e}.status.attention{background:#fde8e6;color:#c0392b}
+.dev-status-summary{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.dev-donut{width:82px;height:82px;border-radius:50%;position:relative;flex:0 0 auto}
+.dev-donut::after{content:"";position:absolute;inset:14px;border-radius:50%;background:#fff}
+.dev-donut-center{position:absolute;inset:0;z-index:1;display:grid;place-items:center;text-align:center}
+.dev-donut-center strong{font-size:18px}.dev-donut-center span{display:block;font-size:8px;color:var(--muted)}
+.dev-legend{display:flex;flex-wrap:wrap;gap:8px 18px}
+.dev-legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#444}
+.dev-legend-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
 .data-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .upload-zone{padding:22px;border:1px dashed #c9c9cf;border-radius:15px;text-align:center;background:#fafafa}
 .report{max-width:900px;margin:auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:25px;box-shadow:var(--shadow)}
@@ -673,6 +681,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 
   <div class="card" style="margin-top:15px">
     <div class="section-head"><h3>What each employee needs for 2027</h3><span class="tag blue">Future role gap</span></div>
+    <div class="dev-status-summary" id="devStatusSummary"></div>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Employee</th><th>Future Match</th><th>Main 2027 Gap</th><th>Action</th><th>Time to Readiness</th><th>Status</th></tr></thead>
@@ -1178,17 +1187,36 @@ function renderFutureStrategyResults(){
 }
 
 function renderDevelopment(){
-  document.getElementById('futureNeedsTable').innerHTML=employees.map(e=>{
+  // Thresholds calibrated to this system's actual output range (roughly 10-70 weeks given
+  // realistic gap/growth combinations) so status genuinely differentiates people instead of
+  // everyone landing in one bucket.
+  const rows=employees.map(e=>{
     const gaps=Object.keys(skills).map(k=>({k,g:futureRequirements[k]-e.skills[k]})).sort((a,b)=>b.g-a.g);const top=gaps[0];const action=top.g<=.3?'Verify on live work':top.k==='FoodSafety'?'Certification + shadowing':top.k==='Robotics'?'Project rotation + mentoring':'Training + project experience';const weeks=Math.max(0,Math.ceil(Math.max(0,top.g)/Math.max(.08,e.growth)*2));
-    // Thresholds calibrated to this system's actual output range (roughly 10-70 weeks given
-    // realistic gap/growth combinations) so status genuinely differentiates people instead of
-    // everyone landing in one bucket.
     let statusClass,statusLabel;
     if(weeks<=0){statusClass='done';statusLabel='Verified'}
     else if(weeks<20){statusClass='verify';statusLabel='Ready Soon'}
     else if(weeks<=45){statusClass='progress';statusLabel='In Progress'}
     else{statusClass='attention';statusLabel='Needs Support'}
-    return `<tr><td><span class="mini-avatar" style="background:${avatarColor(e.id)}">${initials(e.name)}</span><span class="employee-link" onclick="openEmployee('${e.id}')">${e.name}</span></td><td>${e.futureMatch}%</td><td>${skills[top.k].label} ${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)}</td><td>${action}</td><td>${weeks<=0?'Ready Now':weeks<52?`~${weeks} weeks`:`~${Math.round(weeks/4.33)} months`}</td><td><span class="status ${statusClass}">${statusLabel}</span></td></tr>`
+    return {e,top,action,weeks,statusClass,statusLabel};
+  });
+
+  const segColors={done:'#24774e',verify:'#9b5f05',progress:'#0064c6',attention:'#c0392b'};
+  const segLabels={done:'Verified',verify:'Ready Soon',progress:'In Progress',attention:'Needs Support'};
+  const order=['done','verify','progress','attention'];
+  const counts={done:0,verify:0,progress:0,attention:0};
+  rows.forEach(r=>counts[r.statusClass]++);
+  let acc=0;
+  const stops=order.filter(k=>counts[k]>0).map(k=>{
+    const start=acc;acc+=counts[k]/rows.length*100;
+    return `${segColors[k]} ${start}% ${acc}%`;
+  }).join(',');
+  document.getElementById('devStatusSummary').innerHTML=`
+    <div class="dev-donut" style="background:conic-gradient(${stops})"><div class="dev-donut-center"><div><strong>${rows.length}</strong><span>employees</span></div></div></div>
+    <div class="dev-legend">${order.filter(k=>counts[k]>0).map(k=>`<span class="dev-legend-item"><span class="dev-legend-dot" style="background:${segColors[k]}"></span>${counts[k]} ${segLabels[k]}</span>`).join('')}</div>`;
+
+  document.getElementById('futureNeedsTable').innerHTML=rows.map(({e,top,action,weeks,statusClass,statusLabel})=>{
+    const ringColor=e.futureMatch>=88?'var(--green)':e.futureMatch>=78?'var(--blue)':'var(--amber)';
+    return `<tr><td><span class="mini-avatar" style="background:${avatarColor(e.id)}">${initials(e.name)}</span><span class="employee-link" onclick="openEmployee('${e.id}')">${e.name}</span></td><td><div class="match-ring" style="--p:${e.futureMatch};background:conic-gradient(${ringColor} calc(var(--p)*1%),#ececf0 0)"><span>${e.futureMatch}%</span></div></td><td>${skills[top.k].label} ${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)}</td><td>${action}</td><td>${weeks<=0?'Ready Now':weeks<52?`~${weeks} weeks`:`~${Math.round(weeks/4.33)} months`}</td><td><span class="status ${statusClass}">${statusLabel}</span></td></tr>`
   }).join('')
 }
 
