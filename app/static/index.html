@@ -163,6 +163,11 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .search-hero-btn{width:48px;height:48px;border-radius:50%;background:var(--blue);color:#fff;border:0;display:grid;place-items:center;cursor:pointer;flex:0 0 auto;transition:.15s}
 .search-hero-btn:hover{background:#0064c6}
 .search-hero-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.role-chips{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:13px}
+.role-chips-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:750;color:var(--muted);margin-right:2px}
+.role-chip{font-size:11px;font-weight:650;padding:6px 13px;border-radius:999px;background:#f5f5f7;border:1px solid var(--line);color:#444;cursor:pointer;transition:.15s}
+.role-chip:hover{background:#eef6ff;border-color:#bcdcfb;color:var(--blue)}
+.role-chip .n{color:var(--muted);font-weight:550}
 .calc-box{display:none;margin-top:9px;padding:10px 11px;border-radius:11px;background:#f7f7f9;border:1px solid var(--line);font-size:10px;color:#555;line-height:1.55}
 .calc-box.show{display:block;animation:pageIn .18s ease forwards}
 .visual-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:15px}
@@ -612,6 +617,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <input id="talentEmployeeSearch" class="search-hero-input" placeholder="Search a name or role — e.g. Priya Shah, Process Engineer…" onkeydown="if(event.key==='Enter')searchTalentEmployee()">
       <button class="search-hero-btn" onclick="searchTalentEmployee()" title="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
     </div>
+    <div class="role-chips" id="roleChipsRow"></div>
     <div id="talentEmployeeSearchResult" style="margin-top:12px"></div>
     <div id="roleCoverageResult" style="margin-top:12px"></div>
 
@@ -977,7 +983,7 @@ function refreshAll(){
   setText('donutText',r+'%');document.getElementById('readinessDonut').style.setProperty('--p',r);
   setText('overviewSuccession',sc+'%');setText('overviewEmerging',emergingTalent());setText('overviewStale',staleSkillCount());
   setText('briefReady',r+'%');setText('briefGaps',fg.length);setText('briefSingle',sp.length);setText('briefSucc',sc+'%');
-  renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();renderFormerStaffDirectory();populateAiSuggestSelectors();populateVerifySelectors();
+  renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();renderFormerStaffDirectory();populateAiSuggestSelectors();populateVerifySelectors();populateRoleChips();
   const alexRemoved=employees.filter(e=>e.id!=='alex');setText('miniBefore',r+'%');setText('miniAfter',readiness(alexRemoved)+'%');setText('miniWhy','Why? Removing Alex reduces SAP and automation coverage; the score is recalculated from the remaining verified skill evidence.');runDiagnostics();
 }
 function setText(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
@@ -1197,6 +1203,19 @@ function renderDevelopment(){
   }).join('')
 }
 
+function populateRoleChips(){
+  const wrap=document.getElementById('roleChipsRow');if(!wrap)return;
+  const counts={};
+  employees.forEach(e=>{counts[e.role]=(counts[e.role]||0)+1});
+  const roles=Object.keys(counts).sort();
+  wrap.innerHTML=`<span class="role-chips-label">Browse by role</span>`+roles.map(r=>
+    `<button class="role-chip" onclick="searchRoleChip(this)" data-role="${r.replace(/"/g,'&quot;')}">${r} <span class="n">${counts[r]}</span></button>`
+  ).join('');
+}
+function searchRoleChip(btn){
+  document.getElementById('talentEmployeeSearch').value=btn.dataset.role;
+  searchTalentEmployee();
+}
 function searchTalentEmployee(){
   const raw=document.getElementById('talentEmployeeSearch').value.trim();
   const q=raw.toLowerCase();
