@@ -380,11 +380,11 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <div class="sap-spotlight-icon"><svg viewBox="0 0 24 24" aria-hidden="true" width="30" height="30" stroke="var(--danger)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5"/><circle cx="12" cy="17" r=".8"/></svg></div>
       <div class="sap-spotlight-text">
         <strong>SAP Configuration depends on one person.</strong>
-        <span>Alex Morgan is the only qualified expert. Everything below recalculates live from real workforce data — this isn't a scripted example.</span>
+        <span>Alex Morgan is the only qualified expert — every number below recalculates live from real workforce data.</span>
       </div>
       <div class="sap-spotlight-money">
         <div class="money" id="sapStoryMoney">$0</div>
-        <div class="muted"><strong id="sapExpertCount">0</strong> qualified backup · 47-day window</div>
+        <div class="muted"><strong id="sapExpertCount">0</strong> qualified backup · <span id="sapDeadlineDays">0</span>-day window</div>
       </div>
       <button class="btn primary" onclick="simulateEmployee('alex');go('simulator')">Run stress test →</button>
     </div>
@@ -556,7 +556,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <div class="impact-value" id="simImpactValue">$0</div>
       <div class="impact-detail" id="simImpactDetail">Additional operational exposure created by this workforce scenario.</div>
     </div>
-    <div class="impact-detail" style="max-width:340px"><strong>Calculated, not hardcoded.</strong><br>Business loss/hour and disruption assumptions are editable below; the workforce risk factor comes from real skill coverage and concentration.</div>
+    <div class="impact-detail" style="max-width:340px"><strong>Calculated live.</strong><br>Business loss/hour and disruption assumptions are editable below; the workforce risk factor comes from real skill coverage and concentration.</div>
   </div>
 
   <div class="card" style="margin-top:15px">
@@ -599,7 +599,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
   <div class="card dep-card" style="margin-top:15px">
     <div class="section-head"><h3>Capability Dependency Map</h3><span class="tag blue">Why this risk matters</span></div>
     <div id="dependencyMap" class="dep-map"><div class="muted">Run a scenario to see capability dependencies.</div></div>
-    <div class="chart-caption">This is intentionally small: Person → Skill → Critical process/project → Business capability. The map changes with the simulation.</div>
+    <div class="chart-caption">Person → Skill → Critical process/project → Business capability. The map updates with the simulation.</div>
   </div>
 
   <div class="grid-2" style="margin-top:15px">
@@ -624,12 +624,12 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <h3>Editable assumptions</h3>
       <span class="tag gray" id="assumptionsToggleLabel">Show ▾</span>
     </div>
-    <div class="muted" style="font-size:11px">Future capability targets, and the cost-per-hour / disruption-day inputs behind every exposure number on this page — nothing above is hardcoded, this is where those numbers actually come from.</div>
+    <div class="muted" style="font-size:11px">Future capability targets, and the cost-per-hour / disruption-day inputs behind every exposure number on this page.</div>
     <div id="assumptionsPanel" style="display:none;margin-top:16px">
       <h4 style="margin:0 0 8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)">Future capability requirements</h4>
       <div id="futureEditTable"><div class="muted">Loading capability requirements…</div></div>
       <h4 style="margin:20px 0 8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)">Business impact model</h4>
-      <div class="notice"><strong>Why this is credible:</strong> Foresight does not invent a dollar-loss number. A manager supplies the business impact assumptions; the system calculates the risk factor from verified workforce coverage and knowledge concentration.</div>
+      <div class="notice"><strong>How this is built:</strong> a manager supplies the business impact assumptions below; Foresight calculates the risk factor from verified workforce coverage and knowledge concentration.</div>
       <div class="table-wrap" style="margin-top:10px">
         <table>
           <thead><tr><th>Capability</th><th>Loss / hour</th><th>Potential disruption</th><th>Calculated risk factor</th><th>Exposure</th></tr></thead>
@@ -777,7 +777,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
         <div class="exposure-bar-row"><span>Current</span><div class="exposure-bar-track"><div class="exposure-bar-fill" id="expBarCurrent" style="background:var(--blue)"></div></div></div>
         <div class="exposure-bar-row"><span>If key person leaves</span><div class="exposure-bar-track"><div class="exposure-bar-fill" id="expBarStress" style="background:var(--red)"></div></div></div>
       </div>
-      <div class="why"><strong>Source:</strong> editable business impact assumptions × workforce coverage/concentration risk. Not a hardcoded loss figure.</div>
+      <div class="why"><strong>Source:</strong> editable business impact assumptions × workforce coverage/concentration risk.</div>
     </div>
     <h3>Top workforce risks</h3><div id="briefRisks"><div class="muted">Loading workforce risks…</div></div>
     <h3>Future requirements</h3><div id="briefFuture"><div class="muted">Loading future requirements…</div></div>
@@ -1403,6 +1403,8 @@ function renderPresentationStory(){
   const sapExperts=qualifiedCount(employees,'SAP');
   setText('sapExpertCount',sapExperts);
   setText('sapStoryMoney',money(capabilityExposure(employees,'SAP')));
+  const sapRisk=riskDates.find(r=>r.skill==='SAP');
+  if(sapRisk)setText('sapDeadlineDays',daysUntil(sapRisk.date));
 }
 function renderScenarioImpact(list=lastScenarioList||employees,req=lastScenarioReq){
   const incremental=scenarioIncrementalExposure(list,req);
@@ -1671,7 +1673,7 @@ function renderSkillSuggestion(){
   const d=lastSuggestion;if(!d)return;
   const resultEl=document.getElementById('aiSuggestResult');
   const delta=d.suggested_score-d.current_score;
-  const deltaColor=delta>0.05?'var(--good)':delta<-0.05?'var(--danger)':'var(--muted)';
+  const deltaColor=delta>0.05?'var(--green)':delta<-0.05?'var(--danger)':'var(--muted)';
   resultEl.innerHTML=`
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
       <div><div class="muted" style="font-size:10px;text-transform:uppercase">Current</div><div style="font-size:26px;font-weight:800">${d.current_score.toFixed(1)}</div></div>
