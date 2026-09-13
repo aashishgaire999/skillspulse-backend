@@ -61,7 +61,7 @@ SKILLS = {
 EMPLOYEES = [
     {
         "id": "alex",
-        "name": "Alex Morgan",
+        "name": "Derek Falkner",
         "role": "Operations Systems Lead",
         "department": "Operations",
         "team": "Enterprise Systems",
@@ -75,7 +75,7 @@ EMPLOYEES = [
     },
     {
         "id": "maria",
-        "name": "Maria Santos",
+        "name": "Camila Reyes",
         "role": "Process Engineer",
         "department": "Engineering",
         "team": "Plant Engineering",
@@ -89,7 +89,7 @@ EMPLOYEES = [
     },
     {
         "id": "john",
-        "name": "John Lee",
+        "name": "Desmond Whitaker",
         "role": "Quality Specialist",
         "department": "Quality",
         "team": "Food Safety",
@@ -103,7 +103,7 @@ EMPLOYEES = [
     },
     {
         "id": "priya",
-        "name": "Priya Shah",
+        "name": "Ishani Rao",
         "role": "Supply Chain Analyst",
         "department": "Supply Chain",
         "team": "Cold Chain",
@@ -117,7 +117,7 @@ EMPLOYEES = [
     },
     {
         "id": "sam",
-        "name": "Sam Rivera",
+        "name": "Travis Ondrasek",
         "role": "Maintenance Engineer",
         "department": "Operations",
         "team": "Plant Reliability",
@@ -131,7 +131,7 @@ EMPLOYEES = [
     },
     {
         "id": "lena",
-        "name": "Lena Park",
+        "name": "Yuna Cho",
         "role": "R&D Specialist",
         "department": "R&D",
         "team": "Product Innovation",
@@ -145,7 +145,7 @@ EMPLOYEES = [
     },
     {
         "id": "daniel",
-        "name": "Daniel Brooks",
+        "name": "Marcus Feldman",
         "role": "Operations Systems Lead",
         "department": "Operations",
         "team": "Enterprise Systems",
@@ -159,7 +159,7 @@ EMPLOYEES = [
     },
     {
         "id": "kevin",
-        "name": "Kevin Nguyen",
+        "name": "Trevor Nakamura",
         "role": "Process Engineer",
         "department": "Engineering",
         "team": "Plant Engineering",
@@ -173,7 +173,7 @@ EMPLOYEES = [
     },
     {
         "id": "hannah",
-        "name": "Hannah Kim",
+        "name": "Josephine Okafor",
         "role": "Quality Specialist",
         "department": "Quality",
         "team": "Food Safety",
@@ -187,7 +187,7 @@ EMPLOYEES = [
     },
     {
         "id": "olivia",
-        "name": "Olivia Grant",
+        "name": "Simone Beaulieu",
         "role": "Supply Chain Analyst",
         "department": "Supply Chain",
         "team": "Cold Chain",
@@ -201,7 +201,7 @@ EMPLOYEES = [
     },
     {
         "id": "ethan",
-        "name": "Ethan Cole",
+        "name": "Cormac Doyle",
         "role": "Maintenance Engineer",
         "department": "Operations",
         "team": "Plant Reliability",
@@ -215,7 +215,7 @@ EMPLOYEES = [
     },
     {
         "id": "maya",
-        "name": "Maya Johnson",
+        "name": "Talia Bloom",
         "role": "R&D Specialist",
         "department": "R&D",
         "team": "Product Innovation",
@@ -229,7 +229,7 @@ EMPLOYEES = [
     },
     {
         "id": "noah",
-        "name": "Noah Williams",
+        "name": "Jonah Whitcomb",
         "role": "Robotics Engineer",
         "department": "Engineering",
         "team": "Automation",
@@ -243,7 +243,7 @@ EMPLOYEES = [
     },
     {
         "id": "sofia",
-        "name": "Sofia Martinez",
+        "name": "Valentina Cruz",
         "role": "Robotics Engineer",
         "department": "Engineering",
         "team": "Automation",
@@ -257,7 +257,7 @@ EMPLOYEES = [
     },
     {
         "id": "liam",
-        "name": "Liam Carter",
+        "name": "Connor MacAllister",
         "role": "Mechanical Engineer",
         "department": "Engineering",
         "team": "Plant Engineering",
@@ -271,7 +271,7 @@ EMPLOYEES = [
     },
     {
         "id": "grace",
-        "name": "Grace Wilson",
+        "name": "Adelaide Kowalski",
         "role": "Mechanical Engineer",
         "department": "Engineering",
         "team": "Plant Engineering",
