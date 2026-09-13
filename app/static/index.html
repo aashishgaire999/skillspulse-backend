@@ -135,6 +135,19 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
 .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.t-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px}.t-card .r{font-size:22px;font-weight:800;margin:5px 0}
 .status{font-size:10px;padding:5px 8px;border-radius:999px;background:#f1f1f3;color:#555}
 .status.progress{background:#eef6ff;color:#0064c6}.status.verify{background:#fff4dc;color:#9b5f05}.status.done{background:#eaf8f0;color:#24774e}.status.attention{background:#fde8e6;color:#c0392b}
+.plan-hero{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.plan-hero-name{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.plan-gap-box{background:var(--surface2);border-radius:13px;padding:13px 15px;margin:16px 0}
+.plan-gap-box .track{height:8px}
+.plan-steps{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px}
+.plan-steps-line{position:absolute;top:15px;left:12.5%;right:12.5%;height:2px;background:var(--line);z-index:0}
+.plan-step{position:relative;z-index:1;background:#fff;border:1px solid var(--line);border-radius:13px;padding:10px 10px 12px;text-align:center}
+.plan-step-circle{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;margin:0 auto 8px;font-weight:800;font-size:13px;background:#fff;border:2px solid var(--line);color:var(--muted)}
+.plan-step-circle.done{background:#24774e;border-color:#24774e;color:#fff}
+.plan-step-circle.progress{background:#0064c6;border-color:#0064c6;color:#fff}
+.plan-step-circle.verify{background:#9b5f05;border-color:#9b5f05;color:#fff}
+.plan-step-circle.attention{background:#c0392b;border-color:#c0392b;color:#fff}
+@media(max-width:620px){.plan-steps{grid-template-columns:1fr 1fr}.plan-steps-line{display:none}}
 .dev-status-summary{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line)}
 .dev-donut{width:82px;height:82px;border-radius:50%;position:relative;flex:0 0 auto}
 .dev-donut::after{content:"";position:absolute;inset:14px;border-radius:50%;background:#fff}
@@ -1406,6 +1419,8 @@ function renderEmployeePlanCard(){
   if(!e){card.style.display='none';return}
   const {top,action,weeks,statusClass,statusLabel}=planFor(e);
   const readyLabel=weeks<=0?'Ready now':weeks<52?`~${weeks} weeks`:`~${Math.round(weeks/4.33)} months`;
+  const statusColor={done:'#24774e',verify:'#9b5f05',progress:'#0064c6',attention:'#c0392b'}[statusClass];
+  const gapPct=Math.max(4,Math.min(100,e.skills[top.k]/futureRequirements[top.k]*100));
   // One real computed bucket (statusClass) spread across the 4 stages: stages
   // before it are complete, the matching stage shows the real label, stages
   // after it haven't started - not 4 independently invented statuses.
@@ -1416,18 +1431,29 @@ function renderEmployeePlanCard(){
     {day:'Day 60',r:'Apply',desc:`Supervised work on ${skills[top.k].label}`},
     {day:'Day 90',r:'Verify',desc:'Manager confirms evidence, skill score updated'}
   ];
-  document.getElementById('employeePlanTitle').textContent=`Talent Plan — ${e.name}`;
+  document.getElementById('employeePlanTitle').textContent='Talent Plan';
   document.getElementById('employeePlanDetail').innerHTML=`
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
-      <span class="mini-avatar" style="background:${avatarColor(e.id)}">${initials(e.name)}</span>
-      <div><strong>${e.name}</strong><br><span class="muted">${e.role} • ${e.department}</span></div>
-      <span class="status ${statusClass}" style="margin-left:auto">${statusLabel}</span>
+    <div class="plan-hero">
+      <div class="match-ring" style="width:64px;height:64px;--p:${e.futureMatch};background:conic-gradient(${statusColor} calc(var(--p)*1%),#ececf0 0)"><span style="font-size:14px">${e.futureMatch}%</span></div>
+      <div><div class="plan-hero-name">${e.name}</div><span class="muted">${e.role} • ${e.department}</span></div>
+      <span class="status ${statusClass}" style="margin-left:auto;font-size:11px;padding:6px 11px">${statusLabel}</span>
     </div>
-    <div class="muted" style="margin-bottom:10px">Main 2027 gap: <strong>${skills[top.k].label}</strong> ${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)} • Estimated time to readiness: <strong>${readyLabel}</strong></div>
-    <div class="timeline">${stages.map((s,i)=>{
-      const cls=i+1<stageIndex?'done':i+1===stageIndex?statusClass:'';
-      const label=i+1<stageIndex?'Complete':i+1===stageIndex?statusLabel:'Not Started';
-      return `<div class="t-card"><strong>${s.day}</strong><div class="r">${s.r}</div><div class="muted">${s.desc}</div><span class="status ${cls}">${label}</span></div>`;
+    <div class="plan-gap-box">
+      <div class="muted" style="font-size:10px;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:8px">Main 2027 gap</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <strong style="white-space:nowrap">${skills[top.k].label}</strong>
+        <div class="track" style="flex:1"><div class="fill" style="width:${gapPct}%;background:${statusColor}"></div></div>
+        <span class="muted" style="font-size:11px;white-space:nowrap">${e.skills[top.k].toFixed(1)} → ${futureRequirements[top.k].toFixed(1)}</span>
+      </div>
+      <div class="muted" style="margin-top:9px;font-size:11px">Estimated time to readiness: <strong style="color:var(--text)">${readyLabel}</strong></div>
+    </div>
+    <div class="plan-steps"><div class="plan-steps-line"></div>${stages.map((s,i)=>{
+      const done=i+1<stageIndex,current=i+1===stageIndex;
+      const circleCls=done?'done':current?statusClass:'';
+      const circleContent=done?'✓':(i+1);
+      const label=done?'Complete':current?statusLabel:'Not Started';
+      const pillCls=done?'done':current?statusClass:'';
+      return `<div class="plan-step"><div class="plan-step-circle ${circleCls}">${circleContent}</div><strong>${s.day} — ${s.r}</strong><div class="muted" style="margin:5px 0 8px;font-size:11px">${s.desc}</div><span class="status ${pillCls}">${label}</span></div>`;
     }).join('')}</div>`;
   card.style.display='';
 }
