@@ -3,8 +3,8 @@
 The live product (`app/static/index.html`) is a self-contained frontend with its
 own tested JavaScript calculation engine — it does not call this backend for
 readiness, coverage, risk, succession, or match numbers. This FastAPI backend
-serves that page and hosts the two real AI calls (`/api/strategy/analyze`,
-`/api/skills/suggest`, both calling Gemini).
+serves that page and hosts the three real AI calls (`/api/strategy/analyze`,
+`/api/skills/suggest`, `/api/data/validate`, all calling Gemini).
 
 `app/engine.py` is a separate, real, unit-tested (`pytest -q`, 8 tests)
 implementation of similar workforce-readiness math, described below. It is
@@ -102,6 +102,7 @@ Health check:
 - `GET /health`
 - `POST /api/strategy/analyze` — Gemini call, translates a strategy into future skill targets
 - `POST /api/skills/suggest` — Gemini call, proposes a skill-score update from evidence text
+- `POST /api/data/validate` — Gemini call, classifies uploaded file content as workforce-related or not before Connect Your Data imports anything
 
 `app/engine.py`'s other functions (`capability_coverage`, `backup_scores`,
 `succession_coverage`, `total_exposure`, `scenario_employee_unavailable`,

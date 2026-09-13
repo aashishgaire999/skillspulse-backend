@@ -29,6 +29,11 @@ class StrategyAnalysisRequest(BaseModel):
     horizon_months: int = Field(default=12, ge=1, le=60)
 
 
+class FileValidationRequest(BaseModel):
+    filename: str
+    content: str = Field(max_length=6000)
+
+
 class SkillSuggestionRequest(BaseModel):
     employee_id: str
     employee_name: str
@@ -129,6 +134,45 @@ async def analyze_strategy(req: StrategyAnalysisRequest):
         "future_readiness_pct": readiness(STATE["employees"], STATE["future_requirements"]),
         "future_gaps": critical_gaps(STATE["employees"], STATE["future_requirements"]),
     }
+
+
+@app.post("/api/data/validate")
+async def validate_uploaded_file(req: FileValidationRequest):
+    """Classify uploaded file content before Connect Your Data imports anything.
+
+    A real model call, not a keyword match: Gemini reads the extracted text
+    and decides whether it plausibly describes employees/workforce/HR/SAP
+    data. Nothing is imported unless this returns ok=True - a wrong file
+    (a recipe, an invoice, a random PDF) gets rejected with a reason instead
+    of being parsed as if it were a roster.
+    """
+    if not req.content.strip():
+        return {"ok": True, "is_relevant": False, "reason": "The file appears to be empty."}
+
+    prompt = (
+        "You are a gatekeeper for a workforce-readiness tool's file import feature. "
+        "Decide whether the text below plausibly comes from an employee roster, HR "
+        "export, skills/competency spreadsheet, SAP or workforce-management data file. "
+        "It does NOT need to match any specific column format - any real employee, "
+        "role, department, skill, or certification data counts.\n\n"
+        f"Filename: {req.filename}\n\n"
+        f"Extracted content (may be partial/truncated):\n\"\"\"\n{req.content}\n\"\"\"\n\n"
+        "Return ONLY a JSON object with:\n"
+        '- "is_relevant": true or false\n'
+        '- "detected_type": a short label for what the file actually looks like '
+        '(e.g. "employee roster", "recipe", "invoice", "unrelated text")\n'
+        '- "reason": one short sentence explaining the decision'
+    )
+
+    parsed = await call_gemini_json(prompt)
+    try:
+        is_relevant = bool(parsed["is_relevant"])
+        detected_type = str(parsed.get("detected_type", "")).strip() or "unknown"
+        reason = str(parsed.get("reason", "")).strip() or "No reason returned."
+    except (KeyError, TypeError):
+        raise HTTPException(502, "AI response was not in the expected format")
+
+    return {"ok": True, "is_relevant": is_relevant, "detected_type": detected_type, "reason": reason}
 
 
 @app.post("/api/skills/suggest")
