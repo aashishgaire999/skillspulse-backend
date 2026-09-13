@@ -943,6 +943,12 @@ const skills={
 };
 let employees=JSON.parse(JSON.stringify(demoEmployees));
 let futureRequirements=Object.fromEntries(Object.entries(skills).map(([k,v])=>[k,v.futureTarget]));
+// Named thresholds - the single source of truth for these two numbers.
+// Anywhere the app describes them in prose (the two "How calculated?" boxes
+// on Workforce Overview), it reads these constants at render time instead of
+// repeating the number, so the two can never silently drift apart.
+const QUALIFIED_THRESHOLD=.90;
+const CRITICAL_GAP_THRESHOLD=.76;
 
 const impactInputs={
  SAP:{lossPerHour:40000,disruptionHours:20},
@@ -1013,7 +1019,7 @@ function currentCoverage(list,key,target=skills[key].target){
   // Each capability has an explicit requiredExpert count.
   const qualified=list
     .map(e=>Math.min(1,effective(e,key)/target))
-    .filter(ratio=>ratio>=.90);
+    .filter(ratio=>ratio>=QUALIFIED_THRESHOLD);
   const capacity=qualified.reduce((a,b)=>a+b,0);
   return Math.min(1,capacity/skills[key].requiredExperts);
 }
@@ -1025,12 +1031,12 @@ function readiness(list, req=null){
   });
   return Math.round(total/weight*100)
 }
-function qualifiedCount(list,key,target=skills[key].target){return list.filter(e=>effective(e,key)>=target*.9).length}
+function qualifiedCount(list,key,target=skills[key].target){return list.filter(e=>effective(e,key)>=target*QUALIFIED_THRESHOLD).length}
 function singlePointRisks(list){return Object.keys(skills).filter(k=>['Critical','High'].includes(skills[k].criticality)&&qualifiedCount(list,k)<=1)}
 function criticalGaps(list,req=null){
   return Object.keys(skills).filter(k=>{
     const target=req?req[k]:skills[k].target;
-    return ['Critical','High'].includes(skills[k].criticality)&&currentCoverage(list,k,target)<.76
+    return ['Critical','High'].includes(skills[k].criticality)&&currentCoverage(list,k,target)<CRITICAL_GAP_THRESHOLD
   })
 }
 function successionCoverage(list){
@@ -1168,13 +1174,32 @@ function protectKnowledge(){
   go('development')
 }
 
+// Single shared match-scoring model, used by every "who fits this need" ranking
+// (skill-based backup search, role-based coverage search). Confidence and
+// freshness are NOT scored again here - they're already inside effective(),
+// which every weightedTargets ratio below is built from. Adding them again
+// would double-count the same evidence twice.
+function skillFitScore(e,weightedTargets){
+  return weightedTargets.reduce((sum,{key,target,weight})=>sum+Math.min(1,effective(e,key)/Math.max(.001,target))*weight,0);
+}
+function growthScore(e){return Math.min(1,.55+e.growth*2)}
+function interestAlignment(e,skillKey){
+  return e.interests.join(' ').toLowerCase().includes(skills[skillKey].label.split(' ')[0].toLowerCase())||e.interests.join(' ').toLowerCase().includes(skillKey.toLowerCase())?1:.65;
+}
+function matchScore(e,weightedTargets,interestKey=null){
+  const skillFit=skillFitScore(e,weightedTargets);
+  const growth=growthScore(e);
+  const interest=interestKey?interestAlignment(e,interestKey):.65;
+  return Math.round((skillFit*.80+growth*.10+interest*.10)*100);
+}
 function backupScores(skillKey,excludeId=null){
+  const adjacentKeys=Object.keys(skills).filter(k=>k!==skillKey);
+  const weightedTargets=[
+    {key:skillKey,target:skills[skillKey].target,weight:.70},
+    ...adjacentKeys.map(k=>({key:k,target:skills[k].target,weight:.30/adjacentKeys.length}))
+  ];
   return employees.filter(e=>e.id!==excludeId).map(e=>{
-    const skillFit=Math.min(1,effective(e,skillKey)/skills[skillKey].target);
-    const adjacent=Object.keys(skills).filter(k=>k!==skillKey).reduce((a,k)=>a+Math.min(1,effective(e,k)/skills[k].target),0)/(Object.keys(skills).length-1);
-    const interest=e.interests.join(' ').toLowerCase().includes(skills[skillKey].label.split(' ')[0].toLowerCase())||e.interests.join(' ').toLowerCase().includes(skillKey.toLowerCase())?1:.65;
-    const growth=Math.min(1,.55+e.growth*2);
-    const score=Math.round((skillFit*.45+adjacent*.20+e.confidence*.15+growth*.10+interest*.10)*100);
+    const score=matchScore(e,weightedTargets,skillKey);
     const missing=Math.max(0,skills[skillKey].target-e.skills[skillKey]);
     const weeks=Math.max(0,Math.ceil(missing/Math.max(.08,e.growth)*2));
     return {e,score,weeks,missing}
@@ -1341,20 +1366,19 @@ function renderRoleCoverage(roleTitle,q){
   const banner=document.getElementById('talentPriorityBanner'),cardsEl=document.getElementById('talentCards');
   if(!holders.length){banner.innerHTML='';cardsEl.innerHTML='';return}
 
-  // Derive a target skill profile from current role-holders, then rank everyone
-  // (including other roles) by fit against that profile - same weighting family
-  // as backupScores, just keyed to a role instead of a single skill.
-  const profile={};
-  Object.keys(skills).forEach(k=>{profile[k]=holders.reduce((s,e)=>s+effective(e,k),0)/holders.length});
-  const ranked=employees.map(e=>{
-    const isHolder=e.role===roleTitle;
-    let fitSum=0,fitCount=0;
-    Object.keys(skills).forEach(k=>{if(profile[k]>0){fitSum+=Math.min(1,effective(e,k)/Math.max(.5,profile[k]));fitCount++}});
-    const skillFit=fitCount?fitSum/fitCount:0;
-    const growth=Math.min(1,.55+e.growth*2);
-    const score=Math.round((skillFit*.65+e.confidence*.20+growth*.15)*100);
-    return {e,score,isHolder};
-  }).sort((a,b)=>b.score-a.score).slice(0,6);
+  // Derive a target skill profile from current role-holders ("derived role
+  // profile" - not an official company requirement), then score everyone
+  // against it with the exact same matchScore() used by backupScores(), so
+  // a skill search and a role search never produce two different formulas
+  // for the same underlying question.
+  const relevantSkills=Object.keys(skills).filter(k=>holders.reduce((s,e)=>s+effective(e,k),0)/holders.length>0);
+  const weightedTargets=relevantSkills.map(k=>({
+    key:k,
+    target:Math.max(.5,holders.reduce((s,e)=>s+effective(e,k),0)/holders.length),
+    weight:1/relevantSkills.length
+  }));
+  const ranked=employees.map(e=>({e,score:matchScore(e,weightedTargets),isHolder:e.role===roleTitle}))
+    .sort((a,b)=>b.score-a.score).slice(0,6);
 
   banner.innerHTML=`<strong>${roleTitle} coverage:</strong> ${holders.length} current holder${holders.length===1?'':'s'} (${holders.map(h=>h.name).join(', ')}). Ranked backups from across the company below.`;
 
@@ -1535,6 +1559,11 @@ document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.addEventListener(
 
 
 function runDiagnostics(){
+  const weightSum=Object.values(skills).reduce((a,s)=>a+s.weight,0);
+  const topSapId=backupScores('SAP')[0].e.id;
+  const overviewReady=document.getElementById('kpiReadiness')?.textContent;
+  const simReady=document.getElementById('simBeforeReady')?.textContent;
+  const pctFields=[readiness(employees),successionCoverage(employees),futureReadiness(employees)];
   const checks=[
     ['Employees loaded',employees.length>0,employees.length+' records'],
     ['Skills model',Object.keys(skills).length===5,Object.keys(skills).length+' capabilities'],
@@ -1544,7 +1573,13 @@ function runDiagnostics(){
     ['Search index',buildSearchIndex('SAP').length>0,'indexed'],
     ['Risk dates',riskDates.every(r=>Number.isFinite(daysUntil(r.date))),riskDates.length+' dated'],
     ['Simulation',Number.isFinite(readiness(employees.filter(e=>e.id!=='alex'))),'live'],
-    ['Succession match',backupScores('SAP','alex').length>0,'ranked']
+    ['Succession match',backupScores('SAP','alex').length>0,'ranked'],
+    ['Capability weights = 100%',Math.round(weightSum*100)===100,Math.round(weightSum*100)+'%'],
+    ['Overview = Risk Sim baseline',!!overviewReady&&overviewReady===simReady,`${overviewReady||'?'} / ${simReady||'?'}`],
+    ['Former staff excluded from roster',formerEmployees.every(f=>!employees.some(e=>e.id===f.id)),formerEmployees.length+' former, 0 counted'],
+    ['Losing top performer can\'t raise readiness',readiness(employees.filter(e=>e.id!==topSapId))<=readiness(employees),'checked'],
+    ['All percentages in 0-100 range',pctFields.every(p=>p>=0&&p<=100),'readiness/succession/future'],
+    ['No zero-required-expert skills',Object.values(skills).every(s=>s.requiredExperts>0),'div-by-zero guard']
   ];
   const wrap=document.getElementById('diagnostics');
   if(wrap)wrap.innerHTML=checks.map(([name,ok,detail])=>`<div class="diag-tile"><div class="diag-icon ${ok?'ok':'fail'}">${ok?'✓':'✕'}</div><div class="diag-text"><div class="diag-name">${name}</div><div class="diag-value">${detail}</div></div></div>`).join('');
@@ -1737,6 +1772,8 @@ function verifyDevelopmentEvidence(){
   refreshAll();renderDependencyMap(e.id,false,true);showToast('Manager verified new evidence. Readiness and succession coverage recalculated.')
 }
 
+setText('calcGaps',`A gap becomes critical when a Critical or High business skill has less than ${Math.round(CRITICAL_GAP_THRESHOLD*100)}% evidence-adjusted coverage against its required target.`);
+setText('calcSingle',`A single-point risk exists when one or fewer people have evidence-adjusted proficiency at least ${Math.round(QUALIFIED_THRESHOLD*100)}% of the target for a critical capability.`);
 setDataStatus('Demo — Northstar Foods');refreshAll();renderFutureStrategyResults();classifyCountdowns();renderExecutiveVisuals();renderSuccessionDepth();renderDependencyMap('alex',false,false);animateInitial();
 </script>
 </body>
