@@ -899,7 +899,7 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
                    analyzeFutureStrategy, renderFutureStrategyResults
    FIND TALENT     rankBackups, renderTalent, renderTalentCards,
                    rankCustomProject, renderSuccessionDepth,
-                   searchTalentEmployee, renderRoleCoverage,
+                   searchTalentEmployee, renderRoleRoster,
                    renderFormerStaffDirectory
    TALENT MATCH    renderDevelopment (sidebar says "Talent Match", the
                    section id in the HTML is "development")
@@ -1422,7 +1422,7 @@ function searchTalentEmployee(){
   // A role search wins when the query is an exact role title, or a role-only substring
   // match with no competing name match (so "priya" still opens her profile, not a role list).
   const roleTitle=exactRole||(substrRoles.length===1&&!nameMatches.length?substrRoles[0]:null);
-  if(roleTitle){renderRoleCoverage(roleTitle,q);return}
+  if(roleTitle){renderRoleRoster(roleTitle,q);return}
 
   const banner=document.getElementById('talentPriorityBanner'),cardsEl=document.getElementById('talentCards');
   const matches=employees.filter(e=>e.name.toLowerCase().includes(q)||e.role.toLowerCase().includes(q)||e.department.toLowerCase().includes(q));
@@ -1437,46 +1437,23 @@ function searchTalentEmployee(){
   cardsEl.innerHTML=`<div class="match-list">${matches.map(simpleMatchRow).join('')}</div>`;
   if(matches.length===1)openEmployee(matches[0].id);
 }
-function renderRoleCoverage(roleTitle,q){
+function renderRoleRoster(roleTitle,q){
+  // Searching a role shows the actual people who hold that role today - a
+  // directory lookup, not a cross-company backup ranking. (Backup/succession
+  // candidates for a role are a different, deliberately separate question -
+  // that's what backupScores()/the default Ranked Matches view and Risk
+  // Simulator's "Find Backup" are for.)
   const holders=employees.filter(e=>e.role===roleTitle);
   const banner=document.getElementById('talentPriorityBanner'),cardsEl=document.getElementById('talentCards');
   if(!holders.length){banner.innerHTML='';cardsEl.innerHTML='';return}
 
-  // Derive a target skill profile from current role-holders ("derived role
-  // profile" - not an official company requirement), then score everyone
-  // against it with the exact same matchScore() used by backupScores(), so
-  // a skill search and a role search never produce two different formulas
-  // for the same underlying question.
-  const relevantSkills=Object.keys(skills).filter(k=>holders.reduce((s,e)=>s+effective(e,k),0)/holders.length>0);
-  const weightedTargets=relevantSkills.map(k=>({
-    key:k,
-    target:Math.max(.5,holders.reduce((s,e)=>s+effective(e,k),0)/holders.length),
-    weight:1/relevantSkills.length
-  }));
-  const ranked=employees.map(e=>({e,score:matchScore(e,weightedTargets),isHolder:e.role===roleTitle}))
-    .sort((a,b)=>b.score-a.score).slice(0,6);
-
-  banner.innerHTML=`<strong>${roleTitle} coverage:</strong> ${holders.length} current holder${holders.length===1?'':'s'} (${holders.map(h=>h.name).join(', ')}). Ranked backups from across the company below.`;
-
-  const rows=ranked.map(({e,score,isHolder},i)=>{
-    const ringColor=score>=88?'var(--green)':score>=78?'var(--blue)':'var(--amber)';
-    return `<div class="match-row">
-      <div class="match-rank${i<3?' r'+(i+1):''}">${i+1}</div>
-      <div class="match-avatar" style="background:${avatarColor(e.id)}">${initials(e.name)}</div>
-      <div class="match-identity">
-        <strong>${e.name}</strong>
-        <span class="muted">${e.role} • ${e.department}</span>
-        ${isHolder?'<div class="match-pills"><span class="match-pill">Current role-holder</span></div>':''}
-      </div>
-      <div class="match-ring" style="--p:${score};background:conic-gradient(${ringColor} calc(var(--p)*1%),#ececf0 0)"><span>${score}%</span></div>
-      <div class="match-row-actions"><button class="btn blue" onclick="openEmployee('${e.id}')">Open →</button></div>
-    </div>`;
-  }).join('');
+  banner.innerHTML=`<strong>${roleTitle}:</strong> ${holders.length} ${holders.length===1?'person holds':'people hold'} this role today.`;
+  cardsEl.innerHTML=`<div class="match-list">${holders.map(simpleMatchRow).join('')}</div>`;
 
   const relatedFormer=formerEmployees.filter(f=>f.formerRole.toLowerCase().includes(q)||q.includes(f.formerRole.toLowerCase()));
-  const formerHtml=relatedFormer.length?`<div class="notice" style="margin-top:12px"><strong>Former staff knowledge available (${relatedFormer.length}):</strong> ${relatedFormer.map(f=>f.name).join(', ')} — historical documentation only, never counted toward active coverage.</div>`:'';
-
-  cardsEl.innerHTML=`<div class="match-list">${rows}</div>${formerHtml}`;
+  if(relatedFormer.length){
+    cardsEl.innerHTML+=`<div class="notice" style="margin-top:12px"><strong>Former staff knowledge available (${relatedFormer.length}):</strong> ${relatedFormer.map(f=>f.name).join(', ')} — historical documentation only, never counted toward active coverage.</div>`;
+  }
 }
 function renderFormerStaffDirectory(){
   const wrap=document.getElementById('formerStaffList');if(!wrap)return;
