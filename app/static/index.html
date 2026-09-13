@@ -652,7 +652,13 @@ th{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;b
       <div class="verify-step"><strong>Manager Verified</strong><span>evidence reviewed</span></div>
       <div class="verify-step"><strong>Skill Updated</strong><span>readiness recalculated</span></div>
     </div>
-    <div class="actions" style="margin-top:12px"><button class="btn green" onclick="verifyDevelopmentEvidence()">Verify Maria's SAP evidence</button><span id="verifyStatus" class="muted">Demo: score will only change after verification.</span></div>
+    <div class="grid-3" style="margin-top:12px">
+      <select id="verifyEmployee"></select>
+      <select id="verifySkill"></select>
+      <input id="verifyScore" class="input" type="number" min="0" max="5" step="0.1" placeholder="New verified score (0-5)">
+    </div>
+    <div class="actions" style="margin-top:10px"><button class="btn green" onclick="verifyDevelopmentEvidence()">Mark as manager-verified</button></div>
+    <div id="verifyStatus" class="muted" style="margin-top:8px">This step is intentionally manual — a manager confirms real evidence, not AI, before a score moves.</div>
   </div>
 
   <div class="card" style="margin-top:15px">
@@ -884,7 +890,7 @@ const riskDates=[
 
 function daysUntil(dateStr){const now=new Date('2026-09-12T12:00:00');const d=new Date(dateStr+'T12:00:00');return Math.max(0,Math.ceil((d-now)/86400000))}
 function freshnessFactor(days){if(days<=90)return 1;if(days<=180)return .93;if(days<=365)return .84;return .70}
-function effective(e,key){return (e.skills[key]||0)*(0.78+.22*e.confidence)*freshnessFactor(e.freshnessDays)}
+function effective(e,key){return (e.skills[key]||0)*(0.70+.30*e.confidence)*freshnessFactor(e.freshnessDays)}
 function currentCoverage(list,key,target=skills[key].target){
   // Coverage is capacity, not average proficiency.
   // Only people at >=90% of the target count as deployment-ready capacity.
@@ -930,7 +936,7 @@ function refreshAll(){
   setText('donutText',r+'%');document.getElementById('readinessDonut').style.setProperty('--p',r);
   setText('overviewSuccession',sc+'%');setText('overviewEmerging',emergingTalent());setText('overviewStale',staleSkillCount());
   setText('briefReady',r+'%');setText('briefGaps',fg.length);setText('briefSingle',sp.length);setText('briefSucc',sc+'%');
-  renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();renderFormerStaffDirectory();populateAiSuggestSelectors();
+  renderOverviewPills(r,fr,sp.length);renderWorkforceComposition();renderOverviewFuture();renderActionCenter();renderOverviewRisks();renderSkills();renderCriticality();populateFilters();populateSimulator();renderSimBaseline();renderTalent();renderDevelopment();renderBrief();renderExecutiveVisuals();renderSuccessionDepth();renderImpactModel();renderPresentationStory();renderFormerStaffDirectory();populateAiSuggestSelectors();populateVerifySelectors();
   const alexRemoved=employees.filter(e=>e.id!=='alex');setText('miniBefore',r+'%');setText('miniAfter',readiness(alexRemoved)+'%');setText('miniWhy','Why? Removing Alex reduces SAP and automation coverage; the score is recalculated from the remaining verified skill evidence.');runDiagnostics();
 }
 function setText(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
@@ -1469,12 +1475,28 @@ function rejectSuggestion(){
   lastSuggestion=null;
 }
 
+function populateVerifySelectors(){
+  const empSel=document.getElementById('verifyEmployee');if(!empSel)return;
+  const curEmp=empSel.value;
+  empSel.innerHTML=employees.map(e=>`<option value="${e.id}">${e.name} — ${e.role}</option>`).join('');
+  if(employees.some(e=>e.id===curEmp))empSel.value=curEmp;
+  const skillSel=document.getElementById('verifySkill');
+  if(skillSel&&!skillSel.options.length){
+    skillSel.innerHTML=Object.entries(skills).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+  }
+}
 function verifyDevelopmentEvidence(){
-  const m=employees.find(e=>e.id==='maria');if(!m)return;
-  if(m.skills.SAP>=4.6){showToast("Maria's SAP evidence is already verified.");return}
-  m.skills.SAP=4.6;m.confidence=Math.max(m.confidence,.94);m.freshnessDays=0;
-  document.getElementById('verifyStatus').textContent='Verified: Maria SAP 4.6/5 • 94% confidence • today';
-  refreshAll();renderDependencyMap('alex',false,true);showToast('New work evidence verified. Readiness and succession coverage recalculated.')
+  const empId=document.getElementById('verifyEmployee').value;
+  const skillKey=document.getElementById('verifySkill').value;
+  const newScore=parseFloat(document.getElementById('verifyScore').value);
+  const e=employees.find(x=>x.id===empId);
+  const statusEl=document.getElementById('verifyStatus');
+  if(!e)return;
+  if(!Number.isFinite(newScore)||newScore<0||newScore>5){showToast('Enter a verified score between 0 and 5.');return}
+  if(e.skills[skillKey]>=newScore){statusEl.textContent=`${e.name}'s ${skills[skillKey].label} is already at ${e.skills[skillKey].toFixed(1)} — nothing to raise.`;return}
+  e.skills[skillKey]=newScore;e.confidence=Math.max(e.confidence,.94);e.freshnessDays=0;
+  statusEl.textContent=`Verified: ${e.name} — ${skills[skillKey].label} ${newScore.toFixed(1)}/5 • 94% confidence • today`;
+  refreshAll();renderDependencyMap(e.id,false,true);showToast('Manager verified new evidence. Readiness and succession coverage recalculated.')
 }
 
 refreshAll();renderFutureStrategyResults();classifyCountdowns();renderExecutiveVisuals();renderSuccessionDepth();renderDependencyMap('alex',false,false);animateInitial();
